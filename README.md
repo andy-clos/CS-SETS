@@ -3,9 +3,13 @@
 All commands are run from the root of the project, from a terminal:
 
 Git commands:
-`git pull origin dev` - Get the latest code from everyone
-`git commit -m "commit messages"` - To commit the change that you have done (it does not push into GitHub server yet, it only commit in your on machine server)
-`git push origin dev` - To push the code that you committed above into GitHub server
+
+| Command                           | Action                                                                                 |
+| :-------------------------------- | :------------------------------------------------------------------------------------- |
+| `git pull origin dev`             | Get the latest code from everyone                                                      |
+| `git commit -m "commit messages"` | To commit the change that you have done (it does not push into GitHub server yet)      |
+| `git push origin dev`             | To push the code that you committed above into GitHub server                           |
+
 
 NPM Commands:
 
