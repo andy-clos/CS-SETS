@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register</title>
+</head>
+<body>
+    <h1>Register</h1>
+    <form>
+        <input type="email" id="email" placeholder="Email">
+        <input type="password" id="password" placeholder="Password">
+        <button type="button" id="registerBtn">Register</button>
+    </form>
+    <p id="message"></p>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+        window.onload = () => {
+            // Firebase configuration
+            const firebaseConfig = {
+                apiKey: "AIzaSyCqHVyxf6nbxfEWIf_YbccJvjursSwIRcc",
+                authDomain: "cs-sets.firebaseapp.com",
+                projectId: "cs-sets",
+                storageBucket: "cs-sets.firebasestorage.app",
+                messagingSenderId: "918781841486",
+                appId: "1:918781841486:web:528cd96da7ba9a9f84b31f",
+                measurementId: "G-77X9SZ0DJ6"
+            };
+        
+            // Initialize Firebase
+            const app = initializeApp(firebaseConfig);
+        
+            // Initialize Firebase Auth
+            const auth = getAuth(app);
+        
+            // Function to register a new user
+            async function register() {
+                const email = document.getElementById('email').value;
+                const password = document.getElementById('password').value;
+        
+                try {
+                    // Create user with email and password
+                    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                    const user = userCredential.user;
+                    document.getElementById('message').innerText = `Registration successful! Welcome, ${user.email}`;
+                } catch (error) {
+                    document.getElementById('message').innerText = `Error: ${error.message}`;
+                }
+            }
+
+            // Bind click event to register button
+            document.getElementById('registerBtn').addEventListener('click', register);
+        };
+    </script>
+</body>
+</html>
