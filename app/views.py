@@ -15,6 +15,30 @@ def register_view(request):
 def dashboard_view(request):
     return render(request, 'dashboard.html')
 
+def academic_view(request):
+    return render(request, 'academic.html')
+
+def tools_view(request):
+    return render(request, 'tools.html')
+
+def appointments_view(request):
+    return render(request, 'appointments.html')
+
+def forum_view(request):
+    return render(request, 'forum.html')
+
+def analytics_view(request):
+    return render(request, 'analytics.html')
+
+def analytics_view(request):
+    return render(request, 'analytics.html')
+
+def users_management_view(request):
+    return render(request, 'users-management.html')
+
+def profile_view(request):
+    return render(request, 'profile.html')
+
 # Token verification
 def verify_token(request):
     if request.method == 'POST':

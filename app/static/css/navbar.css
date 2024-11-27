@@ -1,0 +1,51 @@
+.sidebar {
+    grid-area: sidebar;
+    width: 325px;
+    background-color: white;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.brand {
+    font-size: 30px;
+    font-weight: 800;
+    color: #5d7285;
+    margin-bottom: 10px;
+}
+
+.logo {
+    width: 73px;
+    height: 81px;
+    object-fit: cover;
+    margin-bottom: 20px;
+}
+
+.menu {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    width: 100%;
+}
+
+.menu-item {
+    font-size: 20px;
+    font-weight: normal;
+    color: #5d7285;
+    text-decoration: none;
+    display: block;
+    padding: 10px;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+}
+
+.menu-item:hover {
+    background-color: #f0f0f0;
+}
+
+.menu-item.active {
+    background-color: #667a8a;
+    color: white;
+    font-weight: bold;
+}

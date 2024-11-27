@@ -1,0 +1,30 @@
+/* General Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #e4e7eb;
+    color: #5d7285;
+}
+
+/* Layout */
+.container {
+    display: grid;
+    grid-template-areas:
+        "header header"
+        "sidebar main"
+        "sidebar footer";
+    grid-template-columns: 325px 1fr;
+    grid-template-rows: auto 1fr auto;
+    height: 100vh;
+}
+
+main {
+    grid-area: main;
+    background-color: white;
+    padding: 20px;
+}

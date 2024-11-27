@@ -1,0 +1,101 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CS SETS</title>
+    <link rel="stylesheet" href="{% static 'css/navbar.css' %}">  
+    <link rel="stylesheet" href="{% static 'css/footer.css' %}">  
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">  
+    <style>
+    
+    /* Main Content */
+    .section-title {
+        font-size: 40px;
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
+
+    .sub-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+    .academic-session {
+        font-size: 20px;
+    }
+
+    .separator {
+        margin: 0 10px;
+    }
+
+    .controls {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+    .sort-options {
+        font-size: 20px;
+    }
+
+    .search-bar {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .search-bar input {
+        border: 1px solid #ececec;
+        padding: 5px 10px;
+        border-radius: 5px;
+        font-size: 16px;
+    }
+
+    .search-icon {
+        width: 20px;
+        height: 20px;
+        background-color: #5d7285;
+        mask: url('search-icon.svg') no-repeat center;
+        -webkit-mask: url('search-icon.svg') no-repeat center;
+        cursor: pointer;
+    }
+
+    .analytics-placeholder {
+        background-color: #ececec;
+        height: 53px;
+    }
+    </style>
+</head>
+<body>
+    <div class="container">
+
+        {% include 'navbar.html' %} 
+
+        <main>
+            <section class="content">
+                <h2 class="section-title">Courses Analytics</h2>
+                <div class="sub-header">
+                    <span class="academic-session">Semester 1, Academic Session 2024/2025</span>
+                    <span class="separator">/</span>
+                    <span class="academic-session">Semester 2, Academic Session 2023/2024</span>
+                </div>
+                <div class="controls">
+                    <span class="sort-options">Sort: From A-Z</span>
+                    <div class="search-bar">
+                        <input type="text" placeholder="Search courses you teach by course code or course name">
+                        <button class="search-icon"></button>
+                    </div>
+                </div>
+                <div class="analytics-placeholder"></div>
+            </section>
+        </main>
+
+        {% include 'footer.html' %} 
+    </div>
+    <script src="{% static 'js/logout.js' %}"></script>
+</body>
+</html>

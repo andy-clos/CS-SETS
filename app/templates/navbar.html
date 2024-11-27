@@ -1,0 +1,18 @@
+{% load static %}
+<div class="sidebar">
+    <h1 class="brand">CS SETS</h1>
+    <img src="{% static 'image/logo.jpg' %}" alt="Logo" class="logo">
+    
+    <nav class="menu">
+        <a href="/dashboard" class="menu-item">Dashboard</a>
+        <a href="/academic" class="menu-item">Academic</a>
+        <a href="/tools" class="menu-item">Tools</a>
+        <a href="/appointments" class="menu-item">Appointments</a>
+        <a href="/forum" class="menu-item">Forum</a>
+        <a href="/analytics" class="menu-item">Analytics</a>
+        <a href="/users-management" class="menu-item">Users Management</a>
+        <a href="/profile" class="menu-item">Profile</a>
+
+        <a href="#" class="menu-item active" onclick="logout()">Logout</a>
+    </nav>
+</div>
