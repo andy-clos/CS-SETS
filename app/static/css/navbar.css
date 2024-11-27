@@ -41,7 +41,8 @@
 }
 
 .menu-item:hover {
-    background-color: #f0f0f0;
+    background-color: #5d7285;
+    color: white;
 }
 
 .menu-item.active {
