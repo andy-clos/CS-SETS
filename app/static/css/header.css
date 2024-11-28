@@ -1,0 +1,13 @@
+.header {
+    grid-area: header;
+    background-color: #d1e7f9;
+    text-align:center;
+    padding: 10px 0;
+}
+
+.header-text {
+    font-weight: 500;
+    font-size: 20px;
+    color: #5d7285;
+}
+

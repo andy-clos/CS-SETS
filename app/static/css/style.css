@@ -11,11 +11,10 @@ body {
     color: #5d7285;
 }
 
-/* Layout */
 .container {
     display: grid;
     grid-template-areas:
-        "header header"
+        "sidebar header"
         "sidebar main"
         "sidebar footer";
     grid-template-columns: 325px 1fr;
