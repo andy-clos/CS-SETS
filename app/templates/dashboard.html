@@ -9,16 +9,41 @@
     <link rel="stylesheet" href="{% static 'css/footer.css' %}">  
     <link rel="stylesheet" href="{% static 'css/style.css' %}">  
     <style>
-        .in-content {
-            background-color: #4E598C;
-            padding: 20px; /* Add padding for spacing */
-            border-radius: 5px; /* Optional: rounded corners */
-            margin-top: 10px; /* Add spacing below the title */
-        }
         .section-title {
             font-size: 40px;
             font-weight: bold;
             margin-bottom: 10px;
+        }
+        .main-content{
+            background-color: #4E598C;
+            height: 100vh;
+        }
+        .title {
+            display: flex;
+            align-items: center;
+            text-align: center;
+        }
+        .add-announce-btn {
+            margin: 30px 10px;
+            background-color: rgba(255, 255, 255, 0.5);
+            color: #4E598C;
+            border: none;
+            padding: 10px 15px;
+            text-align: center;
+            font-size: 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+        .add-announce-btn:hover {
+            background-color: #F9C784;
+        }
+        .anc-details{
+            margin: 10px;
+            border-radius: 20px;
+            background-color: #fff;
+            color: #4E598C;
+
         }
     </style>
 </head>
@@ -31,9 +56,19 @@
             <section class="content">
                 <h2 class="section-title">Dashboard</h2>
             </section>
-            <!-- <div id="in-content">
-                <p>This is the background below the word "Dashboard". Add your content here!</p>
-            </div> -->
+            <div class="main-content">
+                <div class="title">
+                    <button class="	fa fa-plus add-announce-btn">   Add Annoucement</button>
+                    <h1 style="flex-basis:100%; color: #fff;">Announcement</h1>
+                </div>
+                <div class="announcement">
+                    <p class="far fa-user-circle"></p>
+                    <div>
+                        <textarea disabled class="anc-details" rows="10" cols="50">Dear student, today due to emergency reason, hall B are closed until 14/11/2025, thus student need to register your application at hall A It’s noticed that you should prepare below document for application. IC SPM sijil RM200 Student card
+                        </textarea>
+                    </div>
+                </div>
+            </div>
         </main>
 
         {% include 'footer.html' %} 
