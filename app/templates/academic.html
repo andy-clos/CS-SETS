@@ -6,14 +6,87 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CS SETS</title>
     <link rel="stylesheet" href="{% static 'css/navbar.css' %}">  
-    <link rel="stylesheet" href="{% static 'css/footer.css' %}">  
+    <link rel="stylesheet" href="{% static 'css/header.css' %}">  
     <link rel="stylesheet" href="{% static 'css/style.css' %}">  
+    <link rel="stylesheet" href="{% static 'css/footer.css' %}">  
+
     <style>
     .section-title {
         font-size: 40px;
         font-weight: bold;
         margin-bottom: 10px;
     }
+
+    .sub-header {
+        width: 1475px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        background-color: #d1e7f9;
+    }
+
+    .highlight-bar {
+        width: 434px;
+        height: 29px;
+        background-color: #d1e7f9;
+    }
+
+    .section {
+        font-size: 20px;
+        color: #5d7285;
+    }
+
+    .title {
+        font-weight: bold;
+        font-size: 40px;
+        color: #5d7285;
+    }
+
+    .session {
+        font-size: 20px;
+        color: #5d7285;
+    }
+
+    .blue {
+        color: #0c7fda;
+    }
+
+    .separator {
+        margin: 0 5px;
+    }
+
+    .sort-text,
+    .sort-label {
+        font-size: 20px;
+        color: #5d7285;
+    }
+
+    .search-bar {
+        display: flex;
+        align-items: center;
+        width: 886px;
+        height: 53px;
+        background-color: #ececec;
+        margin: 20px 0;
+    }
+
+    .input-background {
+        flex-grow: 1;
+        height: 100%;
+    }
+
+    .search-icon,
+    .filter-icon {
+        width: 24px;
+        height: 24px;
+        background: url('icon.svg') no-repeat center;
+    }
+
+    .search-text {
+        font-size: 20px;
+        color: #5d7285;
+    }
+
     </style>
 </head>
 <body>
@@ -21,10 +94,27 @@
 
         {% include 'navbar.html' %} 
 
+        {% include 'header.html' %} 
+
         <main>
             <section class="content">
-                <h2 class="section-title">Academic
-                </h2>
+                <h2 class="section-title">CS Academic Management</h2>
+                <div class="sub-header">
+                    <div class="highlight-bar"></div>
+                    <span class="section">All</span>
+                    <span class="title">CS Academic Management</span>
+                    <span class="session blue">Semester 1, Academic Session 2024/2025</span>
+                    <span class="separator">/</span>
+                    <span class="session">Semester 2, Academic Session 2023/2024</span>
+                    <span class="sort-text">From A-Z</span>
+                    <span class="sort-label">Sort:</span>
+                </div>
+                <div class="search-bar">
+                    <div class="input-background"></div>
+                    <div class="search-icon"></div>
+                    <div class="filter-icon"></div>
+                    <span class="search-text">Search courses you teach by course code or course name</span>
+                </div>
             </section>
         </main>
 
