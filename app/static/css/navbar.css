@@ -1,14 +1,28 @@
 .sidebar {
-    grid-area: sidebar;
+    position: fixed;
+    top: 0;
+    left: 0;
     width: 325px;
+    height: 100%;
     background-color: white;
     padding: 20px;
     display: flex;
     flex-direction: column;
     align-items: flex-start;
+    z-index: 999;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+}
+
+.logo-brand{
+    text-decoration: none;
+    margin-top: 20px;
+    margin-bottom: 20px;
 }
 
 .brand {
+    display: flex;
+    align-items: center; 
+    justify-content: center;
     font-size: 30px;
     font-weight: 800;
     color: #5d7285;
@@ -19,7 +33,7 @@
     width: 73px;
     height: 81px;
     object-fit: cover;
-    margin-bottom: 20px;
+    margin-right: 10px;
 }
 
 .menu {
@@ -32,21 +46,56 @@
 .menu-item {
     font-size: 20px;
     font-weight: normal;
-    color: #5d7285;
+    color: #5D7285;
     text-decoration: none;
-    display: block;
+    display: flex;
+    align-items: center;
     padding: 10px;
     border-radius: 5px;
-    transition: background-color 0.3s ease;
+    margin-bottom: 15px;
+}
+
+.logout{
+    position: absolute;
+    width: 285px;
+    bottom: 0;
+    font-size: 20px;
+    font-weight: normal;
+    color: #5D7285;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    background-color: #5D7285;
+    color: #FFFFFF;
+
+    margin-bottom: 15px;
 }
 
 .menu-item:hover {
-    background-color: #5d7285;
-    color: white;
+    background-color: #D1E7F9;
+    color: #0C7FDA;
+}
+
+.nav-svg {
+    fill: #5D7285;
+}
+
+.menu-item:hover .nav-svg {
+    fill: #0C7FDA;
+}
+
+.menu-item.active .nav-svg {
+    fill: #0C7FDA;
 }
 
 .menu-item.active {
-    background-color: #667a8a;
-    color: white;
-    font-weight: bold;
+    background-color: #D1E7F9;
+    color: #0C7FDA;
+}
+
+svg{
+    margin-right: 20px;
 }

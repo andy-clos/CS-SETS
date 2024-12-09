@@ -1,8 +1,12 @@
 .header {
-    grid-area: header;
-    background-color: #d1e7f9;
-    text-align:center;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%; /* Adjust width as needed */
+    background-color: #ffffff;
+    text-align: center;
     padding: 10px 0;
+    z-index: 998; /* Ensure it's above other content */
 }
 
 .header-text {

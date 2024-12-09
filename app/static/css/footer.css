@@ -1,9 +1,13 @@
 footer {
     grid-area: footer;
-    background-color: #d1e7f9;
+    background-color: #ffffff;
     text-align: center;
     padding: 10px 0;
-}
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    z-index: 998;
+  }
 
 .footer-text {
     font-size: 13px;
