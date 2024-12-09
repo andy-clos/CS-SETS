@@ -1,0 +1,80 @@
+display {
+  width: 60%;
+  padding: 2rem;
+  background-color: #f8f9fa;
+  text-align: center;
+}
+
+.display-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  width: auto;
+  gap: 0.5rem;
+  margin-bottom: 3rem;
+}
+
+.display-header-title {
+  font-size: 2.5rem;
+  font-weight: bold;
+  text-align: center;
+  margin: 0;
+}
+
+.display-header-subtitle {
+  font-size: 1.2rem;
+  font-weight: normal;
+  text-align: center;
+  margin: 0;
+  color: #666;
+}
+
+.user-prompt {
+  text-align: center;
+  font-size: 1.2rem;
+  margin-bottom: 3rem;
+}
+
+.tools-container {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+
+.tool-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.5rem;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.tool-item:hover {
+  transform: translateY(-5px);
+}
+
+.tool-item img {
+  width: 48px;
+  height: 48px;
+}
+
+.tool-item span {
+  font-size: 1rem;
+  text-align: center;
+}
+
+.tools-container a {
+  text-decoration: none;
+  color: inherit;
+}
+
+.tools-container a:hover {
+  text-decoration: none;
+}

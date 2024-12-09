@@ -1,0 +1,80 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CS SETS</title>
+    <link rel="stylesheet" href="{% static 'css/navbar.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/header.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/style.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/footer.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/tools/forum.css' %}" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
+    />
+  </head>
+  <body>
+    <div class="container">
+      {% include 'navbar.html' %} {% include 'header.html' %}
+
+      <main>
+        <section class="content">
+          <h2 class="section-title">Forum</h2>
+        </section>
+
+        <header>
+          <div class="user-profile">
+            <i class="fas fa-user-circle profile-icon"></i>
+            <div class="user-info">
+              {% csrf_token %}
+              <span class="username">{{user_email}}</span>
+            </div>
+          </div>
+          <div class="search-container">
+            <input type="text" placeholder="Search to post" />
+            <a href="/createPost"
+              ><button class="create-post-btn">Create post</button>
+            </a>
+          </div>
+        </header>
+        <div class="post-container">
+          {% if posts %} {% for post in posts %}
+          <div class="post">
+            <div class="post-header">
+              <a href="{% url 'view_post' post.PostID %}" class="post-title"
+                >{{ post.title }}</a
+              >
+              <span class="post-author">{{ post.author }}</span>
+              <span class="post-time">{{ post.timestamp }}</span>
+            </div>
+            <div class="post-comments">{{ post.comments_count }} comments</div>
+          </div>
+          {% endfor %} {% else %}
+          <p>No posts available.</p>
+          {% endif %}
+        </div>
+      </main>
+
+      {% include 'footer.html' %}
+    </div>
+    <script src="{% static 'js/logout.js' %}"></script>
+    <script>
+      function closeModal() {
+        document.getElementById("successModal").style.display = "none";
+      }
+
+      window.onload = function () {
+        // Get email from sessionStorage
+        const userEmail = sessionStorage.getItem("userEmail");
+
+        // Update the username element
+        const usernameElement = document.querySelector(".username");
+        if (usernameElement && userEmail) {
+          usernameElement.textContent = userEmail;
+        }
+      };
+    </script>
+  </body>
+</html>

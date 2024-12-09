@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views
+from .views import getPosts, viewPost,submit_comment
 
 urlpatterns = [
     path('', views.login_view, name='login'),
@@ -14,4 +15,8 @@ urlpatterns = [
     path('users-management/', views.users_management_view, name='users-management'),
     path('profile/', views.profile_view, name='profile'),
     path('api/verify-token/', views.verify_token, name='verify-token'),
+    path('createPost/', views.createpost_view, name='createpost'),
+    path('forum/', getPosts, name='forum'),
+    path('forum/view/<int:post_id>/', viewPost, name='view_post'),
+    path('submit_comment/<int:post_id>/', submit_comment, name='submit_comment'),
 ]

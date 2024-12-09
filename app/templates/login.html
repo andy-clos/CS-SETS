@@ -1,63 +1,74 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Login</title>
-</head>
-<body>
+  </head>
+  <body>
     <h1>Login</h1>
     <form>
-        <input type="email" id="email" placeholder="Email">
-        <input type="password" id="password" placeholder="Password">
-        <button type="button" id="loginBtn">Login</button>
-        <a href="/register">Register now!</a>
+      <input type="email" id="email" placeholder="Email" />
+      <input type="password" id="password" placeholder="Password" />
+      <button type="button" id="loginBtn">Login</button>
+      <a href="/register">Register now!</a>
     </form>
     <p id="message"></p>
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+      import {
+        getAuth,
+        signInWithEmailAndPassword,
+      } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-        // Firebase configuration
-        const firebaseConfig = {
-            apiKey: "AIzaSyCqHVyxf6nbxfEWIf_YbccJvjursSwIRcc",
-            authDomain: "cs-sets.firebaseapp.com",
-            projectId: "cs-sets",
-            storageBucket: "cs-sets.firebasestorage.app",
-            messagingSenderId: "918781841486",
-            appId: "1:918781841486:web:528cd96da7ba9a9f84b31f",
-            measurementId: "G-77X9SZ0DJ6"
-        };
+      // Firebase configuration
+      const firebaseConfig = {
+        apiKey: "AIzaSyCqHVyxf6nbxfEWIf_YbccJvjursSwIRcc",
+        authDomain: "cs-sets.firebaseapp.com",
+        projectId: "cs-sets",
+        storageBucket: "cs-sets.firebasestorage.app",
+        messagingSenderId: "918781841486",
+        appId: "1:918781841486:web:528cd96da7ba9a9f84b31f",
+        measurementId: "G-77X9SZ0DJ6",
+      };
 
-        // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
+      // Initialize Firebase
+      const app = initializeApp(firebaseConfig);
 
-        // Initialize Firebase Auth
-        const auth = getAuth(app);
+      // Initialize Firebase Auth
+      const auth = getAuth(app);
 
-        // Function to log in the user
-        async function login() {
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
+      // Function to log in the user
+      async function login() {
+        const email = document.getElementById("email").value;
+        const password = document.getElementById("password").value;
 
-            try {
-                // Sign in the user with email and password
-                const userCredential = await signInWithEmailAndPassword(auth, email, password);
-                const user = userCredential.user;
-                document.getElementById('message').innerText = `Login successful! Welcome, ${user.email}`;
-                
-                // Store the user email in session storage
-                sessionStorage.setItem('userEmail', user.email);
-                
-                // Redirect to the dashboard page
-                window.location.href = '../dashboard'; // The dashboard page URL
-            } catch (error) {
-                document.getElementById('message').innerText = `Error: ${error.message}`;
-            }
+        try {
+          // Sign in the user with email and password
+          const userCredential = await signInWithEmailAndPassword(
+            auth,
+            email,
+            password
+          );
+          const user = userCredential.user;
+          document.getElementById(
+            "message"
+          ).innerText = `Login successful! Welcome, ${user.email}`;
+
+          // Store the user email in session storage
+          sessionStorage.setItem("userEmail", user.email);
+
+          // Redirect to the dashboard page
+          window.location.href = "../dashboard"; // The dashboard page URL
+        } catch (error) {
+          document.getElementById(
+            "message"
+          ).innerText = `Error: ${error.message}`;
         }
+      }
 
-        // Bind click event to login button
-        document.getElementById('loginBtn').addEventListener('click', login);
+      // Bind click event to login button
+      document.getElementById("loginBtn").addEventListener("click", login);
     </script>
-</body>
+  </body>
 </html>

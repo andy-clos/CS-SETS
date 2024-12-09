@@ -1,0 +1,79 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CS SETS</title>
+    <link rel="stylesheet" href="{% static 'css/navbar.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/header.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/style.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/footer.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/tools/tools.css' %}" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
+    />
+    <style>
+      .section-title {
+        font-size: 40px;
+        font-weight: bold;
+        margin-bottom: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      {% include 'navbar.html' %} {% include 'header.html' %}
+
+      <main>
+        <section class="content">
+          <h2 class="section-title">Tools</h2>
+        </section>
+
+        <div class="display">
+          <div class="display-header">
+            <h1 class="display-header-title">Academic Tools Management</h1>
+            <p class="display-header-subtitle">
+              Revolutionizing Your Study Routine with a Click
+            </p>
+          </div>
+
+          <div class="user-prompt">
+            HI USER! WHAT TOPIC ARE YOU INTERESTED IN?
+          </div>
+
+          <div class="tools-container">
+            <div class="tool-item">
+              <i class="fas fa-book"></i>
+              <span>Study Tools</span>
+            </div>
+
+            <a href="/forum">
+              <div class="tool-item">
+                <i class="fas fa-comments"></i>
+                <span>Forum</span>
+              </div>
+            </a>
+
+            <div class="tool-item">
+              <i class="fas fa-file-alt"></i>
+              <span>Resume Generator</span>
+            </div>
+            <div class="tool-item">
+              <i class="fas fa-calendar-alt"></i>
+              <span>Timetable Generator</span>
+            </div>
+            <div class="tool-item">
+              <i class="fas fa-calculator"></i>
+              <span>CGPA Calculator</span>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      {% include 'footer.html' %}
+    </div>
+    <script src="{% static 'js/logout.js' %}"></script>
+  </body>
+</html>

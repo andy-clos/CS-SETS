@@ -1,0 +1,376 @@
+main {
+  background-color: #ececec;
+}
+
+header {
+  background-color: white;
+  padding: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.ql-toolbar {
+  background-color: #f9f9f9; /* Change this to your desired color */
+  border: 1px solid #ccc; /* Optional */
+}
+
+.ql-container {
+  background-color: #ffffff; /* Change this to your desired color */
+  border: 1px solid #ccc; /* Optional */
+}
+
+.user-profile {
+  display: flex;
+  align-items: center;
+  margin-right: 20px;
+}
+
+.profile-icon {
+  font-size: 32px;
+  color: #888;
+  margin-right: 10px;
+}
+
+.user-info .username {
+  font-weight: bold;
+}
+
+.search-container {
+  display: flex;
+  align-items: center;
+  flex: 1;
+}
+
+.search-container input[type="text"] {
+  flex: 1;
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+button {
+  background-color: #ff9900;
+  color: #fff;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+  margin-left: 10px;
+}
+
+button:hover {
+  background-color: #e68400;
+}
+
+.create-post-btn a {
+  text-decoration: none;
+  color: inherit;
+}
+
+.create-post-btn a:hover {
+  text-decoration: none;
+}
+
+/*create post*/
+
+.form-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 30px;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.form-group {
+  margin-bottom: 25px;
+}
+
+.form-group label {
+  display: block;
+  font-size: 16px;
+  font-weight: bold;
+  color: #4e598c;
+  margin-bottom: 10px;
+}
+
+.form-group select,
+.form-group input[type="text"],
+.form-group textarea {
+  width: 100%;
+  padding: 12px;
+  border: 2px solid #e0e0e0;
+  border-radius: 6px;
+  font-size: 15px;
+  transition: border-color 0.3s;
+}
+
+.form-group select:focus,
+.form-group input[type="text"]:focus,
+.form-group textarea:focus {
+  border-color: #4e598c;
+  outline: none;
+}
+
+.form-group textarea {
+  min-height: 200px;
+  resize: vertical;
+}
+
+.submit-btn {
+  background-color: #4e598c;
+  color: white;
+  border: none;
+  padding: 12px 30px;
+  border-radius: 6px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  float: right;
+}
+
+.submit-btn:hover {
+  background-color: #3a4369;
+}
+
+/*post */
+.post-container {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  padding: top 10px;
+}
+
+.post {
+  background-color: white;
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.post-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.post-title {
+  font-weight: bold;
+  font-size: 18px;
+}
+
+.post-author {
+  color: #888;
+}
+
+.post-time {
+  color: #888;
+  font-size: 12px;
+}
+
+.post-comments {
+  color: #666;
+}
+
+/*tag */
+.label-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 10px;
+  padding: 10px;
+}
+
+.tag-label {
+  display: flex;
+  align-items: center;
+  background-color: white;
+  color: #333;
+  border-radius: 20px;
+  padding: 5px 10px;
+  font-size: 14px;
+  font-weight: 500;
+  margin: 2px;
+  
+}
+
+.tag-label .remove-btn {
+  margin-left: 10px;
+  color: white;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.tag-label .remove-btn:hover {
+  color: white;
+}
+.section-title {
+  font-size: 40px;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.tag-label {
+  display: inline-flex;
+  align-items: center;
+  background-color: #c82333;
+  padding: 5px 10px;
+  border-radius: 15px;
+  margin: 2px;
+  color: white;
+}
+
+.tag-text {
+  color: white;
+  margin-right: 5px;
+}
+
+.remove-btn {
+  cursor: pointer;
+  color: white;
+  font-size: 14px;
+}
+
+.remove-btn:hover {
+  color: #c82333;
+}
+
+/* Modal Styles */
+.modal {
+  display: none; /* Hidden by default */
+  position: fixed; /* Stay in place */
+  z-index: 1000; /* Sit on top */
+  left: 0;
+  top: 0;
+  width: 100%; /* Full width */
+  height: 100%; /* Full height */
+  background-color: rgba(0, 0, 0, 0.5); /* Black w/ opacity */
+  overflow: auto; /* Enable scroll if needed */
+}
+.modal-content {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  text-align: center;
+}
+
+.icon-container .checkmark {
+  font-size: 50px;
+  color: green;
+  margin-bottom: 10px;
+}
+
+.close {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  font-size: 20px;
+  cursor: pointer;
+  color:#c82333
+}
+
+/*viewPost*/
+.containerViewPost {
+  background-color: white;
+  padding: 30px;
+  border-radius: 5px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  max-width: 100%;
+  margin: 0 auto;
+ 
+}
+
+.subject {
+  color: #e68400;
+  margin-bottom: 10px;
+}
+
+.titleViewPost {
+  font-size: 35px;
+  margin-bottom: 10px;
+  color: #000;
+}
+
+.post-details {
+  display: flex;
+    flex-direction: column; /* Stack items vertically */
+    align-items: flex-end; /* Align items to the right */
+    margin-top: 10px; /
+}
+
+.question-details,
+.view_post_time {
+  margin-top: 5px; /* Adds space between the two elements */
+  color: #888; /* Optional: Set color to match your design */
+  font-size: 15px; /* Optional: Set font size */
+}
+
+.black_font {
+  color: #000;
+}
+
+.comment-section {
+  border-top: 1px solid #ccc;
+  padding-top: 10px;
+  margin-top: 10px;
+}
+
+.add-comment{
+  padding: 10px;
+  font-size: 16px;
+  font-weight: 500;
+  color: #007bff;
+  text-decoration: underline;
+  cursor: pointer;
+}
+.comment {
+  margin-bottom: 10px;
+}
+
+.reply{
+font-size: 20px;
+color: #000;
+}
+
+#cancel{
+  background-color: #c82333;
+}
+#editor{
+  margin-bottom: 10px;
+}
+.comment-text {
+  margin-bottom: 5px;
+}
+
+.comment-author {
+  font-size: 12px;
+  color: #888;
+}
+
+
+#commentModal {
+  display: none; /* Hidden by default */
+  position: fixed; /* Stay in place */
+  z-index: 1000; /* Sit on top */
+  left: 0;
+  top: 0;
+  width: 100%; /* Full width */
+  height: 100%; /* Full height */
+  background-color: rgba(0, 0, 0, 0.5); /* Black w/ opacity */
+  overflow: auto; /* Enable scroll if needed */
+}
+
+#modal-content {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  text-align: center;
+  margin: 15% auto; /* Center the modal */
+  width: 80%; /* Width of the modal */
+}

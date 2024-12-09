@@ -1,0 +1,240 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CS SETS</title>
+    <link rel="stylesheet" href="{% static 'css/navbar.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/header.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/style.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/footer.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/tools/forum.css' %}" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div class="container">
+      {% include 'navbar.html' %} {% include 'header.html' %}
+
+      <main>
+        <section class="content">
+          <h2 class="section-title">Create Post</h2>
+          {% if success_message %}
+          <div id="successModal" class="modal">
+            <div class="modal-content">
+              <span class="close" onclick="closeModal()">&times;</span>
+              <div class="icon-container">
+                <i class="checkmark fas fa-check-circle"></i>
+              </div>
+              <h2>{{ success_message }}</h2>
+            </div>
+          </div>
+          {% endif %}
+
+          <form method="POST" action="{% url 'createpost' %}">
+            {% csrf_token %}
+            <div class="form-group">
+              <label for="subject">Subject:</label>
+              <select id="subject" name="subject">
+                <option value="CAT301">CAT301</option>
+                <option value="CPC353">CPC353</option>
+                <option value="CPT316">CPT316</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="title">Title:</label>
+              <input
+                type="text"
+                id="title"
+                name="title"
+                placeholder="Enter Title"
+              />
+            </div>
+            <div class="form-group">
+              <label for="question">Question:</label>
+              <div id="editor"></div>
+              <input type="hidden" id="content" name="content" />
+            </div>
+            <div class="form-group">
+              <label for="tag">Tag:</label>
+              <div class="tag-container">
+                <input
+                  type="text"
+                  id="tag"
+                  placeholder="Enter tag and press Enter"
+                />
+                <div class="label-container"></div>
+                <input type="hidden" id="tags" name="tags" value="[]" />
+              </div>
+            </div>
+            <button type="submit" class="btn-post">Post</button>
+          </form>
+        </section>
+      </main>
+
+      {% include 'footer.html' %}
+    </div>
+    <script src="{% static 'js/logout.js' %}"></script>
+
+    <!-- Include the Quill library -->
+    <script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"></script>
+    <script>
+      const toolbarOptions = [
+        [{ header: [1, 2, 3, 4, 5, 6, false] }],
+        [{ font: [] }],
+        ["bold", "italic", "underline", "strike"], // toggled buttons
+        ["blockquote", "code-block"],
+        ["link", "image", "video", "formula"],
+        [{ header: 1 }, { header: 2 }], // custom button values
+        [{ list: "ordered" }, { list: "bullet" }, { list: "check" }],
+        [{ indent: "-1" }, { indent: "+1" }], // outdent/indent
+        [{ direction: "rtl" }], // text direction
+        [{ color: [] }, { background: [] }], // dropdown with defaults from theme
+        [{ align: [] }],
+        ["clean"], // remove formatting button
+      ];
+
+      // Initialize Quill with toolbar options
+      const quill = new Quill("#editor", {
+        modules: {
+          toolbar: toolbarOptions,
+        },
+        theme: "snow",
+      });
+
+      document
+        .querySelector("form")
+        .addEventListener("submit", function (event) {
+          event.preventDefault();
+          const subject = document.getElementById("subject").value.trim();
+          const title = document.getElementById("title").value.trim();
+          const content = quill.root.innerHTML.trim();
+          // Get email from sessionStorage
+
+          const authorEmail = sessionStorage.getItem("userEmail");
+
+          // Create hidden input for author email if it doesn't exist
+          let authorInput = document.getElementById("author_email");
+          if (!authorInput) {
+            authorInput = document.createElement("input");
+            authorInput.type = "hidden";
+            authorInput.id = "author_email";
+            authorInput.name = "author_email";
+            this.appendChild(authorInput);
+          }
+
+          authorInput.value = authorEmail;
+          // Get all tags from the label container
+          const tagLabels = document.querySelectorAll(".tag-label span");
+          const tags = Array.from(tagLabels).map((label) => label.textContent);
+
+          // Validate fields
+          if (!subject || !title || content === "<p><br></p>") {
+            alert("Subject, Title, and Question fields cannot be empty.");
+            return;
+          }
+
+          // Set hidden input values
+          document.getElementById("content").value = content;
+          document.getElementById("tags").value = JSON.stringify(tags);
+
+          // Submit the form
+          this.submit();
+        });
+
+      // Tag input handling
+      const tagInput = document.querySelector("#tag");
+      const labelContainer = document.querySelector(".label-container");
+
+      // Handle Enter key
+      tagInput.addEventListener("keypress", function (e) {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          addTag();
+        }
+      });
+
+      // Handle space key
+      tagInput.addEventListener("keydown", function (e) {
+        if (e.key === " " && tagInput.value.trim()) {
+          e.preventDefault();
+          addTag();
+        }
+      });
+
+      // Handle blur (clicking outside)
+      tagInput.addEventListener("blur", function () {
+        if (tagInput.value.trim()) {
+          addTag();
+        }
+      });
+
+      function addTag() {
+        const tagValue = tagInput.value.trim();
+        if (tagValue) {
+          createTagLabel(tagValue);
+          tagInput.value = ""; // Clear input field
+          updateHiddenTagsInput();
+        }
+      }
+
+      function createTagLabel(tagValue) {
+        const tagLabel = document.createElement("div");
+        tagLabel.classList.add("tag-label");
+
+        const labelText = document.createElement("span");
+        labelText.classList.add("tag-text");
+        labelText.textContent = tagValue;
+
+        const removeBtn = document.createElement("i");
+        removeBtn.classList.add("fas", "fa-times", "remove-btn");
+
+        removeBtn.addEventListener("click", function () {
+          labelContainer.removeChild(tagLabel);
+          updateHiddenTagsInput();
+        });
+
+        tagLabel.appendChild(labelText);
+        tagLabel.appendChild(removeBtn);
+        labelContainer.appendChild(tagLabel);
+      }
+
+      function updateHiddenTagsInput() {
+        const tagLabels = document.querySelectorAll(
+          ".tag-label span:not(.remove-btn)"
+        );
+        const tags = Array.from(tagLabels).map((label) => label.textContent);
+        document.getElementById("tags").value = JSON.stringify(tags);
+      }
+      // Show modal if success message exists
+      if (document.getElementById("successModal")) {
+        document.getElementById("successModal").style.display = "block";
+      }
+
+      // Close modal function
+      function closeModal() {
+        window.location.href = "/forum"; // Redirect to forum.html
+      }
+
+      // Add event listener to close the modal when the "X" is clicked
+      document.querySelector(".close").addEventListener("click", closeModal);
+
+      // Add event listener to close the modal when clicking anywhere on the modal
+      document
+        .getElementById("successModal")
+        .addEventListener("click", function (event) {
+          // Check if the click is on the modal background (not the content)
+          if (event.target === this) {
+            closeModal();
+          }
+        });
+    </script>
+  </body>
+</html>
