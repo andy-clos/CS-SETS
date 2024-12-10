@@ -94,10 +94,8 @@ def academic_view(request):
                 semester = str(semester_index)
                 if isinstance(courses_in_semester, dict):
                     for course_code, course_info in courses_in_semester.items():
-                        print("this is course_info", course_info)
                         lecturers = course_info.get('lecturers', {})
                         venue_time = course_info.get('venue and time', {})
-                        print("this is lecturers", venue_time)
                         courses.append({
                             'academic_year': academic_year,
                             'semester': semester,
@@ -139,10 +137,8 @@ def analytics_view(request):
                 semester = str(semester_index)
                 if isinstance(courses_in_semester, dict):
                     for course_code, course_info in courses_in_semester.items():
-                        print("this is course_info", course_info)
                         lecturers = course_info.get('lecturers', {})
                         venue_time = course_info.get('venue and time', {})
-                        print("this is lecturers", venue_time)
                         courses.append({
                             'academic_year': academic_year,
                             'semester': semester,

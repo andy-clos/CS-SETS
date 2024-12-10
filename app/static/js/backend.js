@@ -93,10 +93,10 @@ function addLecturerField() {
   newField.setAttribute('id', `lecturer${totalLecturers}`);
   newField.innerHTML = `
       <label>Lecturer Name ${totalLecturers}: </label>
-      <input id="lecturer_name${totalLecturers}" type="text" name="lecturer_name${totalLecturers}" placeholder="Enter lecturer name">
+      <input id="lecturer_name${totalLecturers}" type="text" name="lecturer_name${totalLecturers}" placeholder="Enter lecturer name" required>
       <br>
       <label>Lecturer Email ${totalLecturers}: </label>
-      <input id="lecturer_email${totalLecturers}" type="text" name="lecturer_email${totalLecturers}" placeholder="Enter lecturer email">
+      <input id="lecturer_email${totalLecturers}" type="text" name="lecturer_email${totalLecturers}" placeholder="Enter lecturer email" required>
       <button type="button" onclick="removeLecturerField(${totalLecturers})">-</button>
   `;
   container.appendChild(newField);
@@ -135,11 +135,11 @@ function addVenueTimeField() {
   newField.setAttribute('id', `venue_time${totalClasses}`);
   newField.innerHTML = `
       <label>Class Venue ${totalClasses}: </label>
-      <input id="class_venue${totalClasses}" type="text" name="class_venue${totalClasses}" placeholder="Enter class venue">
+      <input id="class_venue${totalClasses}" type="text" name="class_venue${totalClasses}" placeholder="Enter class venue" required>
       <br>
       <label>Class Day ${totalClasses}: </label>
-      <select name="class_day${totalClasses}" id="class_day${totalClasses}">
-          <option>Select day</option>
+      <select name="class_day${totalClasses}" id="class_day${totalClasses}" required>
+          <option value="">Select day</option>
           <option value="Monday">Monday</option>
           <option value="Tuesday">Tuesday</option>
           <option value="Wednesday">Wednesday</option>
@@ -150,10 +150,10 @@ function addVenueTimeField() {
       </select>
       <br>
       <label>Class Start Time ${totalClasses}: </label>
-      <input id="class_start_time${totalClasses}" type="time" name="class_start_time${totalClasses}">
+      <input id="class_start_time${totalClasses}" type="time" name="class_start_time${totalClasses}" required>
       <br>
       <label>Class End Time ${totalClasses}: </label>
-      <input id="class_end_time${totalClasses}" type="time" name="class_end_time${totalClasses}">
+      <input id="class_end_time${totalClasses}" type="time" name="class_end_time${totalClasses}" required>
       <button type="button" onclick="removeVenueTimeField(${totalClasses})">-</button>
   `;
   container.appendChild(newField);

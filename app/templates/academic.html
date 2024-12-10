@@ -130,37 +130,37 @@
                         <form method="POST" action="{% url 'academic' %}">
                             {% csrf_token %}
                             <label>Semester: </label>
-                            <select name="semester" id="semester">
-                                <option>Select semester</option>
+                            <select name="semester" id="semester" required>
+                                <option value="">Select semester</option>
                                 <option value="1">1</option>
                                 <option value="2">2</option>
                             </select>
                             <br>
                             <label>Academic Year: </label>
-                            <input id="academic_year" type="text" name="academic_year" placeholder="Enter academic year" maxlength="9">
+                            <input id="academic_year" type="text" name="academic_year" placeholder="Enter academic year" maxlength="9" required>
                             <br>
                             <label>Course Code: </label>
-                            <input id="course_code" type="text" name="course_code" placeholder="Enter course code">
+                            <input id="course_code" type="text" name="course_code" placeholder="Enter course code" required>
                             <br>
                             <label>Course Name: </label>
-                            <input id="course_name" type="text" name="course_name" placeholder="Enter course name">
+                            <input id="course_name" type="text" name="course_name" placeholder="Enter course name" required>
                             <br>
                             <div id="lecturer-container">
                                 <label>Lecturer Name 1: </label>
-                                <input id="lecturer_name1" type="text" name="lecturer_name1" placeholder="Enter lecturer name">
+                                <input id="lecturer_name1" type="text" name="lecturer_name1" placeholder="Enter lecturer name" required>
                                 <br>
                                 <label>Lecturer Email 1: </label>
-                                <input id="lecturer_email1" type="text" name="lecturer_email1" placeholder="Enter lecturer email">
+                                <input id="lecturer_email1" type="text" name="lecturer_email1" placeholder="Enter lecturer email" required>
                                 <button type="button" onclick="addLecturerField()">+</button>
                                 <br>
                             </div>
                             <div id="venue-time-container">
                                 <label>Class Venue 1: </label>
-                                <input id="class_venue1" type="text" name="class_venue1" placeholder="Enter class venue">
+                                <input id="class_venue1" type="text" name="class_venue1" placeholder="Enter class venue" required>
                                 <br>
                                 <label>Class Day 1: </label>
-                                <select name="class_day1" id="class_day1">
-                                    <option>Select day</option>
+                                <select name="class_day1" id="class_day1" required>
+                                    <option value="">Select day</option>
                                     <option value="Monday">Monday</option>
                                     <option value="Tuesday">Tuesday</option>
                                     <option value="Wednesday">Wednesday</option>
@@ -171,10 +171,10 @@
                                 </select>
                                 <br>
                                 <label>Class Start Time 1: </label>
-                                <input id="class_start_time1" type="time" name="class_start_time1">
+                                <input id="class_start_time1" type="time" name="class_start_time1" required>
                                 <br>
                                 <label>Class End Time 1: </label>
-                                <input id="class_end_time1" type="time" name="class_end_time1">
+                                <input id="class_end_time1" type="time" name="class_end_time1" required>
                                 <button type="button" onclick="addVenueTimeField()">+</button>
                                 <br>
                             </div>
