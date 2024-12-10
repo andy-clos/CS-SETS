@@ -52,3 +52,127 @@ function logout() {
   sessionStorage.removeItem('userEmail');
   window.location.href = '../login';
 }
+
+function searchCourse() {
+  let input = document.getElementById('searchbar').value.toLowerCase();
+  let courseCards = document.getElementsByClassName('course-card');
+
+  for (let i = 0; i < courseCards.length; i++) {
+      let h2 = courseCards[i].querySelector('h2');
+      if (h2 && !h2.innerHTML.toLowerCase().includes(input)) {
+          courseCards[i].style.display = "none";
+      } else {
+          courseCards[i].style.display = "list-item";
+      }
+  }
+}
+
+document.getElementById('academic_year').addEventListener('input', function (e) {
+  let value = e.target.value.replace(/\D/g, ''); // Remove non-numeric characters
+  if (value.length > 4) {
+      value = value.slice(0, 4) + '/' + value.slice(4, 8); // Insert slash after the fourth digit
+  }
+  e.target.value = value;
+});
+
+let totalLecturers = 1;
+let totalClasses = 1;
+
+function addLecturerField() {
+  // Remove the minus button from the previous field, if it exists
+  if (totalLecturers > 1) {
+      const previousButton = document.querySelector(`#lecturer-container div:last-child button`);
+      if (previousButton) {
+          previousButton.remove();
+      }
+  }
+
+  totalLecturers++;
+  const container = document.getElementById('lecturer-container');
+  const newField = document.createElement('div');
+  newField.setAttribute('id', `lecturer${totalLecturers}`);
+  newField.innerHTML = `
+      <label>Lecturer Name ${totalLecturers}: </label>
+      <input id="lecturer_name${totalLecturers}" type="text" name="lecturer_name${totalLecturers}" placeholder="Enter lecturer name">
+      <br>
+      <label>Lecturer Email ${totalLecturers}: </label>
+      <input id="lecturer_email${totalLecturers}" type="text" name="lecturer_email${totalLecturers}" placeholder="Enter lecturer email">
+      <button type="button" onclick="removeLecturerField(${totalLecturers})">-</button>
+  `;
+  container.appendChild(newField);
+}
+
+function removeLecturerField(id) {
+  const field = document.getElementById(`lecturer${id}`);
+  field.remove();
+  totalLecturers--;
+
+  // Add the minus button to the new last field, if there are still fields left
+  if (totalLecturers > 1) {
+      const lastField = document.querySelector(`#lecturer-container div:last-child`);
+      if (lastField) {
+          const newButton = document.createElement('button');
+          newButton.type = 'button';
+          newButton.textContent = '-';
+          newButton.setAttribute('onclick', `removeLecturerField(${totalLecturers})`);
+          lastField.appendChild(newButton);
+      }
+  }
+}
+
+function addVenueTimeField() {
+// Remove the minus button from the previous field, if it exists
+  if (totalClasses > 1) {
+      const previousButton = document.querySelector(`#venue-time-container div:last-child button`);
+      if (previousButton) {
+          previousButton.remove();
+      }
+  }
+
+  totalClasses++;
+  const container = document.getElementById('venue-time-container');
+  const newField = document.createElement('div');
+  newField.setAttribute('id', `venue_time${totalClasses}`);
+  newField.innerHTML = `
+      <label>Class Venue ${totalClasses}: </label>
+      <input id="class_venue${totalClasses}" type="text" name="class_venue${totalClasses}" placeholder="Enter class venue">
+      <br>
+      <label>Class Day ${totalClasses}: </label>
+      <select name="class_day${totalClasses}" id="class_day${totalClasses}">
+          <option>Select day</option>
+          <option value="Monday">Monday</option>
+          <option value="Tuesday">Tuesday</option>
+          <option value="Wednesday">Wednesday</option>
+          <option value="Thursday">Thursday</option>
+          <option value="Friday">Friday</option>
+          <option value="Saturday">Saturday</option>
+          <option value="Sunday">Sunday</option>
+      </select>
+      <br>
+      <label>Class Start Time ${totalClasses}: </label>
+      <input id="class_start_time${totalClasses}" type="time" name="class_start_time${totalClasses}">
+      <br>
+      <label>Class End Time ${totalClasses}: </label>
+      <input id="class_end_time${totalClasses}" type="time" name="class_end_time${totalClasses}">
+      <button type="button" onclick="removeVenueTimeField(${totalClasses})">-</button>
+  `;
+  container.appendChild(newField);
+}
+
+function removeVenueTimeField(id) {
+  const field = document.getElementById(`venue_time${id}`);
+  field.remove();
+  totalClasses--;
+
+    // Add the minus button to the new last field, if there are still fields left
+    if (totalClasses > 1) {
+        const lastField = document.querySelector(`#venue-time-container div:last-child`);
+        if (lastField) {
+            const newButton = document.createElement('button');
+            newButton.type = 'button';
+            newButton.textContent = '-';
+            newButton.setAttribute('onclick', `removeVenueTimeField(${totalClasses})`);
+            lastField.appendChild(newButton);
+        }
+    }
+}
