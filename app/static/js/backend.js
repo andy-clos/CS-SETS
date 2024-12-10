@@ -1,8 +1,3 @@
-// Logout function to clear sessionStorage and redirect to login page
-function logout() {
-    sessionStorage.removeItem('userEmail'); // Clear sessionStorage
-    window.location.href = '../login'; // Redirect to login page
-}
 
 function activateMenu(event) {
   const menuItems = document.querySelectorAll('.menu-item');
@@ -22,6 +17,13 @@ function activateMenu(event) {
   }
 }
 
+function setDefaultActiveMenu() {
+  const dashboardItem = document.querySelector('.menu-item[href="/dashboard"]');
+  if (dashboardItem) {
+    dashboardItem.classList.add('active');
+  }
+}
+
 const storedActiveLink = localStorage.getItem('activeLink');
 if (storedActiveLink) {
   const menuItems = document.querySelectorAll('.menu-item');
@@ -31,10 +33,7 @@ if (storedActiveLink) {
     }
   });
 } else {
-  const dashboardItem = document.querySelector('.menu-item[href="/dashboard"]');
-  if (dashboardItem) {
-    dashboardItem.classList.add('active');
-  }
+  setDefaultActiveMenu();
 }
 
 const logoBrand = document.querySelector('.logo-brand');
@@ -46,3 +45,10 @@ const menuItems = document.querySelectorAll('.menu-item');
 menuItems.forEach(item => {
   item.addEventListener('click', activateMenu);
 });
+
+function logout() {
+  localStorage.removeItem('activeLink');
+  setDefaultActiveMenu();
+  sessionStorage.removeItem('userEmail');
+  window.location.href = '../login';
+}
