@@ -5,71 +5,117 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CS SETS</title>
-    <link rel="stylesheet" href="{% static 'css/navbar.css' %}">  
-    <link rel="stylesheet" href="{% static 'css/header.css' %}">  
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">  
-    <link rel="stylesheet" href="{% static 'css/footer.css' %}">  
+    <link rel="stylesheet" href="/static/css/navbar.css">  
+    <link rel="stylesheet" href="/static/css/header.css">  
+    <link rel="stylesheet" href="/static/css/style.css">  
+    <link rel="stylesheet" href="/static/css/footer.css">  
 
     <style>
-        .section-title {
-            font-size: 40px;
-            font-weight: bold;
-            margin-bottom: 10px;
-        }
-        .main-content{
-            background-color: #4E598C;
+        .main-content {
+            background-color: #E4E7EB;
             height: 100vh;
+            padding: 20px;
         }
-        .title {
+
+        .announcement-card {
+            background-color: #4E598C;
+            color: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 0 20px 0 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            font-family: Arial, sans-serif;
             display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .announcement-content {
+            background-color: white; /* Wrap content in white background */
+            color: #4E598C; /* Text color matching the theme */
+            border-radius: 10px;
+            padding: 20px 10px 10px 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .announcement-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+        }
+
+        .profile-img {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .profile-container {
+            display: flex;
+            flex-direction: column;
             align-items: center;
             text-align: center;
+            padding: 10px;
+            width: 100px;
         }
-        .add-announce-btn {
-            margin: 30px 10px;
-            background-color: rgba(255, 255, 255, 0.5);
-            color: #4E598C;
-            border: none;
-            padding: 10px 15px;
-            text-align: center;
+
+        .profile-container p{
+            margin-top: 7px;
+        }
+
+        .announcement-details h3 {
+            font-size: 18px;
+            margin: 0;
+            font-weight: bold;
+            text-decoration: underline;
+        }
+
+        .posted-info {
+            font-size: 13px;
+            color: #B3B3CC;
+            text-align: right;
+        }
+
+        .announcement-body {
             font-size: 16px;
-            border-radius: 20px;
+            line-height: 1.5;
+        }
+
+        .expand-text {
+            color: #F9C784;
+            font-weight: bold;
             cursor: pointer;
-            white-space: nowrap;
-        }
-        .add-announce-btn:hover {
-            background-color: #F9C784;
-        }
-        .anc-details{
-            margin-left: 20px;
-            border-radius: 20px;
-            background-color: #fff;
-            color: #4E598C;
-            padding: 15px;
         }
     </style>
 </head>
 <body>
     <div class="container">
-
         {% include 'navbar.html' %} 
 
         {% include 'header.html' %} 
 
         <main>
-            <section class="content">
-                <h2 class="section-title">Dashboard</h2>
-            </section>
             <div class="main-content">
-                <div class="title">
-                    <button class="	fa fa-plus add-announce-btn">   Add Annoucement</button>
-                    <h1 style="flex-basis:100%; color: #fff;">Announcement</h1>
-                </div>
-                <div class="announcement">
-                    <p class="far fa-user-circle"></p>
-                    <div>
-                        <textarea disabled class="anc-details" rows="30" cols="145">Dear student, today due to emergency reason, hall B are closed until 14/11/2025, thus student need to register your application at hall A It’s noticed that you should prepare below document for application. &#13;&#10;&#13;&#10;IC &#13;&#10;SPM &#13;&#10;sijil &#13;&#10;RM200 &#13;&#10;Student card
-                        </textarea>
+                <div class="announcement-card">
+                    <div class="announcement-content">
+                        <div class="announcement-header">
+                            <div class="profile-container">
+                                <img src="/static/image/user.png" alt="Profile Picture" class="profile-img">
+                                <p>Mr. Bean</p>
+                            </div>
+                            <div class="announcement-details">
+                                <h3>Changes venue for event application</h3>
+                                <p class="announcement-body">
+                                    Dear student, today due to emergency reason, hall B are closed until 14/11/2025, thus student need to register your application at hall A...
+                                    <span class="expand-text">[expand]</span>
+                                </p>
+                                <p class="posted-info">posted 11.00PM 11 Aug 2024</p>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
             </div>
