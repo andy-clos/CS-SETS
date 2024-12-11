@@ -95,13 +95,17 @@ def academic_view(request):
                 if isinstance(courses_in_semester, dict):
                     for course_code, course_info in courses_in_semester.items():
                         lecturers = course_info.get('lecturers', {})
+                        lecturers = [lecturer for lecturer in lecturers if lecturer is not None]
                         venue_time = course_info.get('venue and time', {})
+                        venue_time = [vt for vt in venue_time if vt is not None]
+                        lecturer_count = len(lecturers)
                         courses.append({
                             'academic_year': academic_year,
                             'semester': semester,
                             'course_code': course_code,
                             'course_name': course_info.get('course_name', ''),
                             'lecturers': lecturers,
+                            'lecturer_count': lecturer_count,
                             'venue and time': venue_time
                         })
 
@@ -110,6 +114,114 @@ def academic_view(request):
 
     return render(request, 'academic.html', {'courses': courses})
 
+def course_detail_view(request, semester_year, course_code):
+    if request.method == 'POST':
+        try:
+            academic_year = request.POST.get('academic_year').replace('/', '-')
+            semester = request.POST.get('semester')
+            course_code = request.POST.get('course_code').upper()
+            course_name = request.POST.get('course_name').title()
+
+            lecturers = {}
+            lecturer_index = 1
+            while True:
+                lecturer_name = request.POST.get(f'lecturer_name{lecturer_index}')
+                lecturer_email = request.POST.get(f'lecturer_email{lecturer_index}')
+                if not lecturer_name or not lecturer_email:
+                    break
+                lecturers[lecturer_index] = {
+                    "lecturer_name": lecturer_name.title(),
+                    "lecturer_email": lecturer_email.lower()
+                }
+                lecturer_index += 1
+
+            venue_time = {}
+            venue_time_index = 1
+            while True:
+                class_venue = request.POST.get(f'class_venue{venue_time_index}')
+                class_day = request.POST.get(f'class_day{venue_time_index}')
+                class_start_time = request.POST.get(f'class_start_time{venue_time_index}')
+                class_end_time = request.POST.get(f'class_end_time{venue_time_index}')
+                if not class_venue or not class_day or not class_start_time or not class_end_time:
+                    break
+                venue_time[venue_time_index] = {
+                    "class_venue": class_venue.upper(),
+                    "class_day": class_day.title(),
+                    "class_start_time": class_start_time,
+                    "class_end_time": class_end_time
+                }
+                venue_time_index += 1
+
+            course_data = {
+                "course_name": course_name,
+                "lecturers": lecturers,
+                "venue and time": venue_time
+            }
+
+            database.child("course").child(academic_year).child(semester).child(course_code).update(course_data)
+
+            success_message = "Course updated successfully!"
+
+            return redirect('course-detail', semester_year=semester_year, course_code=course_code)
+        except Exception as e:
+            print(f"Error updating course: {e}")
+            return render(request, 'course-detail.html', {'error': str(e)})
+
+    try:
+        academic_year, semester = semester_year.split('sem')
+        semester = semester[0] 
+        academic_year = semester_year[semester_year.index("year") + 4:]
+
+        courses_data = database.child("course").get().val()
+        courses = []
+        
+        for year, semesters in courses_data.items():
+            if year == academic_year:
+                for semester_index, courses_in_semester in enumerate(semesters):
+                    if str(semester_index) == semester:
+                        if isinstance(courses_in_semester, dict):
+                            for code, course_info in courses_in_semester.items():
+                                if code == course_code: 
+                                    lecturers = course_info.get('lecturers', {})
+                                    lecturers = [lecturer for lecturer in lecturers if lecturer is not None]
+                                    venue_time = course_info.get('venue and time', {})
+                                    venue_time = [vt for vt in venue_time if vt is not None]
+                                    lecturer_count = len(lecturers)
+                                    print("this is count" ,lecturer_count)
+                                    courses.append({
+                                        'semester_year': semester_year,
+                                        'academic_year': year.replace('-', '/'),
+                                        'semester': str(semester_index),
+                                        'course_code': code,
+                                        'course_name': course_info.get('course_name', ''),
+                                        'lecturers': lecturers,
+                                        'lecturer_count': lecturer_count,
+                                        'venue_time': venue_time
+                                    })
+        print(courses)
+        if not courses:
+            return render(request, 'course-detail.html', {'error': 'Course not found'})
+        
+        return render(request, 'course-detail.html', {'courses': courses, 'course_code': course_code, 'academic_year': academic_year, 'semester': semester})
+    except Exception as e:
+        print(f"Error fetching course details: {e}")
+        return render(request, 'course-detail.html', {'error': 'An error occurred while fetching course details'})
+
+def delete_course_view(request, semester_year, course_code):
+    try:
+        print(f"Deleting course: semester_year={semester_year}, course_code={course_code}")
+        academic_year, semester = semester_year.split('sem')
+        semester = semester[0]  # Extract the semester number
+        academic_year = semester_year[semester_year.index("year") + 4:]
+        print("this is year:", academic_year)
+        # Delete the course from the database
+        database.child("course").child(academic_year).child(semester).child(course_code).remove()
+
+        return redirect('academic')
+    except Exception as e:
+        print(f"Error deleting course: {e}")
+        return render(request, 'course-detail.html', {'error': str(e)})
+    
 def tools_view(request):
     return render(request, 'Tools/tools.html')
 
@@ -124,10 +236,6 @@ def forum_view(request):
     return render(request, "Tools/Forum/forum.html", {"user_email": user_email, "posts": posts})
 
 def analytics_view(request):
-    return render(request, 'analytics.html')
-
-def analytics_view(request):
-    
     courses = []
     try:
         courses_data = database.child("course").get().val()
@@ -138,13 +246,17 @@ def analytics_view(request):
                 if isinstance(courses_in_semester, dict):
                     for course_code, course_info in courses_in_semester.items():
                         lecturers = course_info.get('lecturers', {})
+                        lecturers = [lecturer for lecturer in lecturers if lecturer is not None]
                         venue_time = course_info.get('venue and time', {})
+                        venue_time = [vt for vt in venue_time if vt is not None]
+                        lecturer_count = len(lecturers)
                         courses.append({
                             'academic_year': academic_year,
                             'semester': semester,
                             'course_code': course_code,
                             'course_name': course_info.get('course_name', ''),
                             'lecturers': lecturers,
+                            'lecturer_count': lecturer_count,
                             'venue and time': venue_time
                         })
 
