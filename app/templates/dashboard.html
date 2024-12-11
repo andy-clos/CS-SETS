@@ -8,13 +8,17 @@
     <link rel="stylesheet" href="/static/css/navbar.css">  
     <link rel="stylesheet" href="/static/css/header.css">  
     <link rel="stylesheet" href="/static/css/style.css">  
-    <link rel="stylesheet" href="/static/css/footer.css">  
+    <link rel="stylesheet" href="/static/css/footer.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
     <style>
         .main-content {
             background-color: #E4E7EB;
-            height: 100vh;
-            padding: 20px;
+            padding: 10px 20px 20px 20px;
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
         }
 
         .announcement-card {
@@ -28,11 +32,12 @@
             display: flex;
             flex-direction: column;
             gap: 15px;
+            height: fit-content;
         }
 
         .announcement-content {
-            background-color: white; /* Wrap content in white background */
-            color: #4E598C; /* Text color matching the theme */
+            background-color: white;
+            color: #4E598C;
             border-radius: 10px;
             padding: 20px 10px 10px 10px;
             display: flex;
@@ -89,6 +94,243 @@
             font-weight: bold;
             cursor: pointer;
         }
+
+        .leaderboard-card{
+            background-color: #4E598C;
+            color: white;
+            border-radius: 15px;
+            padding: 10px;
+            margin-left: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            width:40%;
+            flex: 1;
+        }
+
+        .leaderboard-card h2{
+            text-align: center;
+        }
+
+        .leaderboard-content{
+            background-color: #F9C784;
+            color: #4E598C;
+            border-radius: 10px;
+            padding: 20px 10px 10px 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            margin: 5px 5px 3px 5px;
+        }
+
+        .leaderboard-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+        }
+
+        .academic-card{
+            background-color: #4E598C;
+            color: white;
+            border-radius: 20px;
+            padding: 10px;
+            margin-right: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            width:60%;
+            flex: 2;
+        }
+
+        .academic-card h2 {
+            text-align: center;
+            color: white;
+        }
+
+        .academic-outsider {
+            background-color: #F9C784;
+            border-radius: 20px;
+            margin-top: 3px;
+            width: 100%;
+            height: 100%;
+        }
+
+        .academic-content{
+            color: #4E598C;
+            border-radius: 20px;
+            padding: 10px 10px 10px 10px;
+            gap: 5px;
+            display: flex; 
+            flex-direction: row; 
+            align-items: flex-start;
+            height: 100%;
+        }
+        .list-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .list-item-content {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-grow: 1;
+        }
+
+        .list-item .fa {
+            font-size: 30px;
+            margin-left: auto;
+        }
+
+        .academic-section{
+            background-color: white;
+            color: #4E598C;
+            padding: 20px 10px 10px 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .academic-cgpa-section {
+            padding: 10px;
+            background-color: white;
+            border-radius: 20px;
+            height: 100%;
+            flex: 1;
+        }
+
+        .progress-bar-container {
+            margin-top: 10px;
+            position: relative;
+            margin-bottom: 20px;
+            
+        }
+
+        .progress-bar-header {
+            position: relative;
+            width: 100%;
+            height: 20px;
+            background-color: #eee;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            position: absolute;
+            width: 92.89%;
+            height: 100%;
+            background-color: #F7D9D9;
+            border-radius: 10px;
+            z-index: 2; /* Keeps the progress bar on top */
+        }
+
+        .progress-text {
+            text-align: center;
+            color: #4E598C;
+            margin-bottom: 10px;
+        }
+
+        .cgpa-container {
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .cgpa-box {
+            text-align: center;
+            flex: 1;
+            margin-bottom: 20px;
+        }
+
+        .cgpa-title {
+            margin: 0;
+            font-size: 18px;
+            color: #4E598C;
+            background-color: #F9C784;
+            border-radius: 20px;
+            padding: 10px 0 10px 0;
+        }
+
+        .cgpa-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #4E598C;
+            margin: 5px 0;
+        }
+
+        .btn {
+            background-color: #F7D9D9;
+            color: #4E598C;
+            border: none;
+            border-radius: 5px;
+            padding: 5px 10px;
+            cursor: pointer;
+            font-size: 14px;
+            border-radius: 20px;
+        }
+
+        .academic-feedback-section {
+            padding: 10px;
+            background-color: white;
+            border-radius: 20px;
+            height: 100%;
+            flex: 1;
+        }
+
+        .feedback-list {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .feedback-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .feedback-icon {
+            font-size: 18px;
+        }
+
+        .positive-icon {
+            color: green;
+        }
+
+        .neutral-icon {
+            color: blue;
+        }
+
+        .warning-icon {
+            color: red;
+        }
+
+        .encouragement-icon {
+            color: orange;
+        }
+
+        .feedback-text {
+            margin: 0;
+            color: #4E598C;
+        }
+
+        .subject{
+            text-align: center;
+            font-size: 23px;
+            color: #4E598C;
+            margin-bottom: 5px;
+        }
+
+        .feedback{
+            margin-top: 30px;
+            font-size: 16px;
+        }
+
     </style>
 </head>
 <body>
@@ -97,7 +339,7 @@
 
         {% include 'header.html' %} 
 
-        <main>
+        <main style="padding-top: 0%;">
             <div class="main-content">
                 <div class="announcement-card">
                     <div class="announcement-content">
@@ -118,6 +360,117 @@
 
                     </div>
                 </div>
+                <div class="leaderboard-card">
+                    <h2>Leaderboard</h2>
+                    <div class="leaderboard-content">
+                        <div class="leaderboard-header">
+                            <ul>
+                                <li class="list-item">
+                                    <div class="list-item-content">
+                                        <p>1.</p>
+                                        <img src="/static/image/user.png" alt="Profile Picture" class="profile-img">
+                                        <p>AndyClos A/L Boon Mee</p>
+                                        <i class="fa fa-file-text"></i>
+                                    </div>
+                                    
+                                </li>
+                                <li class="list-item">
+                                    <div class="list-item-content">
+                                        <p>2.</p>
+                                        <img src="/static/image/user.png" alt="Profile Picture" class="profile-img">
+                                        <p>Muhammad Ezzat Haziq Bin Elhan</p>
+                                        <i class="fa fa-file-text"></i>
+                                    </div>
+                                    
+                                </li>
+                                <li class="list-item">
+                                    <div class="list-item-content">
+                                        <p>3.</p>
+                                        <img src="/static/image/user.png" alt="Profile Picture" class="profile-img">
+                                        <p>Kam Weng Xuan</p>
+                                        <i class="fa fa-file-text"></i>
+                                    </div>
+                                    
+                                </li>
+                                <li class="list-item">
+                                    <div class="list-item-content">
+                                        <p>4.</p>
+                                        <img src="/static/image/user.png" alt="Profile Picture" class="profile-img">
+                                        <p>Loh Wei Ting</p>
+                                        <i class="fa fa-file-text"></i>
+                                    </div>
+                                    
+                                </li>
+                                <li class="list-item">
+                                    <div class="list-item-content">
+                                        <p>5.</p>
+                                        <img src="/static/image/user.png" alt="Profile Picture" class="profile-img">
+                                        <p>John</p>
+                                        <i class="fa fa-file-text"></i>
+                                    </div>
+                                    
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="academic-card">
+                    <h2>Academic Result</h2>
+                    <div class="academic-outsider">
+                        <div class="academic-content">
+                            <!-- CGPA Section -->
+                            <div class="academic-cgpa-section">
+                                <p class="progress-text">Progress to target: 92.89%</p>
+                                <div class="progress-bar-container">
+                                    <div class="progress-bar-header">
+                                        <div class="progress-bar"></div>
+                                    </div>
+                                </div>
+                                <div class="cgpa-container">
+                                    <div class="cgpa-box">
+                                        <h3 class="cgpa-title">Current CGPA</h3>
+                                        <p class="cgpa-value">3.53</p>
+                                        <button class="btn">Check current result</button>
+                                    </div>
+                                    <div class="cgpa-box">
+                                        <h3 class="cgpa-title">Targeted CGPA</h3>
+                                        <p class="cgpa-value">3.80</p>
+                                        <button class="btn">Check targeted result</button>
+                                    </div>
+                                </div>
+                            </div>
+                
+                            <!-- Feedback Section -->
+                            <div class="academic-feedback-section">
+                                <ul class="feedback-list">
+                                    <li class="feedback-item">
+                                        <p class="feedback-text subject">Subject that has risk to fail: 0</p>
+                                    </li>
+                                    <li class="feedback-item">
+                                        <button class="btn" style="margin-left: auto;margin-right: auto;">View details</button>
+                                    </li>
+                                    <li class="feedback-item feedback">
+                                        <span class="feedback-icon positive-icon">&#128077;</span>
+                                        <p class="feedback-text">Maintain your academic result</p>
+                                    </li>
+                                    <li class="feedback-item feedback">
+                                        <span class="feedback-icon neutral-icon">&#128200;</span>
+                                        <p class="feedback-text">You still have the chance to improve</p>
+                                    </li>
+                                    <li class="feedback-item feedback">
+                                        <span class="feedback-icon warning-icon">&#10060;</span>
+                                        <p class="feedback-text">You might fail if next CPT123 test is below 50 marks</p>
+                                    </li>
+                                    <li class="feedback-item feedback">
+                                        <span class="feedback-icon encouragement-icon">&#127800;</span>
+                                        <p class="feedback-text">Work harder to achieve more</p>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
             </div>
         </main>
 
