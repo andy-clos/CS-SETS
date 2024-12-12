@@ -14,7 +14,7 @@
     <style>
         .main-content {
             background-color: #E4E7EB;
-            padding: 10px 20px 20px 20px;
+            padding: 10px 10px 20px 10px;
             display: flex;
             gap: 20px;
             flex-wrap: wrap;
@@ -273,7 +273,7 @@
             left: 0;
             height: 100%;
             width: 92.89%; /* Adjust this value dynamically */
-            background: linear-gradient(90deg, #F9C784, #F7D9D9);
+            background: linear-gradient(90deg, #F7D9D9, #F9C784);
             border-radius: 12px;
             transition: width 0.5s ease-in-out;
             overflow: hidden;
@@ -392,7 +392,7 @@
             font-size: 16px;
         }
 
-        .leaderboard-modal {
+        .pop-modal {
             display: none;
             position: fixed;
             z-index: 1;
@@ -406,7 +406,7 @@
             padding-top: 60px;
         }
 
-        .leaderboard-modal-content {
+        .pop-modal-content {
             background-color: #fff;
             margin: 5% auto;
             padding: 20px;
@@ -459,6 +459,7 @@
 
                     </div>
                 </div>
+                
                 <div class="leaderboard-card">
                     <h2>Leaderboard</h2>
                     <div class="leaderboard-content">
@@ -571,12 +572,19 @@
             </div>
         </main>
 
-<!-- Modal for Leaderboard Details -->
-<div id="leaderboard-modal" class="leaderboard-modal">
-    <div class="leaderboard-modal-content">
-        <span id="close-modal" class="close-modal">&times;</span>
+<div id="leaderboard-modal" class="pop-modal">
+    <div class="pop-modal-content">
         <h2>Leaderboard Details</h2>
         <div id="leaderboard-detail-content">
+            <!-- Content will be dynamically inserted here -->
+        </div>
+    </div>
+</div>
+
+<div id="academic-modal" class="pop-modal">
+    <div class="pop-modal-content">
+        <h2>Academic Details</h2>
+        <div id="academic-detail-content">
             <!-- Content will be dynamically inserted here -->
         </div>
     </div>
@@ -592,67 +600,99 @@
 
 <script>
     document.addEventListener("DOMContentLoaded", () => {
-        const leaderboardDetailsButtons = document.querySelectorAll(".leaderboard-details"); // Target the button
-        const leaderboardModal = document.getElementById("leaderboard-modal");
-        const closeModal = document.getElementById("close-modal");
-        const leaderboardDetailContent = document.getElementById("leaderboard-detail-content");
+    // Handle Leaderboard Modal
+    const leaderboardDetailsButtons = document.querySelectorAll(".leaderboard-details");
+    const leaderboardModal = document.getElementById("leaderboard-modal");
+    const leaderboardDetailContent = document.getElementById("leaderboard-detail-content");
 
-        // When the user clicks the "View Details" button
-        leaderboardDetailsButtons.forEach(button => {
-            button.addEventListener("click", (e) => {
-                const listItem = e.target.closest('.list-item');
-                const name = listItem.querySelector('p').textContent.trim();
-                const imageSrc = listItem.querySelector('img').src;
+    leaderboardDetailsButtons.forEach(button => {
+        button.addEventListener("click", (event) => {
+            const listItem = event.target.closest('.list-item');
+            const name = listItem.querySelector('p').textContent.trim();
+            const imageSrc = listItem.querySelector('img').src;
 
-                // Add content dynamically to the modal
-                leaderboardDetailContent.innerHTML = `
-                    <img src="${imageSrc}" alt="Profile Picture" class="profile-img" style="width: 100px; height: 100px;">
-                    <h3>${name}</h3>
-                    <p>Details about ${name} will go here.</p>
-                `;
+            leaderboardDetailContent.innerHTML = `
+                <img src="${imageSrc}" alt="Profile Picture" class="profile-img" style="width: 100px; height: 100px;">
+                <h3>${name}</h3>
+                <p>Details about ${name} will go here.</p>
+            `;
 
-                // Display the modal
-                leaderboardModal.style.display = "block";
-            });
+            leaderboardModal.style.display = "block";
         });
+    });
 
-        // Close the modal when the user clicks the close button
-        closeModal.addEventListener("click", () => {
+    // Close Leaderboard Modal when clicking outside
+    window.addEventListener("click", (event) => {
+        if (event.target == leaderboardModal) {
             leaderboardModal.style.display = "none";
-        });
-
-        // Close the modal if the user clicks outside of the modal content
-        window.addEventListener("click", (event) => {
-            if (event.target == leaderboardModal) {
-                leaderboardModal.style.display = "none";
-            }
-        });
-    });
-</script>
-
-<script>
-    document.addEventListener("DOMContentLoaded", () => {
-        const progressBarContainer = document.querySelector('.progress-bar-container');
-        
-
-        function createGlitterEffect() {
-            const glitter = document.createElement('div');
-            glitter.classList.add('glitter');
-            
-            const maxWidth = progressBarContainer.offsetWidth;
-            const randomPositionX = Math.random() * maxWidth;
-            const randomDelay = Math.random() * 2;
-            
-            glitter.style.left = `${randomPositionX}px`;
-            glitter.style.animationDelay = `-${randomDelay}s`;
-            
-            progressBarContainer.appendChild(glitter);
-            
-            setTimeout(() => {
-                glitter.remove();
-            }, 2000); 
         }
-
-        setInterval(createGlitterEffect, 100);
     });
+
+    // Handle Academic Modal
+    const academicDetailsButtons = document.querySelectorAll(".btn");
+    const academicModal = document.getElementById("academic-modal");
+    const academicDetailContent = document.getElementById("academic-detail-content");
+
+    academicDetailsButtons.forEach(button => {
+        button.addEventListener("click", (event) => {
+            // Check which button was clicked
+            if (button.textContent.includes("current result")) {
+                academicDetailContent.innerHTML = `
+                    <h3>Current CGPA Results</h3>
+                    <table>
+                        <tr><th>Subject</th><th>Grade</th></tr>
+                        <tr><td>Math</td><td>B+</td></tr>
+                        <tr><td>Physics</td><td>A</td></tr>
+                    </table>
+                `;
+            } else if (button.textContent.includes("targeted result")) {
+                academicDetailContent.innerHTML = `
+                    <h3>Targeted CGPA Results</h3>
+                    <table>
+                        <tr><th>Subject</th><th>Grade</th></tr>
+                        <tr><td>Math</td><td>A</td></tr>
+                        <tr><td>Physics</td><td>A+</td></tr>
+                    </table>
+                `;
+            } else if (button.textContent.includes("View details")) {
+                academicDetailContent.innerHTML = `
+                    <h3>No Subject or risk founded</h3>
+                `;
+            }
+
+            academicModal.style.display = "block";
+        });
+    });
+
+    // Close Academic Modal when clicking outside
+    window.addEventListener("click", (event) => {
+        if (event.target == academicModal) {
+            academicModal.style.display = "none";
+        }
+    });
+
+    // Handle Progress Bar Glitter Effect
+    const progressBarContainer = document.querySelector('.progress-bar-container');
+
+    function createGlitterEffect() {
+        const glitter = document.createElement('div');
+        glitter.classList.add('glitter');
+        
+        const maxWidth = progressBarContainer.offsetWidth;
+        const randomPositionX = Math.random() * maxWidth;
+        const randomDelay = Math.random() * 2;
+
+        glitter.style.left = `${randomPositionX}px`;
+        glitter.style.animationDelay = `-${randomDelay}s`;
+
+        progressBarContainer.appendChild(glitter);
+
+        setTimeout(() => {
+            glitter.remove();
+        }, 2000); 
+    }
+
+    setInterval(createGlitterEffect, 100);
+});
+
 </script>
