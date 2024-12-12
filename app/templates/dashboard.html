@@ -124,6 +124,24 @@
             margin: 5px 5px 3px 5px;
         }
 
+        .leaderboard-details{
+            color: #4E598C;
+            border: none;
+            border-radius: 20px;
+            padding: 5px 10px;
+            cursor: pointer;
+            font-size: 14px;
+            outline: none;
+            background-color: transparent;
+            margin-left: auto;
+            transition: background-color 0.3s, transform 0.2s ease;
+        }
+
+        .leaderboard-details:hover {
+            background-color: white;
+            transform: scale(1.05);
+        }
+
         .leaderboard-header {
             display: flex;
             align-items: flex-start;
@@ -203,13 +221,6 @@
             flex: 1;
         }
 
-        .progress-bar-container {
-            margin-top: 10px;
-            position: relative;
-            margin-bottom: 20px;
-            
-        }
-
         .progress-bar-header {
             position: relative;
             width: 100%;
@@ -219,19 +230,61 @@
             overflow: hidden;
         }
 
+        @keyframes glitter {
+            0% {
+                transform: translateY(-10px) scale(0.5);
+                opacity: 0;
+            }
+            50% {
+                transform: translateY(10px) scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(30px) scale(0.5);
+                opacity: 0;
+            }
+        }
+
+        .glitter {
+            position: absolute;
+            background-color: white;
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            animation: glitter 1.5s linear infinite;
+            opacity: 0;
+        }
+
+        .progress-bar-container {
+            margin-top: 10px;
+            margin-bottom: 20px;
+            position: relative;
+            width: 100%;
+            height: 25px;
+            background-color: #e0e0e0;
+            border-radius: 12px;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
         .progress-bar {
             position: absolute;
-            width: 92.89%;
+            top: 0;
+            left: 0;
             height: 100%;
-            background-color: #F7D9D9;
-            border-radius: 10px;
-            z-index: 2; /* Keeps the progress bar on top */
+            width: 92.89%; /* Adjust this value dynamically */
+            background: linear-gradient(90deg, #F9C784, #F7D9D9);
+            border-radius: 12px;
+            transition: width 0.5s ease-in-out;
+            overflow: hidden;
         }
 
         .progress-text {
+            margin-top: 5px;
             text-align: center;
             color: #4E598C;
-            margin-bottom: 10px;
+            font-size: 18px;
+            font-weight: bold;
         }
 
         .cgpa-container {
@@ -271,6 +324,13 @@
             cursor: pointer;
             font-size: 14px;
             border-radius: 20px;
+            transition: background-color 0.3s, transform 0.2s ease;
+        }
+
+        .btn:hover {
+            background-color: #4E598C;
+            color: white;
+            transform: scale(1.05);
         }
 
         .academic-feedback-section {
@@ -320,8 +380,9 @@
         }
 
         .subject{
-            text-align: center;
-            font-size: 23px;
+            margin-left: auto;
+            margin-right: auto;
+            font-size: 20px;
             color: #4E598C;
             margin-bottom: 5px;
         }
@@ -331,6 +392,44 @@
             font-size: 16px;
         }
 
+        .leaderboard-modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgb(0, 0, 0);
+            background-color: rgba(0, 0, 0, 0.4);
+            padding-top: 60px;
+        }
+
+        .leaderboard-modal-content {
+            background-color: #fff;
+            margin: 5% auto;
+            padding: 20px;
+            border-radius: 10px;
+            width: 80%;
+            max-width: 600px;
+        }
+
+        .close-modal {
+            color: #aaa;
+            font-size: 28px;
+            font-weight: bold;
+            position: absolute;
+            top: 15px;
+            right: 25px;
+        }
+
+        .close-modal:hover,
+        .close-modal:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -370,7 +469,7 @@
                                         <p>1.</p>
                                         <img src="/static/image/user.png" alt="Profile Picture" class="profile-img">
                                         <p>AndyClos A/L Boon Mee</p>
-                                        <i class="fa fa-file-text"></i>
+                                        <button class="leaderboard-details"><i class="fa fa-file-text"></i></button>
                                     </div>
                                     
                                 </li>
@@ -379,7 +478,7 @@
                                         <p>2.</p>
                                         <img src="/static/image/user.png" alt="Profile Picture" class="profile-img">
                                         <p>Muhammad Ezzat Haziq Bin Elhan</p>
-                                        <i class="fa fa-file-text"></i>
+                                        <button class="leaderboard-details"><i class="fa fa-file-text"></i></button>
                                     </div>
                                     
                                 </li>
@@ -388,7 +487,7 @@
                                         <p>3.</p>
                                         <img src="/static/image/user.png" alt="Profile Picture" class="profile-img">
                                         <p>Kam Weng Xuan</p>
-                                        <i class="fa fa-file-text"></i>
+                                        <button class="leaderboard-details"><i class="fa fa-file-text"></i></button>
                                     </div>
                                     
                                 </li>
@@ -397,7 +496,7 @@
                                         <p>4.</p>
                                         <img src="/static/image/user.png" alt="Profile Picture" class="profile-img">
                                         <p>Loh Wei Ting</p>
-                                        <i class="fa fa-file-text"></i>
+                                        <button class="leaderboard-details"><i class="fa fa-file-text"></i></button>
                                     </div>
                                     
                                 </li>
@@ -406,7 +505,7 @@
                                         <p>5.</p>
                                         <img src="/static/image/user.png" alt="Profile Picture" class="profile-img">
                                         <p>John</p>
-                                        <i class="fa fa-file-text"></i>
+                                        <button class="leaderboard-details"><i class="fa fa-file-text"></i></button>
                                     </div>
                                     
                                 </li>
@@ -422,9 +521,7 @@
                             <div class="academic-cgpa-section">
                                 <p class="progress-text">Progress to target: 92.89%</p>
                                 <div class="progress-bar-container">
-                                    <div class="progress-bar-header">
-                                        <div class="progress-bar"></div>
-                                    </div>
+                                    <div class="progress-bar"></div>
                                 </div>
                                 <div class="cgpa-container">
                                     <div class="cgpa-box">
@@ -474,8 +571,88 @@
             </div>
         </main>
 
+<!-- Modal for Leaderboard Details -->
+<div id="leaderboard-modal" class="leaderboard-modal">
+    <div class="leaderboard-modal-content">
+        <span id="close-modal" class="close-modal">&times;</span>
+        <h2>Leaderboard Details</h2>
+        <div id="leaderboard-detail-content">
+            <!-- Content will be dynamically inserted here -->
+        </div>
+    </div>
+</div>
+
         {% include 'footer.html' %} 
     </div>
     <script src="{% static 'js/backend.js' %}"></script>
+
+
 </body>
 </html>
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const leaderboardDetailsButtons = document.querySelectorAll(".leaderboard-details"); // Target the button
+        const leaderboardModal = document.getElementById("leaderboard-modal");
+        const closeModal = document.getElementById("close-modal");
+        const leaderboardDetailContent = document.getElementById("leaderboard-detail-content");
+
+        // When the user clicks the "View Details" button
+        leaderboardDetailsButtons.forEach(button => {
+            button.addEventListener("click", (e) => {
+                const listItem = e.target.closest('.list-item');
+                const name = listItem.querySelector('p').textContent.trim();
+                const imageSrc = listItem.querySelector('img').src;
+
+                // Add content dynamically to the modal
+                leaderboardDetailContent.innerHTML = `
+                    <img src="${imageSrc}" alt="Profile Picture" class="profile-img" style="width: 100px; height: 100px;">
+                    <h3>${name}</h3>
+                    <p>Details about ${name} will go here.</p>
+                `;
+
+                // Display the modal
+                leaderboardModal.style.display = "block";
+            });
+        });
+
+        // Close the modal when the user clicks the close button
+        closeModal.addEventListener("click", () => {
+            leaderboardModal.style.display = "none";
+        });
+
+        // Close the modal if the user clicks outside of the modal content
+        window.addEventListener("click", (event) => {
+            if (event.target == leaderboardModal) {
+                leaderboardModal.style.display = "none";
+            }
+        });
+    });
+</script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const progressBarContainer = document.querySelector('.progress-bar-container');
+        
+
+        function createGlitterEffect() {
+            const glitter = document.createElement('div');
+            glitter.classList.add('glitter');
+            
+            const maxWidth = progressBarContainer.offsetWidth;
+            const randomPositionX = Math.random() * maxWidth;
+            const randomDelay = Math.random() * 2;
+            
+            glitter.style.left = `${randomPositionX}px`;
+            glitter.style.animationDelay = `-${randomDelay}s`;
+            
+            progressBarContainer.appendChild(glitter);
+            
+            setTimeout(() => {
+                glitter.remove();
+            }, 2000); 
+        }
+
+        setInterval(createGlitterEffect, 100);
+    });
+</script>
