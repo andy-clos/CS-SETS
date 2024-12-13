@@ -1,0 +1,152 @@
+html, body {
+    height: 100%;
+    margin: 0;
+}
+
+main {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background-color: #dde0ee;
+}
+
+.rl-title {
+    background: linear-gradient(135deg, #4E598C, #6A7DFF);
+    color: white;
+    text-align: center;
+    padding: 40px 60px;
+    font-size: 45px;
+    font-weight: 900;
+    text-transform: uppercase;
+    border-radius: 15px;
+    box-shadow: 0px 15px 40px rgba(0, 0, 0, 0.2);
+    letter-spacing: 4px;
+    font-family: 'Playfair Display', serif;
+    position: relative;
+    overflow: hidden;
+    animation: fadeIn 1s ease-out;
+}
+
+.rl-title h1 {
+    margin: 0;
+    font-size: 48px;
+    letter-spacing: 5px;
+    text-shadow: 4px 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+@keyframes fadeIn {
+    from {
+    opacity: 0;
+    transform: translateY(-20px);
+    }
+    to {
+    opacity: 1;
+    transform: translateY(0);
+    }
+}
+
+.rl-form {
+    background-color: #f9c784;
+    padding: 50px;
+    border-radius: 20px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+    margin: 20px auto;
+    margin-top: 5%;
+}
+
+.rl-form p {
+    font-size: 14px;
+    font-weight: bold;
+    margin: 5px 0;
+}
+
+.rl-form .input-container {
+    margin-bottom: 20px;
+}
+
+.rl-form input, .rl-form select {
+    width: 100%;
+    padding: 10px;
+    margin-top: 5px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+    display: block;
+    box-sizing: border-box;
+
+.rl-form .checkbox-container {
+    font-size: 12px;
+    margin: 10px 0;
+}
+}
+
+.rl-form button {
+    background-color: white;
+    color: black;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    width: 100%;
+    margin-top: 10px;
+    transition: 0.5s;
+}
+
+.rl-form button:hover {
+    background-color: #4E598C;
+    color: white;
+}
+
+.rl-form a {
+    margin-top: 10px;
+    font-size: 14px;
+    color: black;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.rl-form a:hover {
+    color: #333;
+}
+
+.input-space {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    flex-direction: row;
+    }
+
+.input-space p{
+    font-size: 30px;
+    margin-top: auto;
+    margin-bottom: auto;
+    width: 300px;
+    color: white;
+    -webkit-text-stroke-width: 0.5px;
+    -webkit-text-stroke-color: black;
+    font-weight: bold;
+}
+
+.rl-switch{
+    text-align: center;
+}
+
+.rl-footer{
+    background-color: #4E598C;
+    width: 100%;
+    height: 80px;
+    position: fixed;
+    left: 0;
+    bottom: 0;
+}
+
+.rl-footer p{
+    font-size: 13px;
+    text-align: center;
+    color: white;
+    position: fixed;
+    left: 45%;
+    bottom: 0;
+}

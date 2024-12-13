@@ -1,19 +1,110 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Register</title>
+    <link rel="stylesheet" href="{% static 'css/register-login.css' %}">
+    <style>
+        .rl-form {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            width: 70%;
+            margin: auto;
+        }
+
+        .left-register,
+        .right-register {
+            width: 48%; /* Adjust widths to fit properly */
+        }
+
+        .rl-form > button {
+            width: 100%;
+            margin-top: 20px; /* Add spacing from the input fields */
+            align-self: flex-end;
+        }
+    </style>
 </head>
 <body>
-    <h1>Register</h1>
-    <form>
-        <input type="email" id="email" placeholder="Email">
-        <input type="password" id="password" placeholder="Password">
-        <button type="button" id="registerBtn">Register</button>
-        <a href="/login">Back to login</a>
-    </form>
+    <main>
+        <div class="rl-title">
+            <h1>Register</h1>
+        </div>
+        <div style="margin-top: 3%;">
+            <form class="rl-form">
+                <div class="left-register">
+                    <div class="input-space">
+                        <p>Email:</p>
+                        <input type="email" id="email" placeholder="Email"/>
+                    </div>
+
+                    <div class="input-space">
+                        <p>Password:</p>
+                        <input type="password" id="password" placeholder="Password" />
+                    </div>
+
+                    <div class="input-space">
+                        <p>Name:</p>
+                        <input type="text" id="name" placeholder="Name" />
+                    </div>
+
+                    <div class="input-space">
+                        <p>IC:</p>
+                        <input type="number" id="identity" placeholder="Idenfitication Number" />
+                    </div>
+                </div>
+
+                <div class="right-register">
+                    <div class="input-space">
+                        <p>Gender:</p>
+                        <select name="gender" id="gender">
+                            <option value="M">Male</option>
+                            <option value="F">Female</option>
+                        </select>
+                    </div>
+
+                    <div class="input-space">
+                        <p>Birthday:</p>
+                        <input type="date" id="birthday" placeholder="Birthday"> 
+                    </div>
+
+                    <div class="input-space">
+                        <p>Major:</p>
+                        <select name="major" id="major">
+                            <option value="IC">Intelligent Computing</option>
+                            <option value="SE">Software Engineering</option>
+                            <option value="ci">Computing Infrastructure</option>
+                        </select>
+                    </div>
+
+                    <div class="input-space">
+                        <p>Matrix No.:</p>
+                        <input type="number" id="matrix" placeholder="Idenfitication Number"> 
+                    </div>
+                </div>
+
+                <button type="button" id="registerBtn">Register</button>
+
+            </form>
+            <div class="rl-switch">
+                <p><a href="/login">Back to login</a></p>
+            </div>
+            <div class="rl-footer">
+                <p>© 2024 CS SETS by eLAK</p>
+            </div>
+        </div>
+    </main>
+
     <p id="message"></p>
+    <script>
+        // Set max date for the birthday input
+        const birthdayInput = document.getElementById('birthday');
+        const today = new Date();
+        const maxDate = new Date(today.getFullYear() - 18, today.getMonth(), today.getDate());
+        birthdayInput.max = maxDate.toISOString().split('T')[0];
+    </script>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
