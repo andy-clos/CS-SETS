@@ -47,12 +47,12 @@
 
                     <div class="input-space">
                         <p>Name:</p>
-                        <input type="text" id="name" placeholder="Name" />
+                        <input type="text" id="name" placeholder="Name"/>
                     </div>
 
                     <div class="input-space">
                         <p>IC:</p>
-                        <input type="number" id="identity" placeholder="Idenfitication Number" />
+                        <input type="number" id="identity" placeholder="Idenfitication Number"/>
                     </div>
                 </div>
 
@@ -81,7 +81,7 @@
 
                     <div class="input-space">
                         <p>Matrix No.:</p>
-                        <input type="number" id="matrix" placeholder="Idenfitication Number"> 
+                        <input type="number" id="matrix" placeholder="Matrix Number"> 
                     </div>
                 </div>
 
@@ -97,6 +97,13 @@
         </div>
     </main>
 
+    <div id="errorModal" class="modal">
+        <div class="modal-content">
+          <span class="close">&times;</span>
+          <p id="errorMessage"></p>
+        </div>
+    </div>
+
     <p id="message"></p>
     <script>
         // Set max date for the birthday input
@@ -105,7 +112,9 @@
         const maxDate = new Date(today.getFullYear() - 18, today.getMonth(), today.getDate());
         birthdayInput.max = maxDate.toISOString().split('T')[0];
     </script>
+
     <script type="module">
+
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
@@ -127,23 +136,83 @@
             // Initialize Firebase Auth
             const auth = getAuth(app);
         
-            // Function to register a new user
             async function register() {
-                const email = document.getElementById('email').value;
-                const password = document.getElementById('password').value;
-        
+                const email = document.getElementById('email').value.trim();
+                const password = document.getElementById('password').value.trim();
+                const name = document.getElementById('name').value.trim();
+                const identity = document.getElementById('identity').value.trim();
+                const gender = document.getElementById('gender').value;
+                const birthday = document.getElementById('birthday').value;
+                const major = document.getElementById('major').value;
+                const matrix = document.getElementById('matrix').value.trim();
+
+                // Validate inputs
+                if (!email) return showErrorModal("Email is required.");
+                if (!validateEmail(email)) return showErrorModal("Please enter a valid email address.");
+                if (!password) return showErrorModal("Password is required.");
+                if (!validatePassword(password)) return showErrorModal("Password must be at least 6 characters long, and include at least one uppercase letter, one lowercase letter, one digit, and one special character (e.g. ./?!~`+='\";:<>,{}[]|@#$%^&*()-_).");
+                if (!name) return showErrorModal("Name is required.");
+                if (!identity) return showErrorModal("Identification number is required.");
+                if (!gender) return showErrorModal("Gender is required.");
+                if (!birthday) return showErrorModal("Birthday is required.");
+                if (!major) return showErrorModal("Major is required.");
+                if (!matrix) return showErrorModal("Matrix number is required.");
+
+                if (!identity || !/^\d{12}$/.test(identity)) {
+                    return showErrorModal("IC must contain exactly 12 numeric digits.");
+                }
+
+                if (!name || !/^[a-zA-Z][a-zA-Z\s\.\'\-\d]*$/.test(name)) {
+                    return showErrorModal("Name must start with a letter and can only contain letters, spaces, apostrophes ('), hyphens (-), periods (.), and numbers.");
+                }
+
+
                 try {
-                    // Create user with email and password
+                    //Create user with email and password
                     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
                     const user = userCredential.user;
-                    document.getElementById('message').innerText = `Registration successful! Welcome, ${user.email}`;
+                    showErrorModal(`Registration successful! Welcome, ${name}\n\nYou will be redirected to login page in 3 seconds.`);
+                    setTimeout(() => {
+                        window.location.href = "../login";
+                    }, 3000);
                 } catch (error) {
-                    document.getElementById('message').innerText = `Error: ${error.message}`;
+                    showErrorModal(`Error: ${error.message}`);
                 }
             }
 
+            // Function to validate email format
+            function validateEmail(email) {
+                const re = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+                return re.test(email);
+            }
+
+            // Function to validate password strength
+            function validatePassword(password) {
+                const re = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[./?!~`+='";:<>,{}[\]|@#$%^&*()\-_.])[A-Za-z\d./?!~`+='";:<>,{}[\]|@#$%^&*()\-_.]{6,12}$/;
+                return re.test(password);
+            }
+
+            // Function to show the error modal with the provided message
+            function showErrorModal(message) {
+                const modal = document.getElementById("errorModal");
+                const errorMessage = document.getElementById("errorMessage");
+                errorMessage.innerText = message;
+
+                // Show the modal with fade-in effect
+                modal.style.display = "block";
+                modal.style.animation = "fadeIn 0.5s ease-out"; // Trigger animation
+            }
+
+
+
+
             // Bind click event to register button
             document.getElementById('registerBtn').addEventListener('click', register);
+
+            // Function to close the modal
+            document.querySelector(".close").addEventListener("click", function () {
+                document.getElementById("errorModal").style.display = "none";
+            });
         };
     </script>
 </body>
