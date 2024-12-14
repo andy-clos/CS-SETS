@@ -14,6 +14,7 @@ urlpatterns = [
     path('appointments/', views.appointments_view, name='appointments'),
     path('forum/', views.forum_view, name='forum'),
     path('analytics/', views.analytics_view, name='analytics'),
+    path('analytics/<str:semester_year>/<str:course_code>/', views.analytics_detail_view, name='analytics-detail'),
     path('users-management/', views.users_management_view, name='users-management'),
     path('profile/', views.profile_view, name='profile'),
     path('api/verify-token/', views.verify_token, name='verify-token'),

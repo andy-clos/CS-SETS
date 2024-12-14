@@ -1,0 +1,41 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CS SETS</title>
+    <link rel="stylesheet" href="{% static 'css/navbar.css' %}">  
+    <link rel="stylesheet" href="{% static 'css/header.css' %}">  
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">  
+    <link rel="stylesheet" href="{% static 'css/footer.css' %}">
+</head>
+<body>
+    <div class="container">
+
+        {% include 'navbar.html' %} 
+
+        {% include 'header.html' %} 
+
+        <main>
+          <section class="content">
+            {% if error %}
+            <p>{{ error }}</p>
+            {% else %}
+                {% for course in courses %}
+                <h2 class="section-title">{{ course_code }} : {{course.course_name}}</h2>
+                <span>Lecturer: </span>
+                  {% for lecturer in course.lecturers %}
+                  <span> {{ lecturer.lecturer_name }}{% if not forloop.last %}, {% endif %} </span>
+                  {% endfor %}
+                {% endfor %}
+            {% endif %}
+            <button class="btn btn-primary">Analyze</button>
+        </section>
+        </main>
+
+        {% include 'footer.html' %} 
+    </div>
+    <script src="{% static 'js/backend.js' %}"></script>
+</body>
+</html>

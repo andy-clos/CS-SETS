@@ -126,7 +126,9 @@
                     <img src="{% static 'image/cat304.png' %}" alt="{{ course.course_code }}">
                     <h2>{{ course.course_code }} {{ course.course_name }}</h2>
                     <p>👥 Student: 201 👨‍🏫 Lecturer: {{ course.lecturer_count }}</p>
-                    <button>View Details</button>
+                    <a href="{% url 'analytics-detail' semester_year='sem'|add:course.semester|add:'year'|add:course.academic_year course_code=course.course_code %}">
+                      <button>View Details</button>
+                    </a>
                 </div>
                 {% endfor %}
             {% else %}
