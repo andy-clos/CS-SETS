@@ -26,4 +26,5 @@ main {
   grid-area: main;
   margin-top: 50px;
   padding: 20px;
+  padding-bottom: 60px; 
 }

@@ -5,6 +5,7 @@ import json
 import pyrebase
 from datetime import datetime
 import pytz
+from django.contrib import messages
 
 config = {
     "apiKey": "AIzaSyCqHVyxf6nbxfEWIf_YbccJvjursSwIRcc",
@@ -328,6 +329,12 @@ def forum_view(request):
     posts = getPosts()  # Call the getPosts function to retrieve posts 
     return render(request, "Tools/Forum/forum.html", {"user_email": user_email, "posts": posts})
 
+def getSubject():
+    subject = database.child("forum").child("posts").get()
+
+    
+
+
 def analytics_view(request):
     courses = []
     try:
@@ -432,7 +439,16 @@ def getPosts():
     posts = database.child("forum").child("posts").get()
     #check if post exist
     if posts.val():
-        post_list = [post.val() for post in posts.each()] 
+        post_list = []
+        for post in posts.each():
+            post_data = post.val()
+            # Count replies if 'replies' key exists
+            replies = post_data.get("replies", {})
+            reply_count = len(replies) if isinstance(replies, dict) else 0
+            # Add reply count to the post data
+            post_data['reply_count'] = reply_count
+            post_list.append(post_data)
+            print(post_list)
     else:
         post_list=[]  
     return post_list  
@@ -453,58 +469,45 @@ def viewPost(request, post_id):
         return render(request, 'Tools/Forum/viewPost.html', {'error': 'An error occurred'})
 
 def submit_comment(request, post_id):
-       if request.method == 'POST':
-           try:
-               # Get the comment content from the request
-               content = request.POST.get('content')  # Get the comment content
-               user_email = request.session.get('user_email')
+    if request.method == 'POST':
+        try:
+            # Get the comment content from the request
+            content = request.POST.get('content')  # Get the comment content
+            user_email = request.POST.get('author_email')
+            # Get current timestamp
+            current_timestamp = int(datetime.now(pytz.UTC).timestamp() * 1000)
+            formatted_date = datetime.fromtimestamp(current_timestamp / 1000).strftime('%d/%m/%Y %H:%M:%S')
 
-               # Get current timestamp
-               current_timestamp = int(datetime.now(pytz.UTC).timestamp() * 1000)
-               formatted_date = datetime.fromtimestamp(current_timestamp / 1000).strftime('%d/%m/%Y %H:%M:%S')
+            # Reference to the specific post in Firebase using post_id
+            post_data = database.child("forum").child("posts").order_by_child("PostID").equal_to(post_id).get().val()
+            if post_data:
+                post_key = list(post_data.keys())[0] 
+                # Push the reply to the post's replies
+                reply_data = {
+                    "content": content,
+                    "author": user_email,
+                    "timestamp": formatted_date
+                }
 
-               # Reference to the specific post in Firebase
-               post_ref = database.child("forum").child("posts").child(f"PostID{post_id}")
-               print(f"Post ID: {post_id}")  # Debugging output
+                database.child("forum").child("posts").child(post_key).child("replies").push(reply_data)
 
-               # Check if the post exists
-               post_data = post_ref.get().val()
-               print(f"Post Data: {post_data}")  # Debugging output
+                # Update the comments count if needed
+                current_count = post_data.get("comments_count", 0)
+                new_count = current_count + 1
+                post_data.update({"comments_count": new_count})
 
-               if post_data:
-                   # Push the reply to the post's replies
-                   reply_data = {
-                       "content": content,
-                       "author": user_email,
-                       "timestamp": formatted_date
-                   }
-                   post_ref.child("replies").push(reply_data)
+                  # Add a success message
+                print("Adding success message")  # Debugging line
+                messages.success(request, "Comment added successfully!")
+                
+                # Redirect to the forum page
+                return redirect('forum')  # Change this line to redirect to the forum
 
-                   # Update the comments count if needed
-                   current_count = post_data.get("comments_count", 0)
-                   new_count = current_count + 1
-                   post_ref.update({"comments_count": new_count})
+            #return to the page liao but does not return to the url correctly
+            else:
+                return render({'status': 'error', 'message': 'Post not found.'}, status=404)
 
-                   return JsonResponse({'status': 'success', 'message': 'Reply added successfully.'})
-               else:
-                   return JsonResponse({'status': 'error', 'message': 'Post not found.'}, status=404)
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
 
-           except Exception as e:
-               return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
-
-       return JsonResponse({'status': 'error', 'message': 'Invalid request method.'}, status=405)
-
-#Push Data
-# data = {
-#     "subject": "552",
-#     "title": "Question 1",
-#     "content": "What is the capital of France?",
-#     "tags": ["France", "Paris", "Capital"]
-# }
-# # database.push(data)
-
-# #create data
-# database.child("forum").child("posts").set(data)
-#retrieve data
-# info=authe.current_user()
-# print(info.val())
+    return JsonResponse({'status': 'error', 'message': 'Invalid request method.'}, status=405)

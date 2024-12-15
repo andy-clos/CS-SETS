@@ -23,7 +23,18 @@
         <section class="content">
           <h2 class="section-title">Forum</h2>
         </section>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/7.29.2/sweetalert2.all.js"></script>
+        {% if messages %} {% for message in messages %}
+        <script>
+          swal({
+            title: "{{ message }}",
+            text: "Congratulations",
+            type: "success",
+            showConfirmButton: true,
+          });
+        </script>
 
+        {% endfor %} {% endif %}
         <header>
           <div class="user-profile">
             <i class="fas fa-user-circle profile-icon"></i>
@@ -42,14 +53,29 @@
         <div class="post-container">
           {% if posts %} {% for post in posts %}
           <div class="post">
-            <div class="post-header">
-              <a href="{% url 'view_post' post.PostID %}" class="post-title"
-                >{{ post.title }}</a
+            <div class="ContainerViewPost">
+              <a href="{% url 'view_post' post.PostID %}" class="black_font">
+                {{ post.title }}</a
               >
-              <span class="post-author">{{ post.author }}</span>
-              <span class="post-time">{{ post.timestamp }}</span>
+              <div class="post-details">
+                <div class="question-details">
+                  <span class="black_font">Posted by:</span> {{ post.author }}
+                </div>
+                <div class="view_post_time">
+                  <span class="black_font">Posted time:</span>
+                  {{post.timestamp}}
+                </div>
+              </div>
+              <div class="label">
+                <div class="tag">
+                  <span class="tag-label">{{post.subject}}</span>
+                  {% for tag in post.tags %}
+                  <span class="tag-label"># {{ tag }}</span>
+                  {% endfor %}
+                </div>
+                <span class="comment">{{post.reply_count }} comments</span>
+              </div>
             </div>
-            <div class="post-comments">{{ post.comments_count }} comments</div>
           </div>
           {% endfor %} {% else %}
           <p>No posts available.</p>
@@ -59,7 +85,6 @@
 
       {% include 'footer.html' %}
     </div>
-    <script src="{% static 'js/backend.js' %}"></script>
     <script>
       function closeModal() {
         document.getElementById("successModal").style.display = "none";

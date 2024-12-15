@@ -20,6 +20,6 @@ urlpatterns = [
     path('api/verify-token/', views.verify_token, name='verify-token'),
     path('createPost/', views.createpost_view, name='createpost'),
     path('forum/', getPosts, name='forum'),
-    path('forum/view/<int:post_id>/', viewPost, name='view_post'),
-    path('submit_comment/<int:post_id>/', submit_comment, name='submit_comment'),
+    path('forum/view/<int:post_id>', viewPost, name='view_post'),
+    path('forum/submit_comment/<int:post_id>/', submit_comment, name='submit_comment'),
 ]

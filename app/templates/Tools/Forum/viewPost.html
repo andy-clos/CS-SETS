@@ -18,16 +18,33 @@
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
     />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.1.3/sweetalert.min.css"
+    />
   </head>
   <body>
     <div class="container">
       {% include 'navbar.html' %} {% include 'header.html' %}
       <main>
         <section class="content">
-          {% if post %}
+          {% if success_message %}
+          <script>
+            // Show SweetAlert success message
+            swal({
+              title: "{{success_message}}",
+              text: "Redirecting in 3 seconds.",
+              type: "success",
+              timer: 3000,
+              showConfirmButton: false,
+            }).then(() => {
+              window.location.href = "/forum"; // Redirect to the forum after the alert
+            });;
+          </script>
+          {% endif %} {% if post %}
           <div class="containerViewPost">
             <h1 class="subject">{{post.subject}}</h1>
-            <div class="titleViewPost">{{ post.title }}</div>
+            <div class="titleViewPost">  <span class="black_font">{{ post.title }}</span></div>
 
             <div class="comment-section"></div>
 
@@ -48,19 +65,10 @@
               <span class="add-comment" id="addCommentBtn">Add A Comment</span>
             </div>
 
-            <!-- add modal rich text(add comment) -->
-            <!-- <div id="commentModal" class="modal">
-              <div id="modal-content">
-                  <h2>Add a Comment</h2>
-                  <div id="editor"></div>
-                  <button type="submit" id="submitComment">Reply</button>
-                  <button id="cancel">Cancel</button>
-              </div>
-            </div> -->
-
             <form method="POST" action="{% url 'submit_comment' post.PostID %}">
               {% csrf_token %}
               <div id="commentModal" class="modal">
+                <input type="hidden" id="author_email" name="author_email" />
                 <div id="modal-content">
                   <h2>Add a Comment</h2>
                   <div id="editor"></div>
@@ -69,14 +77,29 @@
                   <button type="button" id="cancel">Cancel</button>
                 </div>
               </div>
+            </div>
             </form>
             <div class="comment-section">
-              <span class="reply">Reply</span>
-              <div class="comment">
-                <div class="comment-text">The answer is A.</div>
-                <div class="comment-author">Mansurul Haque</div>
+              <span class="comment-header"><h3>Reply</h3></span>
+             
+              {% if post.replies %}  {% for reply_key, reply_data in post.replies.items %}  
+              <div class="containerViewPost">
+                <div class="black_font">{{ reply_data.content|safe  }}</div>
+                <div class="post-details">
+                  <div class="question-details">
+                    <span class="black_font">Replied by:</span> {{ reply_data.author }}
+                  </div>
+                  <div class="view_post_time">
+                    <span class="black_font">Replied Time :</span>{{ reply_data.timestamp }}
+                  </div>
+                </div>
               </div>
-            </div>
+                  {% endfor %}
+              {% else %}
+                  <div class="comment-text">No replies yet.</div>
+              {% endif %}
+          
+           
           </div>
 
           {% else %}
@@ -86,7 +109,7 @@
       </main>
 
       {% include 'footer.html' %}
-      <script src="{% static 'js/backend.js' %}"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/7.29.2/sweetalert2.all.js"></script>
       <script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"></script>
       <script>
         document.addEventListener("DOMContentLoaded", function () {
@@ -128,8 +151,41 @@
           cancel.onclick = function () {
             commentModal.style.display = "none";
           };
+
+          // Form submission handling
+          document
+            .querySelector("form")
+            .addEventListener("submit", function (event) {
+              event.preventDefault();
+
+              // Get Quill editor content
+              const content = quill.root.innerHTML.trim();
+
+              // Get email from sessionStorage
+              const authorEmail = sessionStorage.getItem("userEmail");
+
+              // Validate content
+              if (!content || content === "<p><br></p>") {
+                swal({
+                  title: "Comment ",
+                  text: "Comment cannot be empty",
+                  type: "error",
+                  showConfirmButton: true,
+                });
+                return;
+              }
+
+              // Set hidden input values
+              document.getElementById("content").value = content;
+              document.getElementById("author_email").value = authorEmail;
+
+              // Submit form
+              this.submit();
+            });
         });
       </script>
+
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.1.3/sweetalert.min.js"></script>
     </div>
   </body>
 </html>
