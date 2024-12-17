@@ -222,12 +222,14 @@
                   <div class="courses-grid">
                     {% for course in semester_courses %}
                       <div class="course-card">
-                        <img src="{% static 'image/cat304.png' %}" alt="{{ course.course_code }}">
-                        <a href="{% url 'analytics-detail' semester_year='sem'|add:semester|add:'year'|add:academic_year course_code=course.course_code %}" style="text-decoration: none;">
+                        <a href="{% url 'course-detail' semester_year='sem'|add:semester|add:'year'|add:academic_year course_code=course.course_code %}" style="text-decoration: none;">
+                          <img src="{% static 'image/cat304.png' %}" alt="{{ course.course_code }}">
+                        </a>
+                        <a href="{% url 'course-detail' semester_year='sem'|add:semester|add:'year'|add:academic_year course_code=course.course_code %}" style="text-decoration: none;">
                             <h2>{{ course.course_code }} {{ course.course_name }}</h2>
                         </a>
                         <p>👥 Student: 201 👨‍🏫 Lecturer: {{ course.lecturer_count }}</p>
-                        <a href="{% url 'analytics-detail' semester_year='sem'|add:semester|add:'year'|add:academic_year course_code=course.course_code %}">
+                        <a href="{% url 'course-detail' semester_year='sem'|add:semester|add:'year'|add:academic_year course_code=course.course_code %}">
                             <button>View Details</button>
                         </a>
                       </div>
