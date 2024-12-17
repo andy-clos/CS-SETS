@@ -86,29 +86,34 @@ def academic_view(request):
             print(f"Error adding course: {e}")
             return render(request, 'academic.html', {'error': str(e)})
 
-    courses = []
+    courses = {}
     try:
         courses_data = database.child("course").get().val()
-
-        for academic_year, semesters in courses_data.items():
+        sorted_courses_data = dict(sorted(courses_data.items(), key=lambda item: item[0], reverse=True))
+        for academic_year, semesters in sorted_courses_data.items():
+            academic_year_slash = academic_year.replace('-', '/')  # Replace dash with slash for display
+            if academic_year not in courses:
+                courses[academic_year] = {'display': academic_year_slash, 'semesters': {}}
             for semester_index, courses_in_semester in enumerate(semesters):
                 semester = str(semester_index)
                 if isinstance(courses_in_semester, dict):
+                    semester_courses = []
                     for course_code, course_info in courses_in_semester.items():
                         lecturers = course_info.get('lecturers', {})
                         lecturers = [lecturer for lecturer in lecturers if lecturer is not None]
                         venue_time = course_info.get('venue and time', {})
                         venue_time = [vt for vt in venue_time if vt is not None]
                         lecturer_count = len(lecturers)
-                        courses.append({
-                            'academic_year': academic_year,
-                            'semester': semester,
+                        semester_courses.append({
                             'course_code': course_code,
                             'course_name': course_info.get('course_name', ''),
                             'lecturers': lecturers,
                             'lecturer_count': lecturer_count,
                             'venue and time': venue_time
                         })
+                    if semester_courses:
+                        courses[academic_year]['semesters'][semester] = semester_courses
+        print(courses)
 
     except Exception as e:
         print(f"Error fetching courses: {e}")
@@ -332,33 +337,35 @@ def forum_view(request):
 def getSubject():
     subject = database.child("forum").child("posts").get()
 
-    
-
-
 def analytics_view(request):
-    courses = []
+    courses = {}
     try:
         courses_data = database.child("course").get().val()
-
-        for academic_year, semesters in courses_data.items():
+        sorted_courses_data = dict(sorted(courses_data.items(), key=lambda item: item[0], reverse=True))
+        for academic_year, semesters in sorted_courses_data.items():
+            academic_year_slash = academic_year.replace('-', '/')  # Replace dash with slash for display
+            if academic_year not in courses:
+                courses[academic_year] = {'display': academic_year_slash, 'semesters': {}}
             for semester_index, courses_in_semester in enumerate(semesters):
                 semester = str(semester_index)
                 if isinstance(courses_in_semester, dict):
+                    semester_courses = []
                     for course_code, course_info in courses_in_semester.items():
                         lecturers = course_info.get('lecturers', {})
                         lecturers = [lecturer for lecturer in lecturers if lecturer is not None]
                         venue_time = course_info.get('venue and time', {})
                         venue_time = [vt for vt in venue_time if vt is not None]
                         lecturer_count = len(lecturers)
-                        courses.append({
-                            'academic_year': academic_year,
-                            'semester': semester,
+                        semester_courses.append({
                             'course_code': course_code,
                             'course_name': course_info.get('course_name', ''),
                             'lecturers': lecturers,
                             'lecturer_count': lecturer_count,
                             'venue and time': venue_time
                         })
+                    if semester_courses:
+                        courses[academic_year]['semesters'][semester] = semester_courses
+        print(courses)
 
     except Exception as e:
         print(f"Error fetching courses: {e}")

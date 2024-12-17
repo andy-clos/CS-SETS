@@ -18,13 +18,6 @@
         margin-bottom: 10px;
       }
 
-      .breadcrumbs {
-        margin-top: 40px;
-        margin-bottom: 20px;
-        font-size: 17px;
-        color: #777;
-      }
-
       .search-bar {
         display: flex;
         justify-content: space-between;
@@ -98,6 +91,43 @@
         background-color: #0056b3;
       }
 
+      .accordion {
+        background-color: #eee;
+        color: #444;
+        cursor: pointer;
+        padding: 18px;
+        width: 100%;
+        border: none;
+        text-align: left;
+        outline: none;
+        font-size: 15px;
+        transition: 0.4s;
+      }
+
+      .active, .accordion:hover {
+        background-color: #ccc;
+      }
+
+      .accordion:after {
+        content: '\002B';
+        color: #777;
+        font-weight: bold;
+        float: right;
+        margin-left: 5px;
+      }
+
+      .active:after {
+        content: "\2212";
+      }
+
+      .panel {
+        padding: 0 18px;
+        background-color: white;
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.2s ease-out;
+      }
+
     </style>
 </head>
 <body>
@@ -110,102 +140,102 @@
         <main>
           <section class="content">
             <h2 class="section-title">Academic Management</h2>
-            <div class="breadcrumbs">
-              <a><span>All</span> /</a>
-              <a><span>Semester 1, Academic Session 2024/2025</span> /</a>
-              <a><span>Semester 2, Academic Session 2023/2024</span></a>
-              
-              <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
-                Add Course
-              </button>
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+              Add Course
+            </button>
 
-              <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-                  <div class="modal-content">
-                    <div class="modal-header">
-                      <h5 class="modal-title" id="exampleModalLabel">ADD COURSE</h5>
-                      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <form method="POST" action="{% url 'academic' %}">
-                            {% csrf_token %}
-                            <label>Semester: </label>
-                            <select name="semester" id="semester" required>
-                                <option value="">Select semester</option>
-                                <option value="1">1</option>
-                                <option value="2">2</option>
-                            </select>
-                            <br>
-                            <label>Academic Year: </label>
-                            <input id="academic_year" type="text" name="academic_year" placeholder="Enter academic year" maxlength="9" required>
-                            <br>
-                            <label>Course Code: </label>
-                            <input id="course_code" type="text" name="course_code" placeholder="Enter course code" required>
-                            <br>
-                            <label>Course Name: </label>
-                            <input id="course_name" type="text" name="course_name" placeholder="Enter course name" required>
-                            <br>
-                            <div id="lecturer-container">
-                                <label>Lecturer Name 1: </label>
-                                <input id="lecturer_name1" type="text" name="lecturer_name1" placeholder="Enter lecturer name" required>
-                                <br>
-                                <label>Lecturer Email 1: </label>
-                                <input id="lecturer_email1" type="text" name="lecturer_email1" placeholder="Enter lecturer email" required>
-                                <button type="button" onclick="addLecturerField()">+</button>
-                                <br>
-                            </div>
-                            <div id="venue-time-container">
-                                <label>Class Venue 1: </label>
-                                <input id="class_venue1" type="text" name="class_venue1" placeholder="Enter class venue" required>
-                                <br>
-                                <label>Class Day 1: </label>
-                                <select name="class_day1" id="class_day1" required>
-                                    <option value="">Select day</option>
-                                    <option value="Monday">Monday</option>
-                                    <option value="Tuesday">Tuesday</option>
-                                    <option value="Wednesday">Wednesday</option>
-                                    <option value="Thursday">Thursday</option>
-                                    <option value="Friday">Friday</option>
-                                    <option value="Saturday">Saturday</option>
-                                    <option value="Sunday">Sunday</option>
-                                </select>
-                                <br>
-                                <label>Class Start Time 1: </label>
-                                <input id="class_start_time1" type="time" name="class_start_time1" required>
-                                <br>
-                                <label>Class End Time 1: </label>
-                                <input id="class_end_time1" type="time" name="class_end_time1" required>
-                                <button type="button" onclick="addVenueTimeField()">+</button>
-                                <br>
-                            </div>
-                            <button type="submit" class="btn btn-primary">Add</button>
-                        </form>
-                    </div>
-
+            <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+              <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">ADD COURSE</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                   </div>
+                  <div class="modal-body">
+                      <form method="POST" action="{% url 'academic' %}">
+                          {% csrf_token %}
+                          <label>Semester: </label>
+                          <select name="semester" id="semester" required>
+                              <option value="">Select semester</option>
+                              <option value="1">1</option>
+                              <option value="2">2</option>
+                          </select>
+                          <br>
+                          <label>Academic Year: </label>
+                          <input id="academic_year" type="text" name="academic_year" placeholder="Enter academic year" maxlength="9" required>
+                          <br>
+                          <label>Course Code: </label>
+                          <input id="course_code" type="text" name="course_code" placeholder="Enter course code" required>
+                          <br>
+                          <label>Course Name: </label>
+                          <input id="course_name" type="text" name="course_name" placeholder="Enter course name" required>
+                          <br>
+                          <div id="lecturer-container">
+                              <label>Lecturer Name 1: </label>
+                              <input id="lecturer_name1" type="text" name="lecturer_name1" placeholder="Enter lecturer name" required>
+                              <br>
+                              <label>Lecturer Email 1: </label>
+                              <input id="lecturer_email1" type="text" name="lecturer_email1" placeholder="Enter lecturer email" required>
+                              <button type="button" onclick="addLecturerField()">+</button>
+                              <br>
+                          </div>
+                          <div id="venue-time-container">
+                              <label>Class Venue 1: </label>
+                              <input id="class_venue1" type="text" name="class_venue1" placeholder="Enter class venue" required>
+                              <br>
+                              <label>Class Day 1: </label>
+                              <select name="class_day1" id="class_day1" required>
+                                  <option value="">Select day</option>
+                                  <option value="Monday">Monday</option>
+                                  <option value="Tuesday">Tuesday</option>
+                                  <option value="Wednesday">Wednesday</option>
+                                  <option value="Thursday">Thursday</option>
+                                  <option value="Friday">Friday</option>
+                                  <option value="Saturday">Saturday</option>
+                                  <option value="Sunday">Sunday</option>
+                              </select>
+                              <br>
+                              <label>Class Start Time 1: </label>
+                              <input id="class_start_time1" type="time" name="class_start_time1" required>
+                              <br>
+                              <label>Class End Time 1: </label>
+                              <input id="class_end_time1" type="time" name="class_end_time1" required>
+                              <button type="button" onclick="addVenueTimeField()">+</button>
+                              <br>
+                          </div>
+                          <button type="submit" class="btn btn-primary">Add</button>
+                      </form>
+                  </div>
+
                 </div>
               </div>
             </div>
             <div class="search-bar">
-              <input id="searchbar" type="text" onkeyup="searchCourse()" name="searchCourse" placeholder="Search courses you teach by course code or course name">
-              <button>Sort: From A-Z</button>
+              <input id="searchbar" type="text" onkeyup="searchCourse()" name="searchCourse" placeholder="Search courses by course code or course name">
             </div>
-            <div class="courses-grid">
-            {% if courses %}
-                {% for course in courses %}
-                <div class="course-card">
-                  <img src="{% static 'image/cat304.png' %}" alt="{{ course.course_code }}">
-                  <h2>{{ course.course_code }} {{ course.course_name }}</h2>
-                  <p>👥 Student: 201 👨‍🏫 Lecturer: {{ course.lecturer_count }}</p>
-                  <a href="{% url 'course-detail' semester_year='sem'|add:course.semester|add:'year'|add:course.academic_year course_code=course.course_code %}">
-                    <button>View Details</button>
-                  </a>
+
+            {% for academic_year, data in courses.items %}
+              <h2>Academic Session {{ data.display }}</h2>
+              {% for semester, semester_courses in data.semesters.items %}
+                <button class="accordion">Semester {{ semester }}</button>
+                <div class="panel">
+                  <div class="courses-grid">
+                    {% for course in semester_courses %}
+                      <div class="course-card">
+                        <img src="{% static 'image/cat304.png' %}" alt="{{ course.course_code }}">
+                        <a href="{% url 'analytics-detail' semester_year='sem'|add:semester|add:'year'|add:academic_year course_code=course.course_code %}" style="text-decoration: none;">
+                            <h2>{{ course.course_code }} {{ course.course_name }}</h2>
+                        </a>
+                        <p>👥 Student: 201 👨‍🏫 Lecturer: {{ course.lecturer_count }}</p>
+                        <a href="{% url 'analytics-detail' semester_year='sem'|add:semester|add:'year'|add:academic_year course_code=course.course_code %}">
+                            <button>View Details</button>
+                        </a>
+                      </div>
+                    {% endfor %}
+                  </div>
                 </div>
-                {% endfor %}
-            {% else %}
-                <p>No course available.</p>
-            {% endif %}
-            </div>
+              {% endfor %}
+            {% endfor %}
         </section>
         </main>
 

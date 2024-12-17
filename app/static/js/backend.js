@@ -67,12 +67,17 @@ function searchCourse() {
   }
 }
 
-document.getElementById('academic_year').addEventListener('input', function (e) {
-  let value = e.target.value.replace(/\D/g, ''); // Remove non-numeric characters
-  if (value.length > 4) {
-      value = value.slice(0, 4) + '/' + value.slice(4, 8); // Insert slash after the fourth digit
+document.addEventListener('DOMContentLoaded', function () {
+  const academicYearInput = document.getElementById('academic_year');
+  if (academicYearInput) {
+      academicYearInput.addEventListener('input', function (e) {
+          let value = e.target.value.replace(/\D/g, ''); // Remove non-numeric characters
+          if (value.length > 4) {
+              value = value.slice(0, 4) + '/' + value.slice(4, 8); // Insert slash after the fourth digit
+          }
+          e.target.value = value;
+      });
   }
-  e.target.value = value;
 });
 
 let totalLecturers = 1;
@@ -175,4 +180,19 @@ function removeVenueTimeField(id) {
             lastField.appendChild(newButton);
         }
     }
+}
+
+var acc = document.getElementsByClassName("accordion");
+var i;
+
+for (i = 0; i < acc.length; i++) {
+  acc[i].addEventListener("click", function() {
+    this.classList.toggle("active");
+    var panel = this.nextElementSibling;
+    if (panel.style.maxHeight) {
+      panel.style.maxHeight = null;
+    } else {
+      panel.style.maxHeight = panel.scrollHeight + "px";
+    } 
+  });
 }
