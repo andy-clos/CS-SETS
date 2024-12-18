@@ -1,3 +1,5 @@
+import joblib
+import os
 from django.shortcuts import render, redirect
 from django.http import JsonResponse
 from firebase_admin import auth
@@ -6,6 +8,7 @@ import pyrebase
 from datetime import datetime
 import pytz
 from django.contrib import messages
+from sklearn.preprocessing import StandardScaler
 
 config = {
     "apiKey": "AIzaSyCqHVyxf6nbxfEWIf_YbccJvjursSwIRcc",
@@ -113,7 +116,6 @@ def academic_view(request):
                         })
                     if semester_courses:
                         courses[academic_year]['semesters'][semester] = semester_courses
-        print(courses)
 
     except Exception as e:
         print(f"Error fetching courses: {e}")
@@ -193,7 +195,6 @@ def course_detail_view(request, semester_year, course_code):
                                     venue_time = course_info.get('venue and time', {})
                                     venue_time = [vt for vt in venue_time if vt is not None]
                                     lecturer_count = len(lecturers)
-                                    print("this is count" ,lecturer_count)
                                     courses.append({
                                         'semester_year': semester_year,
                                         'academic_year': year.replace('-', '/'),
@@ -214,59 +215,29 @@ def course_detail_view(request, semester_year, course_code):
         return render(request, 'course-detail.html', {'error': 'An error occurred while fetching course details'})
 
 def analytics_detail_view(request, semester_year, course_code):
-    if request.method == 'POST':
-        try:
-            academic_year = request.POST.get('academic_year').replace('/', '-')
-            semester = request.POST.get('semester')
-            course_code = request.POST.get('course_code').upper()
-            course_name = request.POST.get('course_name').title()
+    model_path = os.path.join(os.path.dirname(__file__), 'ml_models', 'model.pkl')
 
-            lecturers = {}
-            lecturer_index = 1
-            while True:
-                lecturer_name = request.POST.get(f'lecturer_name{lecturer_index}')
-                lecturer_email = request.POST.get(f'lecturer_email{lecturer_index}')
-                if not lecturer_name or not lecturer_email:
-                    break
-                lecturers[lecturer_index] = {
-                    "lecturer_name": lecturer_name.title(),
-                    "lecturer_email": lecturer_email.lower()
-                }
-                lecturer_index += 1
+    model = joblib.load(model_path)
 
-            venue_time = {}
-            venue_time_index = 1
-            while True:
-                class_venue = request.POST.get(f'class_venue{venue_time_index}')
-                class_day = request.POST.get(f'class_day{venue_time_index}')
-                class_start_time = request.POST.get(f'class_start_time{venue_time_index}')
-                class_end_time = request.POST.get(f'class_end_time{venue_time_index}')
-                if not class_venue or not class_day or not class_start_time or not class_end_time:
-                    break
-                venue_time[venue_time_index] = {
-                    "class_venue": class_venue.upper(),
-                    "class_day": class_day.title(),
-                    "class_start_time": class_start_time,
-                    "class_end_time": class_end_time
-                }
-                venue_time_index += 1
-
-            course_data = {
-                "course_name": course_name,
-                "lecturers": lecturers,
-                "venue and time": venue_time
-            }
-
-            database.child("course").child(academic_year).child(semester).child(course_code).update(course_data)
-
-            success_message = "Course updated successfully!"
-
-            return redirect('analytics-detail', semester_year=semester_year, course_code=course_code)
-        except Exception as e:
-            print(f"Error updating course: {e}")
-            return render(request, 'analytics-detail.html', {'error': str(e)})
+    predictions = []
 
     try:
+        if request.method == 'POST':
+            data1 = float(request.POST.get('data1'))
+            data2 = float(request.POST.get('data2'))
+            data3 = float(request.POST.get('data3'))
+            data4 = float(request.POST.get('data4'))
+            data5 = float(request.POST.get('data5'))
+            data6 = float(request.POST.get('data6'))
+            data7 = float(request.POST.get('data7'))
+            data8 = float(request.POST.get('data8'))
+            data9 = float(request.POST.get('data9'))
+            data10 = float(request.POST.get('data10'))
+            data11 = float(request.POST.get('data11'))
+            input_data = [[data1, data2, data3, data4, data5, data6, data7, data8, data9, data10, data11]]
+
+            predictions = model.predict(input_data)
+
         academic_year, semester = semester_year.split('sem')
         semester = semester[0] 
         academic_year = semester_year[semester_year.index("year") + 4:]
@@ -286,7 +257,7 @@ def analytics_detail_view(request, semester_year, course_code):
                                     venue_time = course_info.get('venue and time', {})
                                     venue_time = [vt for vt in venue_time if vt is not None]
                                     lecturer_count = len(lecturers)
-                                    print("this is count" ,lecturer_count)
+
                                     courses.append({
                                         'semester_year': semester_year,
                                         'academic_year': year.replace('-', '/'),
@@ -297,11 +268,11 @@ def analytics_detail_view(request, semester_year, course_code):
                                         'lecturer_count': lecturer_count,
                                         'venue_time': venue_time
                                     })
-        print(courses)
+
         if not courses:
             return render(request, 'analytics-detail.html', {'error': 'Course not found'})
         
-        return render(request, 'analytics-detail.html', {'courses': courses, 'course_code': course_code, 'academic_year': academic_year, 'semester': semester})
+        return render(request, 'analytics-detail.html', {'courses': courses, 'course_code': course_code, 'academic_year': academic_year, 'semester': semester, 'predictions': predictions})
     except Exception as e:
         print(f"Error fetching course details: {e}")
         return render(request, 'analytics-detail.html', {'error': 'An error occurred while fetching course details'})
@@ -310,10 +281,9 @@ def delete_course_view(request, semester_year, course_code):
     try:
         print(f"Deleting course: semester_year={semester_year}, course_code={course_code}")
         academic_year, semester = semester_year.split('sem')
-        semester = semester[0]  # Extract the semester number
+        semester = semester[0]
         academic_year = semester_year[semester_year.index("year") + 4:]
-        print("this is year:", academic_year)
-        # Delete the course from the database
+
         database.child("course").child(academic_year).child(semester).child(course_code).remove()
 
         return redirect('academic')
@@ -369,7 +339,6 @@ def analytics_view(request):
                         })
                     if semester_courses:
                         courses[academic_year]['semesters'][semester] = semester_courses
-        print(courses)
 
     except Exception as e:
         print(f"Error fetching courses: {e}")
