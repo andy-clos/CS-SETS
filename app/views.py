@@ -328,11 +328,15 @@ def appointments_view(request):
     return render(request, 'appointments.html')
 
 def forum_view(request):
-    # Get user email from session storage
-    user_email = request.GET.get('email')   
-    # Retrieve posts from Firebase
-    posts = getPosts()  # Call the getPosts function to retrieve posts 
-    return render(request, "Tools/Forum/forum.html", {"user_email": user_email, "posts": posts})
+    user_email = request.GET.get('email')
+    search_query = request.GET.get('search', '')  # Get the search query from the URL
+    posts = getPosts()  # Call the getPosts function to retrieve posts
+
+    # Filter posts based on the search query in title or subject
+    if search_query:
+        posts = [post for post in posts if search_query.lower() in post['title'].lower() or search_query.lower() in post['subject'].lower()]
+
+    return render(request, "Tools/Forum/forum.html", {"user_email": user_email, "posts": posts, "search_query": search_query})
 
 def getSubject():
     subject = database.child("forum").child("posts").get()

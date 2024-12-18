@@ -43,12 +43,21 @@
               <span class="username">{{user_email}}</span>
             </div>
           </div>
-          <div class="search-container">
-            <input type="text" placeholder="Search to post" />
-            <a href="/createPost"
-              ><button class="create-post-btn">Create post</button>
-            </a>
-          </div>
+            <div class="search-container">
+              <form method="GET" action="{% url 'forum' %}">
+              <input
+              type="text"
+              name="search"
+              placeholder="Search to post"
+              value="{{ search_query }}"
+              />
+            </div>
+          </form>
+            <button type="submit" class="create-post-btn">Search</button>
+          <a href="/createPost">
+            <button class="create-post-btn">Create post</button>
+          </a>
+        
         </header>
         <div class="post-container">
           {% if posts %} {% for post in posts %}
@@ -85,6 +94,7 @@
 
       {% include 'footer.html' %}
     </div>
+    <script src="{% static 'js/backend.js' %}"></script>
     <script>
       function closeModal() {
         document.getElementById("successModal").style.display = "none";
@@ -100,6 +110,7 @@
           usernameElement.textContent = userEmail;
         }
       };
+
     </script>
   </body>
 </html>
