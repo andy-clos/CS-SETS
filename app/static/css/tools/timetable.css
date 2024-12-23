@@ -1,0 +1,213 @@
+.section-title {
+  font-size: 40px;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.container-course {
+  background-color: white;
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+h1 {
+  text-align: center;
+  color: #333;
+  margin-bottom: 20px;
+}
+
+form {
+  margin-bottom: 20px;
+}
+
+.course-field {
+  margin-bottom: 15px;
+  padding-bottom: 20px;
+}
+
+label {
+  font-weight: bold;
+  display: block;
+  margin-bottom: 5px;
+}
+
+select {
+  width: 100%;
+  padding: 10px;
+  font-size: 1em;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color: #fff;
+  color: #333;
+  cursor: pointer;
+}
+
+select:focus {
+  outline: none;
+  border-color: #007bff;
+}
+
+button {
+  display: block;
+  width: 100%;
+  padding: 10px;
+  background-color: #ff9900;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  font-size: 1em;
+  cursor: pointer;
+  text-align: center;
+}
+
+.add-course {
+  margin-bottom: 20px;
+  background-color: #c82333;
+}
+
+.timetable {
+  margin-top: 20px;
+}
+
+.timetable h3 {
+  margin-bottom: 10px;
+}
+
+.timetable ul {
+  list-style: none;
+  padding: 0;
+}
+
+.timetable li {
+  padding: 8px;
+  background-color: #f1f1f1;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  margin-bottom: 5px;
+}
+
+h1 {
+  text-align: center;
+  color: #343a40;
+}
+
+table {
+  border-collapse: collapse;
+  margin: 20px auto;
+  background-color: #fff;
+  border: 2px solid #dee2e6;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+th,
+td {
+  border: 1px solid #dee2e6;
+  padding: 10px;
+  text-align: center;
+}
+
+th {
+  background-color: #f2f2f2;
+  color: #343a40;
+}
+
+.highlight {
+  background-color: #f8f9fa;
+}
+
+.special {
+  background-color: #f0f0f0;
+}
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f8f9fa;
+  margin: 0;
+  padding: 0;
+}
+
+.timetable-colored {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+  margin: 20px auto;
+  background-color: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.timetable-colored th {
+  background-color: #f8f9fa;
+  padding: 12px 8px;
+  text-align: center;
+  border: 1px solid #dee2e6;
+  font-weight: bold;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.timetable-colored td {
+  padding: 8px;
+  border: 1px solid #dee2e6;
+  vertical-align: top;
+}
+
+.time-column {
+  width: 120px;
+  min-width: 120px;
+}
+
+.day-column {
+  width: calc((100% - 120px) / 7);
+}
+
+.course-column {
+  height: 80px;
+  overflow: hidden;
+}
+
+.timetable-colored td div {
+  margin: 2px 0;
+  padding: 8px;
+  border-radius: 4px;
+  font-size: 14px;
+  text-align: center;
+  color: #333;
+  transition: transform 0.2s;
+}
+
+.course-code {
+  font-weight: bold;
+  margin-bottom: 4px;
+}
+
+.venue-text {
+  font-size: 12px;
+  word-wrap: break-word;
+}
+
+.timetable-colored td div:hover {
+  transform: scale(1.02);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.download-container {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 15px;
+}
+
+.download-btn {
+  width: auto;
+  background-color: #28a745;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  margin: 0;
+}
+
+.download-btn:hover {
+  background-color: #218838;
+}

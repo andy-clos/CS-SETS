@@ -1,0 +1,175 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CS SETS</title>
+    <link rel="stylesheet" href="{% static 'css/navbar.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/header.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/style.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/footer.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/tools/timetable.css' %}" />
+  </head>
+  <body>
+    <div class="container">
+      {% include 'navbar.html' %} {% include 'header.html' %}
+
+      <main>
+        <section class="content">
+          <h2 class="section-title">Timetable Generator</h2>
+        </section>
+        <div class="container-course">
+          {% if courses %}
+          <form method="POST" id="course-form">
+            {% csrf_token %}
+            <div id="course-fields">
+              <div class="course-field">
+                <label for="course1">Course #1</label>
+                <select name="course" id="course1">
+                  <option value="" disabled selected>Select a course</option>
+                  {% for course in courses %}
+                  <option value="{{ course.course_code }}">
+                    {{ course.course_code }} - {{ course.course_name }}
+                  </option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+            <button type="button" class="add-course" onclick="addCourseField()">Add Course</button>
+            <button type="submit" class="export-btn" onclick="return validateForm()">Generate Timetable</button>
+          </form>
+</div>
+          <div id="timetable-preview" class="timetable">
+            {% if timetable %}
+                {{ timetable|safe }}
+            {% endif %}
+          </div>
+
+          {% else %}
+          <p>This page is not available now.</p>
+          {% endif %}
+        </main>
+
+        {% include 'footer.html' %}
+      </div>
+    </div>
+    <script src="{% static 'js/backend.js' %}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/7.29.2/sweetalert2.all.js"></script>
+    <script>
+        let courseCount = 1;
+
+        function warningMessage(title, text) {
+            Swal.fire({
+                title: title,
+                text: text,
+                type: "warning",
+                confirmButtonText: "OK"
+            });
+        }
+
+        function getSelectedCourses() {
+            const selects = document.querySelectorAll('select[name="course"]');
+            return Array.from(selects).map(select => select.value).filter(value => value);
+        }
+
+        function createCourseOptions(selectedCourses) {
+            let options = '<option value="" disabled selected>Select a course</option>';
+            const courseElements = document.querySelectorAll('#course1 option:not([value=""])');
+            
+            courseElements.forEach(option => {
+                const value = option.value;
+                if (!selectedCourses.includes(value)) {
+                    options += `<option value="${value}">${option.text}</option>`;
+                }
+            });
+            
+            return options;
+        }
+
+        function addCourseField() {
+            const lastCourseSelect = document.getElementById(`course${courseCount}`);
+            if (courseCount > 0 && !lastCourseSelect.value) {
+                warningMessage("Course Selection Required", "Please select a course before adding a new one.");
+                return;
+            }
+
+            const selectedCourses = getSelectedCourses();
+            const courseElements = document.querySelectorAll('#course1 option:not([value=""])');
+            
+            // Check if all courses are selected
+            if (selectedCourses.length >= courseElements.length) {
+                warningMessage("No More Courses", "All available courses have been selected.");
+                return;
+            }
+
+            const availableOptions = createCourseOptions(selectedCourses);
+            courseCount++;
+            const courseFieldsContainer = document.getElementById("course-fields");
+            const newField = document.createElement("div");
+            newField.classList.add("course-field");
+            newField.innerHTML = `
+                <label for="course${courseCount}">Course #${courseCount}</label>
+                <select name="course" id="course${courseCount}">
+                    ${availableOptions}
+                </select>
+            `;
+            courseFieldsContainer.appendChild(newField);
+
+            // Add change event listener to update other dropdowns when selection changes
+            const newSelect = newField.querySelector('select');
+            newSelect.addEventListener('change', updateAllDropdowns);
+        }
+
+        function updateAllDropdowns() {
+            const selectedCourses = getSelectedCourses();
+            const selects = document.querySelectorAll('select[name="course"]');
+            
+            selects.forEach(select => {
+                if (!select.value) {  // Only update dropdowns that haven't been selected yet
+                    const currentOptions = createCourseOptions(selectedCourses.filter(v => v !== select.value));
+                    select.innerHTML = currentOptions;
+                }
+            });
+        }
+
+        function validateForm() {
+            const courseSelects = document.querySelectorAll('select[name="course"]');
+            let selectedCourses = [];
+            let hasSelection = false;
+
+            courseSelects.forEach(select => {
+                if (select.value) {
+                    hasSelection = true;
+                    const selectedOption = select.options[select.selectedIndex];
+                    selectedCourses.push(selectedOption.text);
+                }
+            });
+
+            if (!hasSelection) {
+                warningMessage("Course Selection Required", "Please select at least one course before generating the timetable.");
+                return false;
+            }
+
+             // Format selected courses with left alignment
+            const courseList = selectedCourses.map(course => `<div style="text-align: left; margin-left: 20px;">• ${course}</div>`).join('');
+
+            // Show confirmation with selected courses
+            Swal.fire({
+                title: 'Selected Courses',
+                html: `<div style="margin-top: 15px;">${courseList}</div>`, 
+                icon: 'info',
+                showCancelButton: true,
+                confirmButtonText: 'Generate Timetable',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+                if (result.value) {
+                    // If user confirms, submit the form
+                    document.getElementById('course-form').submit();
+                }
+            });
+            return false; // Prevent default form submission
+        }
+    </script>
+  </body>
+</html>

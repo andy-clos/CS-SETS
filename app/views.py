@@ -8,7 +8,9 @@ import pyrebase
 from datetime import datetime
 import pytz
 from django.contrib import messages
-from sklearn.preprocessing import StandardScaler
+import random
+import colorsys
+
 
 config = {
     "apiKey": "AIzaSyCqHVyxf6nbxfEWIf_YbccJvjursSwIRcc",
@@ -491,3 +493,114 @@ def submit_comment(request, post_id):
             return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
 
     return JsonResponse({'status': 'error', 'message': 'Invalid request method.'}, status=405)
+
+def timetable_view(request):
+    # Fetch course data from the database
+    courses_data = database.child("course").get().val()
+    subject_codes = []
+
+    # Process course data
+    if courses_data:
+        for year, semesters in courses_data.items():
+            for semester_index, courses_in_semester in enumerate(semesters):
+                if isinstance(courses_in_semester, dict):
+                    for code, course_info in courses_in_semester.items():
+                        lecturers = course_info.get('lecturers', [])
+                        lecturers = [lecturer for lecturer in lecturers if lecturer]
+                        venue_time = course_info.get('venue and time', [])
+                        
+                        if isinstance(venue_time, dict):  # Handle dict case
+                            venue_time = [vt for vt in venue_time.values() if vt]
+                        else:  # Handle list case
+                            venue_time = [vt for vt in venue_time if vt]
+
+                        lecturer_count = len(lecturers)
+                        subject_codes.append({
+                            'course_code': code,
+                            'course_name': course_info.get('course_name', ''),
+                            'lecturers': lecturers,
+                            'lecturer_count': lecturer_count,
+                            'venue_time': venue_time
+                        })
+
+    # Handle timetable generation
+    timetable_html = None
+    if request.method == 'POST':
+        selected_courses = request.POST.getlist('course')
+        if selected_courses:
+            timetable_html = generate_timetable(selected_courses, subject_codes)
+            return render(request, 'Tools/Timetable/index.html', {
+                'courses': subject_codes,
+                'timetable': timetable_html,
+                'selected_courses': selected_courses
+            })
+
+    return render(request, 'Tools/Timetable/index.html', {
+        'courses': subject_codes,
+        'timetable': None
+    })
+
+def generate_timetable(selected_courses, subject_codes):
+    days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday","Saturday","Sunday"]
+    
+    # Function to generate random pastel color
+    def generate_pastel_color():
+        hue = random.random()
+        saturation = 0.3 + random.random() * 0.2
+        value = 0.9 + random.random() * 0.1
+        rgb = colorsys.hsv_to_rgb(hue, saturation, value)
+        return '#{:02x}{:02x}{:02x}'.format(int(rgb[0]*255), int(rgb[1]*255), int(rgb[2]*255))
+    
+    course_colors = {course: generate_pastel_color() for course in selected_courses}
+    time_slots = set()
+    
+    for course in subject_codes:
+        for vt in course.get('venue_time', []):
+            if 'class_start_time' in vt and 'class_end_time' in vt:
+                time_slots.add(f"{vt['class_start_time']} - {vt['class_end_time']}")
+    time_slots = sorted(list(time_slots))
+
+    timetable = {day: {slot: [] for slot in time_slots} for day in days}
+
+    for course_code in selected_courses:
+        course_info = next((course for course in subject_codes if course['course_code'] == course_code), None)
+        if course_info:
+            for vt in course_info['venue_time']:
+                day = vt.get('class_day')
+                time_slot = f"{vt['class_start_time']} - {vt['class_end_time']}"
+                venue = vt.get('class_venue', '')
+
+                if day in timetable and time_slot in timetable[day]:
+                    timetable[day][time_slot].append({
+                        'code': course_info['course_code'],
+                        'venue': venue,
+                        'color': course_colors[course_code]
+                    })
+
+    table_html = '<table class="timetable-colored">'
+    table_html += '<tr><th class="time-column">Time</th>'
+    for day in days:
+        table_html += f'<th class="day-column">{day}</th>'
+    table_html += '</tr>'
+
+    for time in time_slots:
+        table_html += '<tr>'
+        table_html += f'<td class="time-column">{time}</td>'
+        for day in days:
+            cell_content = timetable[day][time]
+            if cell_content:
+                td_content = '<td class="course-column">'
+                for course in cell_content:
+                    td_content += f'''
+                        <div style="background-color: {course["color"]}; padding: 5px; margin: 2px; border-radius: 4px;">
+                            <div class="course-code">{course["code"]}</div>
+                            <div class="venue-text">({course["venue"]})</div>
+                        </div>'''
+                td_content += '</td>'
+                table_html += td_content
+            else:
+                table_html += '<td class="course-column"></td>'
+        table_html += '</tr>'
+    table_html += '</table>'
+
+    return table_html
