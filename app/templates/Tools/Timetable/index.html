@@ -42,7 +42,18 @@
          </div>
           <div id="timetable-preview" class="timetable">
             {% if timetable %}
-            <h2>Timetable</h2>
+                <div class="timetable-header">
+                    <div class="header-content">
+                      <h2 class="timetable-title">Timetable</h2>
+                      <form method="POST" action="{% url 'download_timetable' %}">
+                        {% csrf_token %}
+                        {% for course in selected_courses %}
+                            <input type="hidden" name="course" value="{{ course }}">
+                        {% endfor %}
+                        <button type="submit" class="download-btn">Download PDF</button>
+                      </form>
+                    </div>
+                </div>
                 {{ timetable|safe }}
             {% endif %}
           </div>

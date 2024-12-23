@@ -1,7 +1,7 @@
 import joblib
 import os
 from django.shortcuts import render, redirect
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from firebase_admin import auth
 import json
 import pyrebase
@@ -10,6 +10,9 @@ import pytz
 from django.contrib import messages
 import random
 import colorsys
+from io import BytesIO
+import xhtml2pdf.pisa as pisa
+
 
 
 config = {
@@ -537,7 +540,7 @@ def timetable_view(request):
     if request.method == 'POST':
         selected_courses = request.POST.getlist('course')
         if selected_courses:
-            timetable_html = generate_timetable(selected_courses, subject_codes)
+            timetable_html = generate_timetable(selected_courses, subject_codes, request)
             return render(request, 'Tools/Timetable/index.html', {
                 'courses': subject_codes,
                 'timetable': timetable_html,
@@ -549,7 +552,7 @@ def timetable_view(request):
         'timetable': None
     })
 
-def generate_timetable(selected_courses, subject_codes):
+def generate_timetable(selected_courses, subject_codes, request):
     days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday","Saturday","Sunday"]
     
     # Function to generate random pastel color
@@ -612,4 +615,46 @@ def generate_timetable(selected_courses, subject_codes):
         table_html += '</tr>'
     table_html += '</table>'
 
+    table_html = f'''
+    <html>
+    <head>
+        <style>
+            table {{ border-collapse: collapse; width: 100%; }}
+            th, td {{ border: 1px solid black; padding: 8px; text-align: center; }}
+            .course-column {{ width: 13%; }}
+            .time-column {{ width: 9%; }}
+            .course-code {{ font-weight: bold; }}
+            .venue-text {{ font-size: 0.9em; }}
+        </style>
+    </head>
+    <body>
+        {table_html}
+    </body>
+    </html>
+    '''
+    
+    # Store in session
+    request.session['timetable_html'] = table_html
+    
     return table_html
+
+def download_timetable(request):
+    if request.method == 'POST':
+        # Get the HTML content from session
+        html_content = request.session.get('timetable_html')
+        
+        if html_content:
+            # Create PDF
+            buffer = BytesIO()
+            pisa.CreatePDF(html_content, dest=buffer)
+            pdf = buffer.getvalue()
+            buffer.close()
+            
+            # Create response
+            response = HttpResponse(content_type='application/pdf')
+            response['Content-Disposition'] = 'attachment; filename="timetable.pdf"'
+            response.write(pdf)
+            
+            return response
+
+    return HttpResponse('No timetable data found', status=400)

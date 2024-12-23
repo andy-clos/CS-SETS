@@ -87,38 +87,6 @@ button {
   margin-bottom: 5px;
 }
 
-h1 {
-  text-align: center;
-  color: #343a40;
-}
-
-table {
-  border-collapse: collapse;
-  margin: 20px auto;
-  background-color: #fff;
-  border: 2px solid #dee2e6;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-th,
-td {
-  border: 1px solid #dee2e6;
-  padding: 10px;
-  text-align: center;
-}
-
-th {
-  background-color: #f2f2f2;
-  color: #343a40;
-}
-
-.highlight {
-  background-color: #f8f9fa;
-}
-
-.special {
-  background-color: #f0f0f0;
-}
 body {
   font-family: Arial, sans-serif;
   background-color: #f8f9fa;
@@ -194,19 +162,17 @@ h2 {
   word-wrap: break-word;
 }
 
-.timetable-colored td div:hover {
-  transform: scale(1.02);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+.timetable-header {
+  position: relative; /* Allows absolute positioning for the button */
+  text-align: center; /* Centers the title */
+  margin-bottom: 20px;
 }
 
-.timetable-preview {
-  width: 50%;
-}
-
-.download-container {
+.header-content {
   display: flex;
-  justify-content: flex-end;
-  margin-bottom: 15px;
+  justify-content: space-between; /* Pushes items to opposite ends */
+  align-items: center; /* Aligns items vertically */
+  margin-bottom: 10px;
 }
 
 .download-btn {
@@ -217,6 +183,8 @@ h2 {
   border-radius: 4px;
   cursor: pointer;
   transition: background-color 0.3s;
+  border: none;
+  font-size: 14px;
   margin: 0;
 }
 
