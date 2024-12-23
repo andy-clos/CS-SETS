@@ -39,9 +39,10 @@
             <button type="button" class="add-course" onclick="addCourseField()">Add Course</button>
             <button type="submit" class="export-btn" onclick="return validateForm()">Generate Timetable</button>
           </form>
-</div>
+         </div>
           <div id="timetable-preview" class="timetable">
             {% if timetable %}
+            <h2>Timetable</h2>
                 {{ timetable|safe }}
             {% endif %}
           </div>

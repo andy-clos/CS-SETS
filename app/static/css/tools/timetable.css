@@ -125,19 +125,26 @@ body {
   margin: 0;
   padding: 0;
 }
+h2 {
+  text-align: center;
+  font-size: 30px;
+  font-weight: bold;
+  color: #333;
+}
 
 .timetable-colored {
-  width: 100%;
+  width: 90%;
   table-layout: fixed;
   border-collapse: collapse;
   margin: 20px auto;
   background-color: white;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  font-size: 12px;
 }
 
 .timetable-colored th {
   background-color: #f8f9fa;
-  padding: 12px 8px;
+  padding: 6px 4px;
   text-align: center;
   border: 1px solid #dee2e6;
   font-weight: bold;
@@ -147,30 +154,30 @@ body {
 }
 
 .timetable-colored td {
-  padding: 8px;
+  padding: 4px;
   border: 1px solid #dee2e6;
   vertical-align: top;
 }
 
 .time-column {
-  width: 120px;
-  min-width: 120px;
+  width: 100px;
+  min-width: 100px;
 }
 
 .day-column {
-  width: calc((100% - 120px) / 7);
+  width: calc((100% - 100px) / 7);
 }
 
 .course-column {
-  height: 80px;
+  height: 60px;
   overflow: hidden;
 }
 
 .timetable-colored td div {
-  margin: 2px 0;
-  padding: 8px;
-  border-radius: 4px;
-  font-size: 14px;
+  margin: 1px 0;
+  padding: 4px;
+  border-radius: 3px;
+  font-size: 12px;
   text-align: center;
   color: #333;
   transition: transform 0.2s;
@@ -178,17 +185,22 @@ body {
 
 .course-code {
   font-weight: bold;
-  margin-bottom: 4px;
+  margin-bottom: 2px;
+  font-size: 12px;
 }
 
 .venue-text {
-  font-size: 12px;
+  font-size: 10px;
   word-wrap: break-word;
 }
 
 .timetable-colored td div:hover {
   transform: scale(1.02);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.timetable-preview {
+  width: 50%;
 }
 
 .download-container {

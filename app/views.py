@@ -499,29 +499,38 @@ def timetable_view(request):
     courses_data = database.child("course").get().val()
     subject_codes = []
 
-    # Process course data
+    # Find the latest academic year and semester
     if courses_data:
-        for year, semesters in courses_data.items():
-            for semester_index, courses_in_semester in enumerate(semesters):
-                if isinstance(courses_in_semester, dict):
-                    for code, course_info in courses_in_semester.items():
-                        lecturers = course_info.get('lecturers', [])
-                        lecturers = [lecturer for lecturer in lecturers if lecturer]
-                        venue_time = course_info.get('venue and time', [])
-                        
-                        if isinstance(venue_time, dict):  # Handle dict case
-                            venue_time = [vt for vt in venue_time.values() if vt]
-                        else:  # Handle list case
-                            venue_time = [vt for vt in venue_time if vt]
+        # Sort academic years in descending order
+        sorted_years = sorted(courses_data.keys(), reverse=True)
+        latest_year = sorted_years[0] if sorted_years else None
 
-                        lecturer_count = len(lecturers)
-                        subject_codes.append({
-                            'course_code': code,
-                            'course_name': course_info.get('course_name', ''),
-                            'lecturers': lecturers,
-                            'lecturer_count': lecturer_count,
-                            'venue_time': venue_time
-                        })
+        if latest_year:
+            semesters = courses_data[latest_year]
+            # Find the highest semester number
+            latest_semester = max(range(len(semesters)), key=lambda x: x if isinstance(semesters[x], dict) else -1)
+
+            # Process only the latest year and semester
+            courses_in_semester = semesters[latest_semester]
+            if isinstance(courses_in_semester, dict):
+                for code, course_info in courses_in_semester.items():
+                    lecturers = course_info.get('lecturers', [])
+                    lecturers = [lecturer for lecturer in lecturers if lecturer]
+                    venue_time = course_info.get('venue and time', [])
+                    
+                    if isinstance(venue_time, dict):
+                        venue_time = [vt for vt in venue_time.values() if vt]
+                    else:
+                        venue_time = [vt for vt in venue_time if vt]
+
+                    lecturer_count = len(lecturers)
+                    subject_codes.append({
+                        'course_code': code,
+                        'course_name': course_info.get('course_name', ''),
+                        'lecturers': lecturers,
+                        'lecturer_count': lecturer_count,
+                        'venue_time': venue_time
+                    })
 
     # Handle timetable generation
     timetable_html = None
