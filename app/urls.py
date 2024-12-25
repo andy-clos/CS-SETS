@@ -24,4 +24,5 @@ urlpatterns = [
     path('forum/submit_comment/<int:post_id>/', submit_comment, name='submit_comment'),
     path('timetable/', views.timetable_view, name='timetable'),
     path('download-timetable/', views.download_timetable, name='download_timetable'),
+    path('cgpa/', views.cgpa_view, name='cgpa'),
 ]

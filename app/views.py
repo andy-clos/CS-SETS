@@ -482,13 +482,11 @@ def submit_comment(request, post_id):
                 post_data.update({"comments_count": new_count})
 
                   # Add a success message
-                print("Adding success message")  # Debugging line
+                print("Adding success message") 
                 messages.success(request, "Comment added successfully!")
                 
                 # Redirect to the forum page
-                return redirect('forum')  # Change this line to redirect to the forum
-
-            #return to the page liao but does not return to the url correctly
+                return redirect('forum')  
             else:
                 return render({'status': 'error', 'message': 'Post not found.'}, status=404)
 
@@ -632,8 +630,6 @@ def generate_timetable(selected_courses, subject_codes, request):
     </body>
     </html>
     '''
-    
-    # Store in session
     request.session['timetable_html'] = table_html
     
     return table_html
@@ -658,3 +654,22 @@ def download_timetable(request):
             return response
 
     return HttpResponse('No timetable data found', status=400)
+
+def cgpa_view(request):
+    grading = [
+        ("A", 4.00),
+        ("A-", 3.67),
+        ("B+", 3.33),
+        ("B", 3.00),
+        ("B-", 2.67),
+        ("C+", 2.33),
+        ("C", 2.00),
+        ("C-", 1.67),
+        ("D+", 1.33),
+        ("D", 1.00),
+        ("D-", 0.67),
+        ("F", 0.00)
+    ]
+    return render(request, 'Tools/CGPA/index.html', {
+        'grading': grading,
+    })

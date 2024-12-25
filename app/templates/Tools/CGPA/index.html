@@ -1,0 +1,142 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CS SETS</title>
+    <link rel="stylesheet" href="{% static 'css/navbar.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/header.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/style.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/footer.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/tools/cgpa.css' %}" />
+  </head>
+  <body>
+    <div class="container">
+      {% include 'navbar.html' %} {% include 'header.html' %}
+
+      <main>
+        <section class="content">
+          <h2 class="section-title">CGPA Calculator</h2>
+        </section>
+        <div class="container-all">
+            <input type="hidden" name="courseCount" id="courseCount" value="{{ course_count }}" />
+            <div class="input-row">
+                <div class="input-group">
+                    <label for="current-cgpa">Current CGPA:</label>
+                    <input type="number" id="current-cgpa" name="current-cgpa" value="{{ current_cgpa }}" min="0.00" max="4.00" step="0.01" required onchange="calculateGPAandCGPA()" />
+                </div>
+                <div class="input-group">
+                    <label for="total-credit-hour">Total Credit Hour:</label>
+                    <input type="number" id="total-credit-hour" name="total-credit-hour" value="{{ total_credit_hours }}" required onchange="calculateGPAandCGPA()" />
+                </div>
+            </div>
+        
+            <h2>Current Semester</h2>
+            <div id="course-container">
+                <div class="course-row">
+                    <div class="course-code">
+                        <input type="text" name="courses[1][course_code]" placeholder="Course Code (Optional)" onchange="calculateGPAandCGPA()" />
+                    </div>
+                    <div class="grade">
+                        <select name="courses[1][grade]" onchange="calculateGPAandCGPA()" required>
+                            {% for grade, value in grading %}
+                            <option value="{{ grade }}" data-grade-value="{{ value }}">{{ grade }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="credits">
+                        <input type="number" name="courses[1][credits]" placeholder="Credits" min="1" max="9" step="1" required onchange="calculateGPAandCGPA()" />
+                    </div>
+                </div>
+                {% for course in courses %}
+                <div class="course-row">
+                    <div class="course-code">
+                        <input type="text" name="courses[{{ forloop.counter }}][course_code]" value="{{ course.course_code }}" placeholder="Course Code" onchange="calculateGPAandCGPA()" />
+                    </div>
+                    <div class="grade">
+                        <select name="courses[{{ forloop.counter }}][grade]" onchange="calculateGPAandCGPA()" required>
+                            {% for grade, value in grading %}
+                            <option value="{{ grade }}" data-grade-value="{{ value }}" {% if grade == course.grade %}selected{% endif %}>{{ grade }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="credits">
+                        <input type="number" name="courses[{{ forloop.counter }}][credits]" value="{{ course.credits }}" placeholder="Credits" min="1" max="9" step="1" required onchange="calculateGPAandCGPA()" />
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        
+            <button type="button" id="add-course">Add Course</button>
+  
+        
+        <div class="results">
+          
+            <p id="gpa">GPA: {{ gpa|default:0 }}</p>
+            <p id="cgpa">CGPA: {{ new_cgpa|default:0 }}</p>
+            <p>Total Credit of All Semester: <span id="sumCredit">{{ sumCredit|default:0 }}</span></p>
+            <p>Total Credit of This Semester: <span id="total-credits">{{ total_credits|default:0 }}</span></p>
+        </div>
+      </main>
+
+      {% include 'footer.html' %}
+    </div>
+    <script src="{% static 'js/backend.js' %}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/7.29.2/sweetalert2.all.js"></script>
+    <script>
+      let courseCount = 1;
+
+      function calculateGPAandCGPA() {
+            let totalPoints = 0;
+            let totalCredits = 0;
+            const courses = document.querySelectorAll('.course-row');
+
+            courses.forEach(course => {
+                const grade = course.querySelector('select[name*="[grade]"]').value;
+                const credits = parseFloat(course.querySelector('input[name*="[credits]"]').value);
+                const gradeValue = parseFloat(course.querySelector(`option[value="${grade}"]`).getAttribute('data-grade-value'));
+
+                if (gradeValue && credits) {
+                    totalPoints += gradeValue * credits;
+                    totalCredits += credits;
+                }
+            });
+
+            const gpa = totalCredits > 0 ? (totalPoints / totalCredits).toFixed(2) : 0;
+            const currentCGPA = parseFloat(document.getElementById('current-cgpa').value) || 0;
+            const totalCreditHours = parseInt(document.getElementById('total-credit-hour').value) || 0;
+
+            const newCGPA = totalCredits > 0 ? ((totalPoints + (currentCGPA * totalCreditHours)) / (totalCredits + totalCreditHours)).toFixed(2) : currentCGPA;
+            const sumCredit=totalCredits+totalCreditHours
+            document.getElementById('gpa').innerText = `GPA: ${gpa}`;
+            document.getElementById('cgpa').innerText = `CGPA: ${newCGPA}`;
+            document.getElementById('total-credits').innerText = totalCredits;
+            document.getElementById('sumCredit').innerText=sumCredit;
+        }
+
+        document.getElementById("add-course").addEventListener("click", function () {
+            const courseContainer = document.getElementById("course-container");
+            const courseCount = document.querySelectorAll('.course-row').length + 1; // Update course count
+            const newCourseRow = document.createElement("div");
+            newCourseRow.className = "course-row";
+            newCourseRow.innerHTML = `
+                <div class="course-code">
+                    <input type="text" name="courses[${courseCount}][course_code]" placeholder="Course Code (Optional)" onchange="calculateGPAandCGPA()" />
+                </div>
+                <div class="grade">
+                    <select name="courses[${courseCount}][grade]" onchange="calculateGPAandCGPA()" required>
+                        {% for grade, value in grading %}
+                        <option value="{{ grade }}" data-grade-value="{{ value }}">{{ grade }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="credits">
+                    <input type="number" name="courses[${courseCount}][credits]" placeholder="Credits" min="1" max="9" step="1" required onchange="calculateGPAandCGPA()" />
+                </div>
+            `;
+            courseContainer.appendChild(newCourseRow);
+        });
+    </script>
+  </body>
+</html>
