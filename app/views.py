@@ -2,7 +2,7 @@ import joblib
 import os
 from django.shortcuts import render, redirect
 from django.http import JsonResponse, HttpResponse
-from firebase_admin import auth
+from firebase_admin import auth, db as admin_db
 import json
 import pyrebase
 from datetime import datetime
@@ -12,8 +12,17 @@ import random
 import colorsys
 from io import BytesIO
 import xhtml2pdf.pisa as pisa
+import datetime
+from django.core.exceptions import ValidationError
+from functools import wraps
+import logging
+from firebase_admin import firestore
+import firebase_admin
+from firebase_admin import credentials
+import re
+from firebase_admin import auth, firestore, credentials, initialize_app
 
-
+logger = logging.getLogger(__name__)
 
 config = {
     "apiKey": "AIzaSyCqHVyxf6nbxfEWIf_YbccJvjursSwIRcc",
@@ -26,21 +35,281 @@ config = {
     "measurementId": "G-77X9SZ0DJ6"
 }
 
+# Initialize Pyrebase
 firebase = pyrebase.initialize_app(config)
 authe = firebase.auth()
 database = firebase.database()
 
+# Initialize Firebase Admin
+if not firebase_admin._apps:
+    cred = credentials.Certificate('cs-sets-firebase-adminsdk-iqxvr-c5c5c8c3c6.json')
+    firebase_admin.initialize_app(cred)
+
+db = firestore.client()
+
 # Login page
 def login_view(request):
+    if request.method == 'POST':
+        try:
+            email = request.POST.get('email')
+            password = request.POST.get('password')
+            
+            try:
+                # Check if user exists in database first
+                encoded_email = email.replace('.', '-dot-').replace('@', '-at-')
+                user_exists = database.child("users").child(encoded_email).get().val()
+                
+                if not user_exists:
+                    return JsonResponse({
+                        'status': 'error',
+                        'message': "User not found. Please check your email or register."
+                    })
+                
+                try:
+                    # Firebase authentication
+                    user = authe.sign_in_with_email_and_password(email, password)
+                    user_data = user_exists  # Use the data we already retrieved
+                    
+                    # Set session data
+                    session_data = {
+                        'user_email': email,
+                        'user_name': user_data.get('name'),
+                        'user_id': user['localId'],
+                        'user_role': user_data.get('role'),
+                        'id_token': user['idToken']
+                    }
+                    
+                    # Update session
+                    request.session.update(session_data)
+                    request.session['welcome_message'] = f"Welcome back, {user_data.get('name', email)}!"
+                    request.session.modified = True
+                    
+                    return JsonResponse({
+                        'status': 'success',
+                        'redirect_url': '/dashboard/'
+                    })
+                    
+                except Exception as pwd_error:
+                    return JsonResponse({
+                        'status': 'error',
+                        'message': "Incorrect password. Please try again."
+                    })
+                
+            except Exception as auth_error:
+                logger.error(f"Authentication error: {str(auth_error)}")
+                return JsonResponse({
+                    'status': 'error',
+                    'message': handle_firebase_error(auth_error)
+                })
+                
+        except Exception as e:
+            logger.error(f"Unexpected error: {str(e)}")
+            return JsonResponse({
+                'status': 'error',
+                'message': "An unexpected error occurred. Please try again."
+            })
+            
     return render(request, 'login.html')
+
+def is_valid_email(email):
+    """Validate email format"""
+    try:
+        from django.core.validators import validate_email
+        validate_email(email)
+        return True
+    except ValidationError:
+        return False
+
+def handle_firebase_error(e):  # not complete yet, error undetected!!!!
+    error_message = str(e)
+    if "INVALID_PASSWORD" in error_message:
+        return "Invalid password. Please try again."
+    elif "EMAIL_NOT_FOUND" in error_message:
+        return "Email not found. Please check your email or register."
+    elif "INVALID_EMAIL" in error_message:
+        return "Invalid email format."
+    elif "TOO_MANY_ATTEMPTS_TRY_LATER" in error_message:
+        return "Too many failed attempts. Please try again later."
+    else:
+        return "Authentication failed. Please try again."
+
+def logout_view(request):
+    """Handle user logout"""
+    try:
+        # Clear all session data
+        request.session.flush()
+        messages.success(request, "You have been successfully logged out.")
+    except Exception as e:
+        messages.error(request, "Error during logout. Please try again.")
+    
+    return redirect('login')
+
+def is_logged_in(request):
+    """Check if user is logged in"""
+    return 'user_email' in request.session and 'user_id' in request.session
+
+def get_current_user(request):
+    """Get current user's email"""
+    return request.session.get('user_email')
+
+def login_required(view_func):
+    """Decorator to require login for views"""
+    @wraps(view_func)
+    def wrapper(request, *args, **kwargs):
+        if not is_logged_in(request):
+            messages.warning(request, "Please log in to access this page.")
+            return redirect('login')
+        return view_func(request, *args, **kwargs)
+    return wrapper
 
 # Register page
 def register_view(request):
+    if request.method == 'POST':
+        try:
+            # Get form data
+            email = request.POST.get('email', '').strip()
+            password = request.POST.get('password', '')
+            name = request.POST.get('name', '').strip()
+            identity = request.POST.get('identity', '').strip()
+            gender = request.POST.get('gender', '')
+            birthday = request.POST.get('birthday', '')
+            is_lecturer = request.POST.get('isLecturer') == 'on'
+            
+            # Set major based on lecturer status
+            major = 'Teaching' if is_lecturer else request.POST.get('major', '')
+            matrix = request.POST.get('matrix', '').strip()
+
+            # Validate email domain based on lecturer status
+            if is_lecturer:
+                if not email.endswith('@usm.my'):
+                    messages.error(request, 'Lecturer must use @usm.my email address')
+                    return render(request, 'register.html')
+                role = 'lecturer'
+            else:
+                if not email.endswith('@student.usm.my'):
+                    messages.error(request, 'Student must use @student.usm.my email address')
+                    return render(request, 'register.html')
+                role = 'student'
+
+            try:
+                # Create users node if it doesn't exist
+                if not database.child("users").get().val():
+                    database.child("users").set({})
+
+                # Create user in Firebase Authentication using Pyrebase
+                user = authe.create_user_with_email_and_password(email, password)
+                
+                # Encode email for Firebase path (replace @ and . with safe characters)
+                encoded_email = email.replace('.', '-dot-').replace('@', '-at-')
+                
+                # Prepare user data for Realtime Database in specific sequence
+                user_data = {
+                    'uid': user['localId'],
+                    'email': email,
+                    'name': name,
+                    'role': role,
+                    'matrix': matrix,
+                    'identity': identity,
+                    'major': major,
+                    'gender': gender,
+                    'birthday': birthday
+                }
+
+                # Save user data to Realtime Database using encoded email as key
+                database.child("users").child(encoded_email).set(user_data)
+
+                # Set session data after successful registration
+                session_data = {
+                    'user_email': email,
+                    'user_id': user['localId'],
+                    'user_role': role,
+                    'id_token': user['idToken']
+                }
+                request.session.update(session_data)
+                request.session['welcome_message'] = f"Welcome, {name}! Your registration was successful."
+                request.session.modified = True
+
+                messages.success(request, 'Registration successful! You will be redirected to login page in 2 seconds.')
+                response = render(request, 'register.html')
+                response['Refresh'] = '2;url=/login'
+                return response
+
+            except Exception as auth_error:
+                # If there's an error, attempt to delete the user if it was created
+                try:
+                    if 'user' in locals():
+                        auth.delete_user(user['localId'])
+                except:
+                    pass
+                
+                error_message = str(auth_error)
+                if "EMAIL_EXISTS" in error_message:
+                    messages.error(request, 'This email is already registered')
+                else:
+                    messages.error(request, f'Registration failed: {error_message}')
+                return render(request, 'register.html')
+
+        except Exception as e:
+            messages.error(request, f'Server error: {str(e)}')
+            return render(request, 'register.html')
+
     return render(request, 'register.html')
 
 # Dashboard page
+@login_required
 def dashboard_view(request):
-    return render(request, 'dashboard.html')
+    # Debug logging
+    logger.debug(f"Session contents: {dict(request.session)}")
+    
+    welcome_message = request.session.pop('welcome_message', None)
+    logger.debug(f"Welcome message retrieved: {welcome_message}")  # Debug log
+    
+    if request.method == 'POST':
+        try:
+            title = request.POST.get('add-title').upper()
+            content = request.POST.get('add-content')
+            
+            # Get current time in Malaysia timezone
+            malaysia_tz = pytz.timezone('Asia/Kuala_Lumpur')
+            current_time = datetime.datetime.now(malaysia_tz)
+            formatted_time = current_time.strftime("%I:%M %p, %d %b %Y")
+
+            # Create announcement data with user email
+            announcement_data = {
+                "title": title,
+                "content": content,
+                "timestamp": formatted_time,
+                "author": get_current_user(request)  # Use session email
+            }
+
+            # Save to Firebase
+            database.child("announcements").push(announcement_data)
+
+        except Exception as e:
+            print(f"Error adding announcement: {e}")
+
+    # Fetch announcements to display
+    try:
+        announcements = []
+        announcements_data = database.child("announcements").get()
+        if announcements_data.val():
+            for announcement in announcements_data.each():
+                announcements.append(announcement.val())
+        
+        # Sort announcements by timestamp (newest first)
+        announcements.sort(key=lambda x: datetime.datetime.strptime(x['timestamp'], "%I:%M %p, %d %b %Y"), reverse=True)
+        
+    except Exception as e:
+        print(f"Error fetching announcements: {e}")
+        announcements = []
+
+    context = {
+        'announcements': announcements,
+        'user_email': get_current_user(request),
+        'welcome_message': welcome_message
+    }
+    logger.debug(f"Context being sent to template: {context}")  # Debug log
+    return render(request, 'dashboard.html', context)
 
 def academic_view(request):
     if request.method == 'POST':
@@ -673,3 +942,31 @@ def cgpa_view(request):
     return render(request, 'Tools/CGPA/index.html', {
         'grading': grading,
     })
+
+def is_valid_usm_email(email):
+    """Validate that email is from USM domain"""
+    valid_domains = ['@student.usm.my', '@usm.my']
+    email = email.lower()
+    return any(email.endswith(domain) for domain in valid_domains)
+
+def test_database_connection(request):
+    try:
+        # Test Pyrebase connection
+        test_data = database.child("test").get()
+        logger.info("Pyrebase connection successful")
+        
+        # Test Firebase Admin SDK connection
+        ref = admin_db.reference('/test')
+        ref.get()
+        logger.info("Firebase Admin SDK connection successful")
+        
+        return JsonResponse({
+            'status': 'success',
+            'message': 'Database connection successful'
+        })
+    except Exception as e:
+        logger.error(f"Database connection test failed: {str(e)}")
+        return JsonResponse({
+            'status': 'error',
+            'message': str(e)
+        })

@@ -1,0 +1,281 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CS SETS</title>
+    <link rel="stylesheet" href="/static/css/navbar.css">  
+    <link rel="stylesheet" href="/static/css/header.css">  
+    <link rel="stylesheet" href="/static/css/style.css">  
+    <link rel="stylesheet" href="/static/css/footer.css">
+    <link rel="stylesheet" href="/static/css/dashboard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+
+    <title>Dashboard</title>
+</head>
+<body>
+    <div class="container">
+        {% include 'navbar.html' %} 
+
+        {% include 'header.html' %} 
+
+        <main style="padding-top: 0%;">
+            <div class="main-content">
+                <div class="announcement-card">
+                    <div class="announcement-content">
+                        <div class="announcement-header">
+                            <div class="profile-container">
+                                <img src="/static/image/user.png" alt="Profile Picture" class="profile-img">
+                                <p>Mr. Bean</p>
+                            </div>
+                            <div class="announcement-details">
+                                <h3>Changes venue for event application</h3>
+                                <p class="announcement-body">
+                                    Dear student, today due to emergency reason, hall B are closed until 14/11/2025, thus student need to register your application at hall A...
+                                    <span class="expand-text">[expand]</span>
+                                </p>
+                                <p class="posted-info">posted 11.00PM 11 Aug 2024</p>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+                
+                <div class="leaderboard-card">
+                    <h2>Leaderboard</h2>
+                    <div class="leaderboard-content">
+                        <div class="leaderboard-header">
+                            <ul>
+                                <li class="list-item">
+                                    <div class="list-item-content">
+                                        <p>1.</p>
+                                        <img src="/static/image/user.png" alt="Profile Picture" class="profile-img">
+                                        <p>AndyClos A/L Boon Mee</p>
+                                        <button class="leaderboard-details"><i class="fa fa-file-text"></i></button>
+                                    </div>
+                                    
+                                </li>
+                                <li class="list-item">
+                                    <div class="list-item-content">
+                                        <p>2.</p>
+                                        <img src="/static/image/user.png" alt="Profile Picture" class="profile-img">
+                                        <p>Muhammad Ezzat Haziq Bin Elhan</p>
+                                        <button class="leaderboard-details"><i class="fa fa-file-text"></i></button>
+                                    </div>
+                                    
+                                </li>
+                                <li class="list-item">
+                                    <div class="list-item-content">
+                                        <p>3.</p>
+                                        <img src="/static/image/user.png" alt="Profile Picture" class="profile-img">
+                                        <p>Kam Weng Xuan</p>
+                                        <button class="leaderboard-details"><i class="fa fa-file-text"></i></button>
+                                    </div>
+                                    
+                                </li>
+                                <li class="list-item">
+                                    <div class="list-item-content">
+                                        <p>4.</p>
+                                        <img src="/static/image/user.png" alt="Profile Picture" class="profile-img">
+                                        <p>Loh Wei Ting</p>
+                                        <button class="leaderboard-details"><i class="fa fa-file-text"></i></button>
+                                    </div>
+                                    
+                                </li>
+                                <li class="list-item">
+                                    <div class="list-item-content">
+                                        <p>5.</p>
+                                        <img src="/static/image/user.png" alt="Profile Picture" class="profile-img">
+                                        <p>John</p>
+                                        <button class="leaderboard-details"><i class="fa fa-file-text"></i></button>
+                                    </div>
+                                    
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="academic-card">
+                    <h2>Academic Result</h2>
+                    <div class="academic-outsider">
+                        <div class="academic-content">
+                            <!-- CGPA Section -->
+                            <div class="academic-cgpa-section">
+                                <p class="progress-text">Progress to target: 92.89%</p>
+                                <div class="progress-bar-container">
+                                    <div class="progress-bar"></div>
+                                </div>
+                                <div class="cgpa-container">
+                                    <div class="cgpa-box">
+                                        <h3 class="cgpa-title">Current CGPA</h3>
+                                        <p class="cgpa-value">3.53</p>
+                                        <button class="btn">Check current result</button>
+                                    </div>
+                                    <div class="cgpa-box">
+                                        <h3 class="cgpa-title">Targeted CGPA</h3>
+                                        <p class="cgpa-value">3.80</p>
+                                        <button class="btn">Check targeted result</button>
+                                    </div>
+                                </div>
+                            </div>
+                
+                            <!-- Feedback Section -->
+                            <div class="academic-feedback-section">
+                                <ul class="feedback-list">
+                                    <li class="feedback-item">
+                                        <p class="feedback-text subject">Subject that has risk to fail: 0</p>
+                                    </li>
+                                    <li class="feedback-item">
+                                        <button class="btn" style="margin-left: auto;margin-right: auto;">View details</button>
+                                    </li>
+                                    <li class="feedback-item feedback">
+                                        <span class="feedback-icon positive-icon">&#128077;</span>
+                                        <p class="feedback-text">Maintain your academic result</p>
+                                    </li>
+                                    <li class="feedback-item feedback">
+                                        <span class="feedback-icon neutral-icon">&#128200;</span>
+                                        <p class="feedback-text">You still have the chance to improve</p>
+                                    </li>
+                                    <li class="feedback-item feedback">
+                                        <span class="feedback-icon warning-icon">&#10060;</span>
+                                        <p class="feedback-text">You might fail if next CPT123 test is below 50 marks</p>
+                                    </li>
+                                    <li class="feedback-item feedback">
+                                        <span class="feedback-icon encouragement-icon">&#127800;</span>
+                                        <p class="feedback-text">Work harder to achieve more</p>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+            </div>
+        </main>
+
+<div id="leaderboard-modal" class="pop-modal">
+    <div class="pop-modal-content">
+        <h2>Leaderboard Details</h2>
+        <div id="leaderboard-detail-content">
+            <!-- Content will be dynamically inserted here -->
+        </div>
+    </div>
+</div>
+
+<div id="academic-modal" class="pop-modal">
+    <div class="pop-modal-content">
+        <h2>Academic Details</h2>
+        <div id="academic-detail-content">
+            <!-- Content will be dynamically inserted here -->
+        </div>
+    </div>
+</div>
+
+        {% include 'footer.html' %} 
+    </div>
+    <script src="{% static 'js/backend.js' %}"></script>
+
+
+</body>
+</html>
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+    // Handle Leaderboard Modal
+    const leaderboardDetailsButtons = document.querySelectorAll(".leaderboard-details");
+    const leaderboardModal = document.getElementById("leaderboard-modal");
+    const leaderboardDetailContent = document.getElementById("leaderboard-detail-content");
+
+    leaderboardDetailsButtons.forEach(button => {
+        button.addEventListener("click", (event) => {
+            const listItem = event.target.closest('.list-item');
+            const name = listItem.querySelector('p').textContent.trim();
+            const imageSrc = listItem.querySelector('img').src;
+
+            leaderboardDetailContent.innerHTML = `
+                <img src="${imageSrc}" alt="Profile Picture" class="profile-img" style="width: 100px; height: 100px;">
+                <h3>${name}</h3>
+                <p>Details about ${name} will go here.</p>
+            `;
+
+            leaderboardModal.style.display = "block";
+        });
+    });
+
+    // Close Leaderboard Modal when clicking outside
+    window.addEventListener("click", (event) => {
+        if (event.target == leaderboardModal) {
+            leaderboardModal.style.display = "none";
+        }
+    });
+
+    // Handle Academic Modal
+    const academicDetailsButtons = document.querySelectorAll(".btn");
+    const academicModal = document.getElementById("academic-modal");
+    const academicDetailContent = document.getElementById("academic-detail-content");
+
+    academicDetailsButtons.forEach(button => {
+        button.addEventListener("click", (event) => {
+            // Check which button was clicked
+            if (button.textContent.includes("current result")) {
+                academicDetailContent.innerHTML = `
+                    <h3>Current CGPA Results</h3>
+                    <table>
+                        <tr><th>Subject</th><th>Grade</th></tr>
+                        <tr><td>Math</td><td>B+</td></tr>
+                        <tr><td>Physics</td><td>A</td></tr>
+                    </table>
+                `;
+            } else if (button.textContent.includes("targeted result")) {
+                academicDetailContent.innerHTML = `
+                    <h3>Targeted CGPA Results</h3>
+                    <table>
+                        <tr><th>Subject</th><th>Grade</th></tr>
+                        <tr><td>Math</td><td>A</td></tr>
+                        <tr><td>Physics</td><td>A+</td></tr>
+                    </table>
+                `;
+            } else if (button.textContent.includes("View details")) {
+                academicDetailContent.innerHTML = `
+                    <h3>No Subject or risk founded</h3>
+                `;
+            }
+
+            academicModal.style.display = "block";
+        });
+    });
+
+    // Close Academic Modal when clicking outside
+    window.addEventListener("click", (event) => {
+        if (event.target == academicModal) {
+            academicModal.style.display = "none";
+        }
+    });
+
+    // Handle Progress Bar Glitter Effect
+    const progressBarContainer = document.querySelector('.progress-bar-container');
+
+    function createGlitterEffect() {
+        const glitter = document.createElement('div');
+        glitter.classList.add('glitter');
+        
+        const maxWidth = progressBarContainer.offsetWidth;
+        const randomPositionX = Math.random() * maxWidth;
+        const randomDelay = Math.random() * 2;
+
+        glitter.style.left = `${randomPositionX}px`;
+        glitter.style.animationDelay = `-${randomDelay}s`;
+
+        progressBarContainer.appendChild(glitter);
+
+        setTimeout(() => {
+            glitter.remove();
+        }, 2000); 
+    }
+
+    setInterval(createGlitterEffect, 100);
+});
+
+</script>

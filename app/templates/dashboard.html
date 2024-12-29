@@ -9,430 +9,179 @@
     <link rel="stylesheet" href="/static/css/header.css">  
     <link rel="stylesheet" href="/static/css/style.css">  
     <link rel="stylesheet" href="/static/css/footer.css">
+    <link rel="stylesheet" href="/static/css/dashboard.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-
-    <style>
-        .main-content {
-            background-color: #E4E7EB;
-            padding: 10px 10px 20px 10px;
-            display: flex;
-            gap: 20px;
-            flex-wrap: wrap;
-            margin-bottom: 10px;
-        }
-
-        .announcement-card {
-            background-color: #4E598C;
-            color: white;
-            border-radius: 15px;
-            padding: 20px;
-            margin: 0 20px 0 20px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            font-family: Arial, sans-serif;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            height: fit-content;
-        }
-
-        .announcement-content {
-            background-color: white;
-            color: #4E598C;
-            border-radius: 10px;
-            padding: 20px 10px 10px 10px;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        .announcement-header {
-            display: flex;
-            align-items: flex-start;
-            gap: 15px;
-        }
-
-        .profile-img {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            object-fit: cover;
-        }
-
-        .profile-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
-            padding: 10px;
-            width: 100px;
-        }
-
-        .profile-container p{
-            margin-top: 7px;
-        }
-
-        .announcement-details h3 {
-            font-size: 18px;
-            margin: 0;
-            font-weight: bold;
-            text-decoration: underline;
-        }
-
-        .posted-info {
-            font-size: 13px;
-            color: #B3B3CC;
-            text-align: right;
-        }
-
-        .announcement-body {
-            font-size: 16px;
-            line-height: 1.5;
-        }
-
-        .expand-text {
-            color: #F9C784;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
-        .leaderboard-card{
-            background-color: #4E598C;
-            color: white;
-            border-radius: 15px;
-            padding: 10px;
-            margin-left: 20px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            font-family: Arial, sans-serif;
-            display: flex;
-            flex-direction: column;
-            width:40%;
-            flex: 1;
-        }
-
-        .leaderboard-card h2{
-            text-align: center;
-        }
-
-        .leaderboard-content{
-            background-color: #F9C784;
-            color: #4E598C;
-            border-radius: 10px;
-            padding: 20px 10px 10px 10px;
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-            margin: 5px 5px 3px 5px;
-        }
-
-        .leaderboard-details{
-            color: #4E598C;
-            border: none;
-            border-radius: 20px;
-            padding: 5px 10px;
-            cursor: pointer;
-            font-size: 14px;
-            outline: none;
-            background-color: transparent;
-            margin-left: auto;
-            transition: background-color 0.3s, transform 0.2s ease;
-        }
-
-        .leaderboard-details:hover {
-            background-color: white;
-            transform: scale(1.05);
-        }
-
-        .leaderboard-header {
-            display: flex;
-            align-items: flex-start;
-            gap: 15px;
-        }
-
-        .academic-card{
-            background-color: #4E598C;
-            color: white;
-            border-radius: 20px;
-            padding: 10px;
-            margin-right: 20px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            font-family: Arial, sans-serif;
-            display: flex;
-            flex-direction: column;
-            width:60%;
-            flex: 2;
-        }
-
-        .academic-card h2 {
-            text-align: center;
-            color: white;
-        }
-
-        .academic-outsider {
-            background-color: #F9C784;
-            border-radius: 20px;
-            margin-top: 3px;
-            width: 100%;
-            height: 100%;
-        }
-
-        .academic-content{
-            color: #4E598C;
-            border-radius: 20px;
-            padding: 10px 10px 10px 10px;
-            gap: 5px;
-            display: flex; 
-            flex-direction: row; 
-            align-items: flex-start;
-            height: 100%;
-        }
-        .list-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-
-        .list-item-content {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            flex-grow: 1;
-        }
-
-        .list-item .fa {
-            font-size: 30px;
-            margin-left: auto;
-        }
-
-        .academic-section{
-            background-color: white;
-            color: #4E598C;
-            padding: 20px 10px 10px 10px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .academic-cgpa-section {
-            padding: 10px;
-            background-color: white;
-            border-radius: 20px;
-            height: 100%;
-            flex: 1;
-        }
-
-        .progress-bar-header {
-            position: relative;
-            width: 100%;
-            height: 20px;
-            background-color: #eee;
-            border-radius: 10px;
-            overflow: hidden;
-        }
-
-        @keyframes glitter {
-            0% {
-                transform: translateY(-10px) scale(0.5);
-                opacity: 0;
-            }
-            50% {
-                transform: translateY(10px) scale(1);
-                opacity: 1;
-            }
-            100% {
-                transform: translateY(30px) scale(0.5);
-                opacity: 0;
-            }
-        }
-
-        .glitter {
-            position: absolute;
-            background-color: white;
-            width: 5px;
-            height: 5px;
-            border-radius: 50%;
-            animation: glitter 1.5s linear infinite;
-            opacity: 0;
-        }
-
-        .progress-bar-container {
-            margin-top: 10px;
-            margin-bottom: 20px;
-            position: relative;
-            width: 100%;
-            height: 25px;
-            background-color: #e0e0e0;
-            border-radius: 12px;
-            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
-        }
-
-        .progress-bar {
-            position: absolute;
-            top: 0;
-            left: 0;
-            height: 100%;
-            width: 92.89%; /* Adjust this value dynamically */
-            background: linear-gradient(90deg, #F7D9D9, #F9C784);
-            border-radius: 12px;
-            transition: width 0.5s ease-in-out;
-            overflow: hidden;
-        }
-
-        .progress-text {
-            margin-top: 5px;
-            text-align: center;
-            color: #4E598C;
-            font-size: 18px;
-            font-weight: bold;
-        }
-
-        .cgpa-container {
-            justify-content: space-between;
-            align-items: center;
-            gap: 20px;
-        }
-
-        .cgpa-box {
-            text-align: center;
-            flex: 1;
-            margin-bottom: 20px;
-        }
-
-        .cgpa-title {
-            margin: 0;
-            font-size: 18px;
-            color: #4E598C;
-            background-color: #F9C784;
-            border-radius: 20px;
-            padding: 10px 0 10px 0;
-        }
-
-        .cgpa-value {
-            font-size: 24px;
-            font-weight: bold;
-            color: #4E598C;
-            margin: 5px 0;
-        }
-
-        .btn {
-            background-color: #F7D9D9;
-            color: #4E598C;
-            border: none;
-            border-radius: 5px;
-            padding: 5px 10px;
-            cursor: pointer;
-            font-size: 14px;
-            border-radius: 20px;
-            transition: background-color 0.3s, transform 0.2s ease;
-        }
-
-        .btn:hover {
-            background-color: #4E598C;
-            color: white;
-            transform: scale(1.05);
-        }
-
-        .academic-feedback-section {
-            padding: 10px;
-            background-color: white;
-            border-radius: 20px;
-            height: 100%;
-            flex: 1;
-        }
-
-        .feedback-list {
-            list-style-type: none;
-            padding: 0;
-            margin: 0;
-        }
-
-        .feedback-item {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 10px;
-        }
-
-        .feedback-icon {
-            font-size: 18px;
-        }
-
-        .positive-icon {
-            color: green;
-        }
-
-        .neutral-icon {
-            color: blue;
-        }
-
-        .warning-icon {
-            color: red;
-        }
-
-        .encouragement-icon {
-            color: orange;
-        }
-
-        .feedback-text {
-            margin: 0;
-            color: #4E598C;
-        }
-
-        .subject{
-            margin-left: auto;
-            margin-right: auto;
-            font-size: 20px;
-            color: #4E598C;
-            margin-bottom: 5px;
-        }
-
-        .feedback{
-            margin-top: 30px;
-            font-size: 16px;
-        }
-
-        .pop-modal {
-            display: none;
-            position: fixed;
-            z-index: 1;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            overflow: auto;
-            background-color: rgb(0, 0, 0);
-            background-color: rgba(0, 0, 0, 0.4);
-            padding-top: 60px;
-        }
-
-        .pop-modal-content {
-            background-color: #fff;
-            margin: 5% auto;
-            padding: 20px;
-            border-radius: 10px;
-            width: 80%;
-            max-width: 600px;
-        }
-
-        .close-modal {
-            color: #aaa;
-            font-size: 28px;
-            font-weight: bold;
-            position: absolute;
-            top: 15px;
-            right: 25px;
-        }
-
-        .close-modal:hover,
-        .close-modal:focus {
-            color: black;
-            text-decoration: none;
-            cursor: pointer;
-        }
-    </style>
-    <title>Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css" rel="stylesheet" />
 </head>
+
+<style>
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.4);
+        opacity: 0;
+        transition: opacity 0.3s ease-in-out;
+        overflow-y: auto;
+        padding: 20px;
+    }
+
+    .modal.show {
+        opacity: 1;
+        display: block;
+    }
+
+    .modal-content {
+        background-color: #fefefe;
+        margin: 5vh 30%;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 90%;
+        max-width: 800px;
+        border-radius: 5px;
+        transform: translateY(-50px);
+        opacity: 0;
+        transition: all 0.3s ease-in-out;
+        position: relative;
+    }
+
+    .modal.show .modal-content {
+        transform: translateY(0);
+        opacity: 1;
+    }
+
+    .close {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+
+    .close:hover {
+        color: black;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: bold;
+    }
+
+    .form-group input,
+    .form-group textarea {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+    }
+
+    .form-group #editor {
+        height: 300px;
+        margin-bottom: 20px;
+    }
+
+    .submit-btn {
+        background-color: #4CAF50;
+        color: white;
+        padding: 10px 15px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+    .submit-btn:hover {
+        background-color: #45a049;
+    }
+
+    /* Quill editor container */
+    .ql-container {
+        font-size: 16px;
+    }
+
+    /* Ensure toolbar is visible */
+    .ql-toolbar {
+        background: white;
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+    }
+
+    /* Tooltip styles */
+    [data-tooltip] {
+        position: relative;
+    }
+
+    [data-tooltip]:before {
+        content: attr(data-tooltip);
+        position: absolute;
+        bottom: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        padding: 5px 10px;
+        background-color: #333;
+        color: white;
+        border-radius: 4px;
+        font-size: 12px;
+        white-space: nowrap;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.2s ease;
+        transition-delay: 500ms;
+        z-index: 1000;
+    }
+
+    [data-tooltip]:hover:before {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    .fade-message {
+        animation: fadeOut 5s ease-in-out forwards;
+    }
+
+    @keyframes fadeOut {
+        0% { opacity: 1; }
+        70% { opacity: 1; }
+        100% { opacity: 0; }
+    }
+
+    .alert-success {
+        color: #155724;
+        background-color: #d4edda;
+        border: 1px solid #c3e6cb;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        border-radius: 0.25rem;
+    }
+
+    .fade-message {
+        position: fixed;
+        top: 20px;
+        left: 55%;
+        transform: translateX(-50%);
+        z-index: 1000;
+        min-width: 300px;
+        text-align: center;
+        opacity: 1;
+        transition: opacity 0.5s ease-in-out;
+    }
+
+    .fade-out {
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.5s ease-in-out;
+    }
+</style>
+
 <body>
     <div class="container">
         {% include 'navbar.html' %} 
@@ -440,6 +189,31 @@
         {% include 'header.html' %} 
 
         <main style="padding-top: 0%;">
+            <button class="btn btn-add-announce">
+                Create Announcement
+            </button>
+
+            <div id="addannounce" class="modal">
+                <div class="modal-content">
+                    <span class="close">&times;</span>
+                    <h2>Create New Announcement</h2>
+                    <form method="POST" action="{% url 'dashboard' %}">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <label for="title">Title:</label>
+                            <input type="text" id="add-title" name="add-title" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="content">Content:</label>
+                            <div id="editor"></div>
+                            <input type="hidden" id="add-content" name="add-content" />
+                        </div>
+                        <button type="submit" class="submit-btn">Post Announcement</button>
+                        <p style="display: none;"></p>
+                    </form>
+                </div>
+            </div>
+            
             <div class="main-content">
                 <div class="announcement-card">
                     <div class="announcement-content">
@@ -457,243 +231,152 @@
                                 <p class="posted-info">posted 11.00PM 11 Aug 2024</p>
                             </div>
                         </div>
-
                     </div>
                 </div>
-                
-                <div class="leaderboard-card">
-                    <h2>Leaderboard</h2>
-                    <div class="leaderboard-content">
-                        <div class="leaderboard-header">
-                            <ul>
-                                <li class="list-item">
-                                    <div class="list-item-content">
-                                        <p>1.</p>
-                                        <img src="/static/image/user.png" alt="Profile Picture" class="profile-img">
-                                        <p>AndyClos A/L Boon Mee</p>
-                                        <button class="leaderboard-details"><i class="fa fa-file-text"></i></button>
-                                    </div>
-                                    
-                                </li>
-                                <li class="list-item">
-                                    <div class="list-item-content">
-                                        <p>2.</p>
-                                        <img src="/static/image/user.png" alt="Profile Picture" class="profile-img">
-                                        <p>Muhammad Ezzat Haziq Bin Elhan</p>
-                                        <button class="leaderboard-details"><i class="fa fa-file-text"></i></button>
-                                    </div>
-                                    
-                                </li>
-                                <li class="list-item">
-                                    <div class="list-item-content">
-                                        <p>3.</p>
-                                        <img src="/static/image/user.png" alt="Profile Picture" class="profile-img">
-                                        <p>Kam Weng Xuan</p>
-                                        <button class="leaderboard-details"><i class="fa fa-file-text"></i></button>
-                                    </div>
-                                    
-                                </li>
-                                <li class="list-item">
-                                    <div class="list-item-content">
-                                        <p>4.</p>
-                                        <img src="/static/image/user.png" alt="Profile Picture" class="profile-img">
-                                        <p>Loh Wei Ting</p>
-                                        <button class="leaderboard-details"><i class="fa fa-file-text"></i></button>
-                                    </div>
-                                    
-                                </li>
-                                <li class="list-item">
-                                    <div class="list-item-content">
-                                        <p>5.</p>
-                                        <img src="/static/image/user.png" alt="Profile Picture" class="profile-img">
-                                        <p>John</p>
-                                        <button class="leaderboard-details"><i class="fa fa-file-text"></i></button>
-                                    </div>
-                                    
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-                <div class="academic-card">
-                    <h2>Academic Result</h2>
-                    <div class="academic-outsider">
-                        <div class="academic-content">
-                            <!-- CGPA Section -->
-                            <div class="academic-cgpa-section">
-                                <p class="progress-text">Progress to target: 92.89%</p>
-                                <div class="progress-bar-container">
-                                    <div class="progress-bar"></div>
-                                </div>
-                                <div class="cgpa-container">
-                                    <div class="cgpa-box">
-                                        <h3 class="cgpa-title">Current CGPA</h3>
-                                        <p class="cgpa-value">3.53</p>
-                                        <button class="btn">Check current result</button>
-                                    </div>
-                                    <div class="cgpa-box">
-                                        <h3 class="cgpa-title">Targeted CGPA</h3>
-                                        <p class="cgpa-value">3.80</p>
-                                        <button class="btn">Check targeted result</button>
-                                    </div>
-                                </div>
-                            </div>
-                
-                            <!-- Feedback Section -->
-                            <div class="academic-feedback-section">
-                                <ul class="feedback-list">
-                                    <li class="feedback-item">
-                                        <p class="feedback-text subject">Subject that has risk to fail: 0</p>
-                                    </li>
-                                    <li class="feedback-item">
-                                        <button class="btn" style="margin-left: auto;margin-right: auto;">View details</button>
-                                    </li>
-                                    <li class="feedback-item feedback">
-                                        <span class="feedback-icon positive-icon">&#128077;</span>
-                                        <p class="feedback-text">Maintain your academic result</p>
-                                    </li>
-                                    <li class="feedback-item feedback">
-                                        <span class="feedback-icon neutral-icon">&#128200;</span>
-                                        <p class="feedback-text">You still have the chance to improve</p>
-                                    </li>
-                                    <li class="feedback-item feedback">
-                                        <span class="feedback-icon warning-icon">&#10060;</span>
-                                        <p class="feedback-text">You might fail if next CPT123 test is below 50 marks</p>
-                                    </li>
-                                    <li class="feedback-item feedback">
-                                        <span class="feedback-icon encouragement-icon">&#127800;</span>
-                                        <p class="feedback-text">Work harder to achieve more</p>
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
             </div>
         </main>
 
-<div id="leaderboard-modal" class="pop-modal">
-    <div class="pop-modal-content">
-        <h2>Leaderboard Details</h2>
-        <div id="leaderboard-detail-content">
-            <!-- Content will be dynamically inserted here -->
-        </div>
-    </div>
-</div>
-
-<div id="academic-modal" class="pop-modal">
-    <div class="pop-modal-content">
-        <h2>Academic Details</h2>
-        <div id="academic-detail-content">
-            <!-- Content will be dynamically inserted here -->
-        </div>
-    </div>
-</div>
-
         {% include 'footer.html' %} 
     </div>
+
     <script src="{% static 'js/backend.js' %}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"></script>
+    <script>
+        // Quill toolbar configuration with tooltips
+        const toolbarOptions = [
+            // Essential formatting options
+            [
+                'bold',
+                'italic',
+                'underline',
+                'strike'
+            ],
+            
+            // Headers and text style
+            [{ 'header': [1, 2, 3, false] }],
+            
+            // Lists
+            [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+            
+            // Indentation
+            [{ 'indent': '-1'}, { 'indent': '+1' }],
+            
+            // Text alignment
+            [{ 'align': [] }],
+            
+            // Links and media
+            ['link', 'image'],
+            
+            // Color options
+            [{ 'color': [] }, { 'background': [] }],
+            
+            // Clean formatting
+            ['clean']
+        ];
 
+        // Initialize Quill
+        const quill = new Quill('#editor', {
+            modules: {
+                toolbar: toolbarOptions
+            },
+            theme: 'snow'
+        });
 
+        // Add tooltips after Quill is initialized
+        const tooltips = {
+            'bold': 'Bold (Ctrl+B)',
+            'italic': 'Italic (Ctrl+I)',
+            'underline': 'Underline (Ctrl+U)',
+            'strike': 'Strikethrough',
+            'header': 'Heading',
+            'list': 'List',
+            'indent-1': 'Indent Left',
+            'indent+1': 'Indent Right',
+            'align': 'Align',
+            'link': 'Insert Link',
+            'image': 'Insert Image',
+            'color': 'Text Color',
+            'background': 'Background Color',
+            'clean': 'Clear Formatting'
+        };
+
+        // Apply tooltips to toolbar buttons
+        setTimeout(() => {
+            const buttons = document.querySelectorAll('.ql-toolbar button, .ql-toolbar select');
+            buttons.forEach(button => {
+                const className = Array.from(button.classList)
+                    .find(cls => cls.startsWith('ql-'));
+                if (className) {
+                    const format = className.replace('ql-', '');
+                    // Special handling for indent buttons
+                    if (format === 'indent') {
+                        const value = button.value;
+                        if (value === '-1') {
+                            button.setAttribute('data-tooltip', 'Indent Left');
+                        } else if (value === '+1') {
+                            button.setAttribute('data-tooltip', 'Indent Right');
+                        }
+                    } else if (tooltips[format]) {
+                        button.setAttribute('data-tooltip', tooltips[format]);
+                    }
+                }
+            });
+        }, 100);
+
+        // Modal and form handling
+        const modal = document.getElementById('addannounce');
+        
+        document.querySelector('.btn-add-announce').onclick = function() {
+            modal.style.display = 'block';
+            setTimeout(() => {
+                modal.classList.add('show');
+                quill.focus();
+            }, 10);
+        }
+
+        document.querySelector('.close').onclick = function() {
+            modal.classList.remove('show');
+            setTimeout(() => {
+                modal.style.display = 'none';
+            }, 300);
+        }
+
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                modal.classList.remove('show');
+                setTimeout(() => {
+                    modal.style.display = 'none';
+                }, 300);
+            }
+        }
+
+        // Form submission
+        document.querySelector('form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const content = quill.root.innerHTML;
+            document.getElementById('add-content').value = content;
+            this.submit();
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const welcomeAlert = document.getElementById('welcomeAlert');
+            if (welcomeAlert) {
+                // Wait 3 seconds before starting fade out
+                setTimeout(() => {
+                    welcomeAlert.classList.add('fade-out');
+                    // Remove from DOM after fade completes
+                    setTimeout(() => {
+                        welcomeAlert.remove();
+                    }, 500);
+                }, 3000);
+            }
+        });
+    </script>
+
+    {% if welcome_message %}
+    <div class="alert alert-success fade-message" id="welcomeAlert">
+        {{ welcome_message }}
+    </div>
+    {% endif %}
 </body>
 </html>
-
-<script>
-    document.addEventListener("DOMContentLoaded", () => {
-    // Handle Leaderboard Modal
-    const leaderboardDetailsButtons = document.querySelectorAll(".leaderboard-details");
-    const leaderboardModal = document.getElementById("leaderboard-modal");
-    const leaderboardDetailContent = document.getElementById("leaderboard-detail-content");
-
-    leaderboardDetailsButtons.forEach(button => {
-        button.addEventListener("click", (event) => {
-            const listItem = event.target.closest('.list-item');
-            const name = listItem.querySelector('p').textContent.trim();
-            const imageSrc = listItem.querySelector('img').src;
-
-            leaderboardDetailContent.innerHTML = `
-                <img src="${imageSrc}" alt="Profile Picture" class="profile-img" style="width: 100px; height: 100px;">
-                <h3>${name}</h3>
-                <p>Details about ${name} will go here.</p>
-            `;
-
-            leaderboardModal.style.display = "block";
-        });
-    });
-
-    // Close Leaderboard Modal when clicking outside
-    window.addEventListener("click", (event) => {
-        if (event.target == leaderboardModal) {
-            leaderboardModal.style.display = "none";
-        }
-    });
-
-    // Handle Academic Modal
-    const academicDetailsButtons = document.querySelectorAll(".btn");
-    const academicModal = document.getElementById("academic-modal");
-    const academicDetailContent = document.getElementById("academic-detail-content");
-
-    academicDetailsButtons.forEach(button => {
-        button.addEventListener("click", (event) => {
-            // Check which button was clicked
-            if (button.textContent.includes("current result")) {
-                academicDetailContent.innerHTML = `
-                    <h3>Current CGPA Results</h3>
-                    <table>
-                        <tr><th>Subject</th><th>Grade</th></tr>
-                        <tr><td>Math</td><td>B+</td></tr>
-                        <tr><td>Physics</td><td>A</td></tr>
-                    </table>
-                `;
-            } else if (button.textContent.includes("targeted result")) {
-                academicDetailContent.innerHTML = `
-                    <h3>Targeted CGPA Results</h3>
-                    <table>
-                        <tr><th>Subject</th><th>Grade</th></tr>
-                        <tr><td>Math</td><td>A</td></tr>
-                        <tr><td>Physics</td><td>A+</td></tr>
-                    </table>
-                `;
-            } else if (button.textContent.includes("View details")) {
-                academicDetailContent.innerHTML = `
-                    <h3>No Subject or risk founded</h3>
-                `;
-            }
-
-            academicModal.style.display = "block";
-        });
-    });
-
-    // Close Academic Modal when clicking outside
-    window.addEventListener("click", (event) => {
-        if (event.target == academicModal) {
-            academicModal.style.display = "none";
-        }
-    });
-
-    // Handle Progress Bar Glitter Effect
-    const progressBarContainer = document.querySelector('.progress-bar-container');
-
-    function createGlitterEffect() {
-        const glitter = document.createElement('div');
-        glitter.classList.add('glitter');
-        
-        const maxWidth = progressBarContainer.offsetWidth;
-        const randomPositionX = Math.random() * maxWidth;
-        const randomDelay = Math.random() * 2;
-
-        glitter.style.left = `${randomPositionX}px`;
-        glitter.style.animationDelay = `-${randomDelay}s`;
-
-        progressBarContainer.appendChild(glitter);
-
-        setTimeout(() => {
-            glitter.remove();
-        }, 2000); 
-    }
-
-    setInterval(createGlitterEffect, 100);
-});
-
-</script>

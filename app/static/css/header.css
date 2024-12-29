@@ -4,14 +4,15 @@
     left: 0;
     width: 100%; /* Adjust width as needed */
     background-color: #ffffff;
-    text-align: center;
     padding: 10px 0;
     z-index: 998; /* Ensure it's above other content */
+    
 }
 
 .header-text {
     font-weight: 500;
     font-size: 20px;
     color: #5d7285;
+    margin-left: 55%;
 }
 
