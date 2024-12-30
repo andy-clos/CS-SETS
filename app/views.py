@@ -212,7 +212,8 @@ def register_view(request):
                     'identity': identity,
                     'major': major,
                     'gender': gender,
-                    'birthday': birthday
+                    'birthday': birthday,
+                    'profile_picture': ''
                 }
 
                 # Save user data to Realtime Database using encoded email as key
