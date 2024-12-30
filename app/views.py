@@ -622,8 +622,75 @@ def analytics_view(request):
 def users_management_view(request):
     return render(request, 'users-management.html')
 
+@login_required
 def profile_view(request):
-    return render(request, 'profile.html')
+    try:
+        user_email = get_current_user(request)
+        encoded_email = user_email.replace('.', '-dot-').replace('@', '-at-')
+        
+        if request.method == 'POST':
+            try:
+                # Handle profile picture upload
+                if 'profile_picture' in request.FILES:
+                    profile_pic = request.FILES['profile_picture']
+                    import base64
+                    profile_pic_base64 = base64.b64encode(profile_pic.read()).decode('utf-8')
+                    database.child("users").child(encoded_email).update({
+                        "profile_picture": profile_pic_base64
+                    })
+                
+                # Handle other profile updates
+                name = request.POST.get('name')
+                gender = request.POST.get('gender')
+                birthday = request.POST.get('birthday')
+                major = request.POST.get('major')
+                matrix = request.POST.get('matrix')
+                identity = request.POST.get('identity')
+
+                user_data = {
+                    'name': name,
+                    'gender': gender,
+                    'birthday': birthday,
+                    'major': major,
+                    'matrix': matrix,
+                    'identity': identity
+                }
+                database.child("users").child(encoded_email).update(user_data)
+                
+                # Check if it's an AJAX request
+                if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                    return JsonResponse({
+                        'status': 'success',
+                        'message': 'Profile updated successfully!'
+                    })
+                else:
+                    messages.success(request, 'Profile updated successfully!')
+                    return redirect('profile')
+                    
+            except Exception as e:
+                if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                    return JsonResponse({
+                        'status': 'error',
+                        'message': str(e)
+                    })
+                else:
+                    messages.error(request, str(e))
+                    return redirect('profile')
+
+        # Get user data
+        user_data = database.child("users").child(encoded_email).get().val()
+        if not user_data:
+            messages.error(request, 'User data not found')
+            return redirect('login')
+
+        return render(request, 'profile.html', {
+            'user': user_data,
+            'default_image': 'image/user.png'
+        })
+
+    except Exception as e:
+        messages.error(request, f'Error: {str(e)}')
+        return redirect('dashboard')
 
 # Token verification
 def verify_token(request):
