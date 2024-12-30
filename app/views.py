@@ -689,14 +689,6 @@ def profile_view(request):
                 elif user_data['gender'] == 'F':
                     user_data['gender'] = 'Female'
             
-            # Transform major
-            if 'major' in user_data:
-                major_mapping = {
-                    'IC': 'Intelligent Computing',
-                    'SE': 'Software Engineering',
-                    'ci': 'Computing Infrastructure'
-                }
-                user_data['major'] = major_mapping.get(user_data['major'], user_data['major'])
         if not user_data:
             messages.error(request, 'User data not found')
             return redirect('login')

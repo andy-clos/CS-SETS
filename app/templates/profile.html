@@ -211,8 +211,8 @@
                             <div class="form-group">
                                 <label>Gender</label>
                                 <select name="gender" required>
-                                    <option value="Male" {% if user.gender == 'Male' %}selected{% endif %}>Male</option>
-                                    <option value="Female" {% if user.gender == 'Female' %}selected{% endif %}>Female</option>
+                                    <option value="M" {% if user.gender == 'Male' %}selected{% endif %}>Male</option>
+                                    <option value="F" {% if user.gender == 'Female' %}selected{% endif %}>Female</option>
                                 </select>
                             </div>
 
@@ -223,7 +223,8 @@
 
                             <div class="form-group">
                                 <label>Major</label>
-                                <input type="text" name="major" value="{{ user.major }}" readonly>
+                                <input type="hidden" name="major" value="{{ user.major }}">
+                                <input type="text" value="{% if user.major == 'IC' %}Intelligent Computing{% elif user.major == 'SE' %}Software Engineering{% elif user.major == 'CI' %}Computing Infrastructure{% else %}{{ user.major }}{% endif %}" readonly>
                             </div>
 
                             <div class="form-group">
