@@ -680,6 +680,23 @@ def profile_view(request):
 
         # Get user data
         user_data = database.child("users").child(encoded_email).get().val()
+         # Transform gender and major values if user_data exists
+        if user_data:
+            # Transform gender
+            if 'gender' in user_data:
+                if user_data['gender'] == 'M':
+                    user_data['gender'] = 'Male'
+                elif user_data['gender'] == 'F':
+                    user_data['gender'] = 'Female'
+            
+            # Transform major
+            if 'major' in user_data:
+                major_mapping = {
+                    'IC': 'Intelligent Computing',
+                    'SE': 'Software Engineering',
+                    'ci': 'Computing Infrastructure'
+                }
+                user_data['major'] = major_mapping.get(user_data['major'], user_data['major'])
         if not user_data:
             messages.error(request, 'User data not found')
             return redirect('login')
@@ -1038,3 +1055,35 @@ def test_database_connection(request):
             'status': 'error',
             'message': str(e)
         })
+
+def delete_profile(request):
+    if request.method == 'POST':
+        try:
+            user_email = get_current_user(request)
+            encoded_email = user_email.replace('.', '-dot-').replace('@', '-at-')
+            
+            # Delete from Realtime Database
+            database.child("users").child(encoded_email).remove()
+            
+            # Delete from Authentication
+            user = auth.get_user_by_email(user_email)
+            auth.delete_user(user.uid)
+            
+            # Clear session
+            request.session.flush()
+            
+            return JsonResponse({
+                'status': 'success',
+                'message': 'Account deleted successfully'
+            })
+            
+        except Exception as e:
+            return JsonResponse({
+                'status': 'error',
+                'message': str(e)
+            })
+    
+    return JsonResponse({
+        'status': 'error',
+        'message': 'Invalid request method'
+    })
