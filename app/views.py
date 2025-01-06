@@ -573,7 +573,7 @@ def appointments_view(request):
     return render(request, 'appointments.html')
 
 def forum_view(request):
-    user_email = request.GET.get('email')
+    user_email = get_current_user(request)
     search_query = request.GET.get('search', '')  # Get the search query from the URL
     posts = getPosts()  # Call the getPosts function to retrieve posts
 
@@ -726,9 +726,10 @@ def createpost_view(request):
             author_email = request.POST.get('author_email')
             
             # Get current timestamp
-            current_timestamp = int(datetime.now(pytz.UTC).timestamp() * 1000)
-            formatted_date = datetime.fromtimestamp(current_timestamp / 1000).strftime('%d/%m/%Y %H:%M:%S')
-            
+            current_timestamp =int(datetime.datetime.now(pytz.UTC).timestamp() * 1000)
+            formatted_date = datetime.datetime.fromtimestamp(current_timestamp / 1000).strftime('%d/%m/%Y %H:%M:%S')
+            print("Current Timestamp:", current_timestamp)
+
             # Retrieve all posts
             all_posts = database.child("forum").get()
             

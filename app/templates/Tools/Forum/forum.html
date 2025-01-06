@@ -99,18 +99,6 @@
       function closeModal() {
         document.getElementById("successModal").style.display = "none";
       }
-
-      window.onload = function () {
-        // Get email from sessionStorage
-        const userEmail = sessionStorage.getItem("userEmail");
-
-        // Update the username element
-        const usernameElement = document.querySelector(".username");
-        if (usernameElement && userEmail) {
-          usernameElement.textContent = userEmail;
-        }
-      };
-
     </script>
   </body>
 </html>
