@@ -314,88 +314,172 @@ def dashboard_view(request):
 
 def academic_view(request):
     if request.method == 'POST':
-        try:
-            academic_year = request.POST.get('academic_year').replace('/', '-')
-            semester = request.POST.get('semester')
-            course_code = request.POST.get('course_code').upper()
-            course_name = request.POST.get('course_name').title()
+        if request.POST.get('action') == 'add_student_course':
+            try:
+                # Handle student course addition
+                user_email = get_current_user(request)
+                encoded_email = user_email.replace('.', '-dot-').replace('@', '-at-')
+                selected_course = request.POST.get('selected_course')
+                
+                # Get latest academic year and semester
+                courses_data = database.child("course").get().val()
+                latest_year = sorted(courses_data.keys(), reverse=True)[0]
+                latest_semester = max(range(len(courses_data[latest_year])), 
+                                   key=lambda x: x if isinstance(courses_data[latest_year][x], dict) else -1)
 
-            lecturers = {}
-            lecturer_index = 1
-            while True:
-                lecturer_name = request.POST.get(f'lecturer_name{lecturer_index}')
-                lecturer_email = request.POST.get(f'lecturer_email{lecturer_index}')
-                if not lecturer_name or not lecturer_email:
-                    break
-                lecturers[lecturer_index] = {
-                    "lecturer_name": lecturer_name.title(),
-                    "lecturer_email": lecturer_email.lower()
+                # Store course info in user's data
+                course_info = {
+                    'academic_year': latest_year,
+                    'semester': str(latest_semester),
+                    'course_code': selected_course
                 }
-                lecturer_index += 1
+                
+                # Add to user's courses list
+                database.child("users").child(encoded_email).child("courses").push(course_info)
+                
+                return redirect('academic')
+                
+            except Exception as e:
+                return redirect('academic')
+        else:
+            # Handle admin course addition
+            try:
+                semester = request.POST.get('semester')
+                academic_year = request.POST.get('academic_year').replace('/', '-')
+                course_code = request.POST.get('course_code').upper()
+                course_name = request.POST.get('course_name').title()
 
-            venue_time = {}
-            venue_time_index = 1
-            while True:
-                class_venue = request.POST.get(f'class_venue{venue_time_index}')
-                class_day = request.POST.get(f'class_day{venue_time_index}')
-                class_start_time = request.POST.get(f'class_start_time{venue_time_index}')
-                class_end_time = request.POST.get(f'class_end_time{venue_time_index}')
-                if not class_venue or not class_day or not class_start_time or not class_end_time:
-                    break
-                venue_time[venue_time_index] = {
-                    "class_venue": class_venue.upper(),
-                    "class_day": class_day.title(),
-                    "class_start_time": class_start_time,
-                    "class_end_time": class_end_time
+                # Process lecturers
+                lecturers = {}
+                lecturer_index = 1
+                while True:
+                    lecturer_name = request.POST.get(f'lecturer_name{lecturer_index}')
+                    lecturer_email = request.POST.get(f'lecturer_email{lecturer_index}')
+                    if not lecturer_name or not lecturer_email:
+                        break
+                    lecturers[lecturer_index] = {
+                        "lecturer_name": lecturer_name.title(),
+                        "lecturer_email": lecturer_email.lower()
+                    }
+                    lecturer_index += 1
+
+                # Process venue and time
+                venue_time = {}
+                venue_time_index = 1
+                while True:
+                    class_venue = request.POST.get(f'class_venue{venue_time_index}')
+                    class_day = request.POST.get(f'class_day{venue_time_index}')
+                    class_start_time = request.POST.get(f'class_start_time{venue_time_index}')
+                    class_end_time = request.POST.get(f'class_end_time{venue_time_index}')
+                    if not all([class_venue, class_day, class_start_time, class_end_time]):
+                        break
+                    venue_time[venue_time_index] = {
+                        "class_venue": class_venue.upper(),
+                        "class_day": class_day,
+                        "class_start_time": class_start_time,
+                        "class_end_time": class_end_time
+                    }
+                    venue_time_index += 1
+
+                course_data = {
+                    "course_name": course_name,
+                    "lecturers": lecturers,
+                    "venue and time": venue_time
                 }
-                venue_time_index += 1
 
-            course_data = {
-                "course_name": course_name,
-                "lecturers": lecturers,
-                "venue and time": venue_time
-            }
+                database.child("course").child(academic_year).child(semester).child(course_code).set(course_data)
+                return redirect('academic')
 
-            database.child("course").child(academic_year).child(semester).child(course_code).set(course_data)
+            except Exception as e:
+                print(f"Error adding course: {e}")
+                return redirect('academic')
 
-            success_message = "Course added successfully!"
-            return redirect('academic')
-        except Exception as e:
-            print(f"Error adding course: {e}")
-            return render(request, 'academic.html', {'error': str(e)})
-
+    # Get latest courses for student selection
+    latest_courses = []
+    student_courses = []
     courses = {}
+    latest_year = None
+    latest_semester = None
+
     try:
         courses_data = database.child("course").get().val()
-        sorted_courses_data = dict(sorted(courses_data.items(), key=lambda item: item[0], reverse=True))
-        for academic_year, semesters in sorted_courses_data.items():
-            academic_year_slash = academic_year.replace('-', '/')  # Replace dash with slash for display
-            if academic_year not in courses:
-                courses[academic_year] = {'display': academic_year_slash, 'semesters': {}}
-            for semester_index, courses_in_semester in enumerate(semesters):
-                semester = str(semester_index)
-                if isinstance(courses_in_semester, dict):
-                    semester_courses = []
-                    for course_code, course_info in courses_in_semester.items():
-                        lecturers = course_info.get('lecturers', {})
-                        lecturers = [lecturer for lecturer in lecturers if lecturer is not None]
-                        venue_time = course_info.get('venue and time', {})
-                        venue_time = [vt for vt in venue_time if vt is not None]
-                        lecturer_count = len(lecturers)
-                        semester_courses.append({
-                            'course_code': course_code,
-                            'course_name': course_info.get('course_name', ''),
-                            'lecturers': lecturers,
-                            'lecturer_count': lecturer_count,
-                            'venue and time': venue_time
+        if courses_data:
+            # Get latest academic year
+            sorted_years = sorted(courses_data.keys(), reverse=True)
+            latest_year = sorted_years[0]
+            
+            # Get latest semester
+            latest_semester = None
+            for i in range(len(courses_data[latest_year])):
+                if isinstance(courses_data[latest_year][i], dict):
+                    latest_semester = i
+
+            # Process all courses for display
+            for academic_year in sorted_years:
+                year_display = academic_year.replace('-', '/')
+                courses[academic_year] = {'display': year_display, 'semesters': {}}
+                
+                for semester_index, semester_data in enumerate(courses_data[academic_year]):
+                    if isinstance(semester_data, dict):
+                        semester_courses = []
+                        for code, course_info in semester_data.items():
+                            lecturers = course_info.get('lecturers', {})
+                            lecturers = [lecturer for lecturer in lecturers if lecturer is not None]
+                            venue_time = course_info.get('venue and time', {})
+                            venue_time = [vt for vt in venue_time if vt is not None]
+                            lecturer_count = len(lecturers)
+                            semester_courses.append({
+                                'course_code': code,
+                                'course_name': course_info.get('course_name', ''),
+                                'lecturers': lecturers,
+                                'lecturer_count': lecturer_count,
+                                'venue_time': venue_time
+                            })
+                            
+                        if semester_courses:
+                            courses[academic_year]['semesters'][str(semester_index)] = semester_courses
+
+            # Get latest courses for dropdown
+            if latest_semester is not None:
+                latest_semester_courses = courses_data[latest_year][latest_semester]
+                if isinstance(latest_semester_courses, dict):
+                    for code, course_info in latest_semester_courses.items():
+                        latest_courses.append({
+                            'course_code': code,
+                            'course_name': course_info.get('course_name', '')
                         })
-                    if semester_courses:
-                        courses[academic_year]['semesters'][semester] = semester_courses
+
+            print("This is andy", semester_courses)
+            
+            # Get student's courses if user is a student
+            if request.session.get('user_role') == 'student':
+                user_email = get_current_user(request)
+                encoded_email = user_email.replace('.', '-dot-').replace('@', '-at-')
+                user_courses = database.child("users").child(encoded_email).child("courses").get().val()
+                student_courses = []
+                if user_courses and isinstance(user_courses, dict):
+                    for course in user_courses.values():
+                        student_courses.append({
+                            'course_code': course.get('course_code', ''),
+                            'academic_year': course.get('academic_year', '')
+                        })
+                    # Sort by academic year to get the earliest year first
+                    student_courses.sort(key=lambda x: x['academic_year'])
 
     except Exception as e:
         print(f"Error fetching courses: {e}")
-
-    return render(request, 'academic.html', {'courses': courses})
+        print(f"Latest year: {latest_year}")
+        print(f"Latest semester: {latest_semester}")
+   
+    context = {
+        'courses': courses,
+        'latest_courses': latest_courses,
+        'student_courses': student_courses,
+        'latest_year': latest_year,
+        'latest_semester': latest_semester
+    }
+    
+    return render(request, 'academic.html', context)
 
 def course_detail_view(request, semester_year, course_code):
     if request.method == 'POST':
