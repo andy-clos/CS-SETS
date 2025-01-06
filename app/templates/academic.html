@@ -140,105 +140,199 @@
         <main>
           <section class="content">
             <h2 class="section-title">Academic Management</h2>
-            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
-              Add Course
-            </button>
+            {% if request.session.user_role == 'admin' or request.session.user_role == 'student' %}
+              <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                {% if request.session.user_role == 'admin' %}Add Course{% elif request.session.user_role == 'student' %}Add My Course{% endif %}
+              </button>
 
-            <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-              <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-                <div class="modal-content">
-                  <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel">ADD COURSE</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                  </div>
-                  <div class="modal-body">
-                      <form method="POST" action="{% url 'academic' %}">
+              <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <h5 class="modal-title" id="exampleModalLabel">
+                        {% if request.session.user_role == 'admin' %}ADD COURSE{% elif request.session.user_role == 'student' %}ADD MY COURSE{% endif %}
+                      </h5>
+                      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                      {% if request.session.user_role == 'admin' %}
+                        <form method="POST" action="{% url 'academic' %}">
+                            {% csrf_token %}
+                            <label>Semester: </label>
+                            <select name="semester" id="semester" required>
+                                <option value="">Select semester</option>
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                            </select>
+                            <br>
+                            <label>Academic Year: </label>
+                            <input id="academic_year" type="text" name="academic_year" placeholder="Enter academic year" maxlength="9" required>
+                            <br>
+                            <label>Course Code: </label>
+                            <input id="course_code" type="text" name="course_code" placeholder="Enter course code" required>
+                            <br>
+                            <label>Course Name: </label>
+                            <input id="course_name" type="text" name="course_name" placeholder="Enter course name" required>
+                            <br>
+                            <div id="lecturer-container">
+                                <label>Lecturer Name 1: </label>
+                                <input id="lecturer_name1" type="text" name="lecturer_name1" placeholder="Enter lecturer name" required>
+                                <br>
+                                <label>Lecturer Email 1: </label>
+                                <input id="lecturer_email1" type="text" name="lecturer_email1" placeholder="Enter lecturer email" required>
+                                <button type="button" onclick="addLecturerField()">+</button>
+                                <br>
+                            </div>
+                            <div id="venue-time-container">
+                                <label>Class Venue 1: </label>
+                                <input id="class_venue1" type="text" name="class_venue1" placeholder="Enter class venue" required>
+                                <br>
+                                <label>Class Day 1: </label>
+                                <select name="class_day1" id="class_day1" required>
+                                    <option value="">Select day</option>
+                                    <option value="Monday">Monday</option>
+                                    <option value="Tuesday">Tuesday</option>
+                                    <option value="Wednesday">Wednesday</option>
+                                    <option value="Thursday">Thursday</option>
+                                    <option value="Friday">Friday</option>
+                                    <option value="Saturday">Saturday</option>
+                                    <option value="Sunday">Sunday</option>
+                                </select>
+                                <br>
+                                <label>Class Start Time 1: </label>
+                                <input id="class_start_time1" type="time" name="class_start_time1" required>
+                                <br>
+                                <label>Class End Time 1: </label>
+                                <input id="class_end_time1" type="time" name="class_end_time1" required>
+                                <button type="button" onclick="addVenueTimeField()">+</button>
+                                <br>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Add</button>
+                        </form>
+                      {% elif request.session.user_role == 'student' %}
+                        <form method="POST" action="{% url 'academic' %}">
                           {% csrf_token %}
-                          <label>Semester: </label>
-                          <select name="semester" id="semester" required>
-                              <option value="">Select semester</option>
-                              <option value="1">1</option>
-                              <option value="2">2</option>
+                          <input type="hidden" name="action" value="add_student_course">
+                          <label>Available Courses:</label>
+                          <select name="selected_course" required>
+                            <option value="">Select a course</option>
+                            {% for course in latest_courses %}
+                              <option value="{{ course.course_code }}">
+                                {{ course.course_code }} - {{ course.course_name }}
+                              </option>
+                            {% endfor %}
                           </select>
-                          <br>
-                          <label>Academic Year: </label>
-                          <input id="academic_year" type="text" name="academic_year" placeholder="Enter academic year" maxlength="9" required>
-                          <br>
-                          <label>Course Code: </label>
-                          <input id="course_code" type="text" name="course_code" placeholder="Enter course code" required>
-                          <br>
-                          <label>Course Name: </label>
-                          <input id="course_name" type="text" name="course_name" placeholder="Enter course name" required>
-                          <br>
-                          <div id="lecturer-container">
-                              <label>Lecturer Name 1: </label>
-                              <input id="lecturer_name1" type="text" name="lecturer_name1" placeholder="Enter lecturer name" required>
-                              <br>
-                              <label>Lecturer Email 1: </label>
-                              <input id="lecturer_email1" type="text" name="lecturer_email1" placeholder="Enter lecturer email" required>
-                              <button type="button" onclick="addLecturerField()">+</button>
-                              <br>
-                          </div>
-                          <div id="venue-time-container">
-                              <label>Class Venue 1: </label>
-                              <input id="class_venue1" type="text" name="class_venue1" placeholder="Enter class venue" required>
-                              <br>
-                              <label>Class Day 1: </label>
-                              <select name="class_day1" id="class_day1" required>
-                                  <option value="">Select day</option>
-                                  <option value="Monday">Monday</option>
-                                  <option value="Tuesday">Tuesday</option>
-                                  <option value="Wednesday">Wednesday</option>
-                                  <option value="Thursday">Thursday</option>
-                                  <option value="Friday">Friday</option>
-                                  <option value="Saturday">Saturday</option>
-                                  <option value="Sunday">Sunday</option>
-                              </select>
-                              <br>
-                              <label>Class Start Time 1: </label>
-                              <input id="class_start_time1" type="time" name="class_start_time1" required>
-                              <br>
-                              <label>Class End Time 1: </label>
-                              <input id="class_end_time1" type="time" name="class_end_time1" required>
-                              <button type="button" onclick="addVenueTimeField()">+</button>
-                              <br>
-                          </div>
-                          <button type="submit" class="btn btn-primary">Add</button>
-                      </form>
-                  </div>
+                          <button type="submit" class="btn btn-primary">Add Course</button>
+                        </form>
+                      {% endif %}
+                    </div>
 
+                  </div>
                 </div>
               </div>
-            </div>
+            {% endif %}
             <div class="search-bar">
               <input id="searchbar" type="text" onkeyup="searchCourse()" name="searchCourse" placeholder="Search courses by course code or course name">
             </div>
 
-            {% for academic_year, data in courses.items %}
-              <h2>Academic Session {{ data.display }}</h2>
-              {% for semester, semester_courses in data.semesters.items %}
-                <button class="accordion">Semester {{ semester }}</button>
-                <div class="panel">
-                  <div class="courses-grid">
-                    {% for course in semester_courses %}
-                      <div class="course-card">
-                        <a href="{% url 'course-detail' semester_year='sem'|add:semester|add:'year'|add:academic_year course_code=course.course_code %}" style="text-decoration: none;">
-                          <img src="{% static 'image/cat304.png' %}" alt="{{ course.course_code }}">
-                        </a>
-                        <a href="{% url 'course-detail' semester_year='sem'|add:semester|add:'year'|add:academic_year course_code=course.course_code %}" style="text-decoration: none;">
+            {% if request.session.user_role == 'admin' %}
+              {% for academic_year, data in courses.items %}
+                <h2>Academic Session {{ data.display }}</h2>
+                {% for semester, semester_courses in data.semesters.items %}
+                  <button class="accordion">Semester {{ semester }}</button>
+                  <div class="panel">
+                    <div class="courses-grid">
+                      {% for course in semester_courses %}
+                        <div class="course-card">
+                          <a href="{% url 'course-detail' semester_year='sem'|add:semester|add:'year'|add:academic_year course_code=course.course_code %}" style="text-decoration: none;">
+                            <img src="{% static 'image/cat304.png' %}" alt="{{ course.course_code }}">
+                          </a>
+                          <a href="{% url 'course-detail' semester_year='sem'|add:semester|add:'year'|add:academic_year course_code=course.course_code %}" style="text-decoration: none;">
                             <h2>{{ course.course_code }} {{ course.course_name }}</h2>
-                        </a>
-                        <p>👥 Student: 201 👨‍🏫 Lecturer: {{ course.lecturer_count }}</p>
-                        <a href="{% url 'course-detail' semester_year='sem'|add:semester|add:'year'|add:academic_year course_code=course.course_code %}">
+                          </a>
+                          <p>👥 Student: 201 👨‍🏫 Lecturer: {{ course.lecturer_count }}</p>
+                          <a href="{% url 'course-detail' semester_year='sem'|add:semester|add:'year'|add:academic_year course_code=course.course_code %}">
                             <button>View Details</button>
-                        </a>
-                      </div>
-                    {% endfor %}
+                          </a>
+                        </div>
+                      {% endfor %}
+                    </div>
                   </div>
-                </div>
+                {% endfor %}
               {% endfor %}
-            {% endfor %}
-        </section>
+            
+            {% elif request.session.user_role == 'student' %}
+              {% if student_courses %}
+                {% with first_course=student_courses.0 %}
+                  {% for academic_year, data in courses.items %}
+                    {% if academic_year >= first_course.academic_year %}
+                      <h2>Academic Session {{ data.display }}</h2>
+                      {% for semester, semester_courses in data.semesters.items %}
+                          <button class="accordion">Semester {{ semester }}</button>
+                          <div class="panel">
+                          {% for course in semester_courses %}
+                            {% for student_course in student_courses %}
+                              {% if course.course_code == student_course.course_code %}
+                                <div class="courses-grid">
+                                  <div class="course-card">
+                                    <a href="{% url 'course-detail' semester_year='sem'|add:semester|add:'year'|add:academic_year course_code=course.course_code %}" style="text-decoration: none;">
+                                      <img src="{% static 'image/cat304.png' %}" alt="{{ course.course_code }}">
+                                    </a>
+                                    <a href="{% url 'course-detail' semester_year='sem'|add:semester|add:'year'|add:academic_year course_code=course.course_code %}" style="text-decoration: none;">
+                                      <h2>{{ course.course_code }} {{ course.course_name }}</h2>
+                                    </a>
+                                    <p>👥 Student: 201 👨‍🏫 Lecturer: {{ course.lecturer_count }}</p>
+                                    <a href="{% url 'course-detail' semester_year='sem'|add:semester|add:'year'|add:academic_year course_code=course.course_code %}">
+                                      <button>View Details</button>
+                                    </a>
+                                  </div>
+                                </div>
+                              {% endif %}
+                            {% endfor %}
+                          {% endfor %}
+                          </div>
+                      {% endfor %}
+                    {% endif %}
+                  {% endfor %}
+                {% endwith %}
+              {% else %}
+                <p>No courses added yet.</p>
+              {% endif %}
+            
+            {% elif request.session.user_role == 'lecturer' %}
+              {% for academic_year, data in courses.items %}
+                <h2>Academic Session {{ data.display }}</h2>
+                {% for semester, semester_courses in data.semesters.items %}
+                  <button class="accordion">Semester {{ semester }}</button>
+                  <div class="panel">
+                    <div class="courses-grid">
+                      {% for course in semester_courses %}
+                        {% for lecturer in course.lecturers %}
+                          {% if lecturer.lecturer_email == request.session.user_email %}
+                            <div class="course-card">
+                              <a href="{% url 'course-detail' semester_year='sem'|add:semester|add:'year'|add:academic_year course_code=course.course_code %}" style="text-decoration: none;">
+                                <img src="{% static 'image/cat304.png' %}" alt="{{ course.course_code }}">
+                              </a>
+                              <a href="{% url 'course-detail' semester_year='sem'|add:semester|add:'year'|add:academic_year course_code=course.course_code %}" style="text-decoration: none;">
+                                <h2>{{ course.course_code }} {{ course.course_name }}</h2>
+                              </a>
+                              <p>👥 Student: 201 👨‍🏫 Lecturer: {{ course.lecturer_count }}</p>
+                              <a href="{% url 'course-detail' semester_year='sem'|add:semester|add:'year'|add:academic_year course_code=course.course_code %}">
+                                <button>View Details</button>
+                              </a>
+                            </div>
+                          {% endif %}
+                        {% endfor %}
+                      {% endfor %}
+                    </div>
+                  </div>
+                {% endfor %}
+              {% endfor %}
+
+            {% else %}
+              <p>No courses added yet.</p>
+            {% endif %}
+          </section>
         </main>
 
         {% include 'footer.html' %} 

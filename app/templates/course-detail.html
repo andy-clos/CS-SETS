@@ -30,35 +30,42 @@
                     <input id="academic_year" type="text" name="academic_year" placeholder="Enter academic year" maxlength="9" required value="{{ course.academic_year }}" readonly>
                     <br>
                     <label>Semester: </label>
+                    {% if request.session.user_role == 'admin'%}
                     <select name="semester" id="semester" required readonly>
                         <option value="" disabled>Select semester</option>
                         <option value="1" {% if semester == "1" %}selected {% else %} disabled {% endif %}>1</option>
                         <option value="2" {% if semester == "2" %}selected {% else %} disabled {% endif %}>2</option>
                     </select>
+                    {% else %}
+                        <input id="semester" type="text" name="semester" placeholder="Enter semester" maxlength="1" required value="{{ semester }}" readonly>
+                    {% endif %}
                     <br>
                     <label>Course Code: </label>
                     <input id="course_code" type="text" name="course_code" placeholder="Enter course code" required value="{{ course_code }}" readonly>
                     <br>
                     <label>Course Name: </label>
-                    <input id="course_name" type="text" name="course_name" placeholder="Enter course name" required value="{{ course.course_name }}">
+                    <input id="course_name" type="text" name="course_name" placeholder="Enter course name" required value="{{ course.course_name }}" {% if request.session.user_role == 'student' or request.session.user_role == 'lecturer' %} readonly {% endif %}>
                     <br>
                     <div id="lecturer-container">
                         {% for lecturer in course.lecturers %}
                         <label>Lecturer Name {{ forloop.counter }}: </label>
-                        <input id="lecturer_name{{ forloop.counter }}" type="text" name="lecturer_name{{ forloop.counter }}" placeholder="Enter lecturer name" required value="{{ lecturer.lecturer_name }}">
+                        <input id="lecturer_name{{ forloop.counter }}" type="text" name="lecturer_name{{ forloop.counter }}" placeholder="Enter lecturer name" required value="{{ lecturer.lecturer_name }}" {% if request.session.user_role == 'student' or request.session.user_role == 'lecturer' %} readonly {% endif %}>
                         <br>
                         <label>Lecturer Email {{ forloop.counter }}: </label>
-                        <input id="lecturer_email{{ forloop.counter }}" type="text" name="lecturer_email{{ forloop.counter }}" placeholder="Enter lecturer email" required value="{{ lecturer.lecturer_email }}">
-                        <button type="button" onclick="addLecturerField()">+</button>
+                        <input id="lecturer_email{{ forloop.counter }}" type="text" name="lecturer_email{{ forloop.counter }}" placeholder="Enter lecturer email" required value="{{ lecturer.lecturer_email }}" {% if request.session.user_role == 'student' or request.session.user_role == 'lecturer' %} readonly {% endif %}>
+                        {% if request.session.user_role == 'admin'%}
+                            <button type="button" onclick="addLecturerField()">+</button>
+                        {% endif %}
                         <br>
                         {% endfor %}
                     </div>
                     <div id="venue-time-container">
                         {% for class in course.venue_time %}
                         <label>Class Venue {{ forloop.counter }}: </label>
-                        <input id="class_venue{{ forloop.counter }}" type="text" name="class_venue{{ forloop.counter }}" placeholder="Enter class venue" required value="{{ class.class_venue }}">
+                        <input id="class_venue{{ forloop.counter }}" type="text" name="class_venue{{ forloop.counter }}" placeholder="Enter class venue" required value="{{ class.class_venue }}" {% if request.session.user_role == 'student' or request.session.user_role == 'lecturer' %} readonly {% endif %}>
                         <br>
                         <label>Class Day {{ forloop.counter }}: </label>
+                        {% if request.session.user_role == 'admin'%}
                         <select name="class_day{{ forloop.counter }}" id="class_day{{ forloop.counter }}" required>
                             <option value="">Select day</option>
                             <option value="Monday" {% if class.class_day == "Monday" %}selected{% endif %}>Monday</option>
@@ -69,23 +76,34 @@
                             <option value="Saturday" {% if class.class_day == "Saturday" %}selected{% endif %}>Saturday</option>
                             <option value="Sunday" {% if class.class_day == "Sunday" %}selected{% endif %}>Sunday</option>
                         </select>
+                        {% else %}
+                            <input id="class_day{{ forloop.counter }}" type="text" name="class_day{{ forloop.counter }}" placeholder="Enter class day" required value="{{ class.class_day }}" readonly>
+                        {% endif %}
                         <br>
                         <label>Class Start Time {{ forloop.counter }}: </label>
-                        <input id="class_start_time{{ forloop.counter }}" type="time" name="class_start_time{{ forloop.counter }}" value="{{ class.class_start_time }}" required>
+                        <input id="class_start_time{{ forloop.counter }}" type="time" name="class_start_time{{ forloop.counter }}" value="{{ class.class_start_time }}" required {% if request.session.user_role == 'student' or request.session.user_role == 'lecturer' %} readonly {% endif %}>
                         <br>
                         <label>Class End Time {{ forloop.counter }}: </label>
-                        <input id="class_end_time{{ forloop.counter }}" type="time" name="class_end_time{{ forloop.counter }}" value="{{ class.class_end_time }}" required>
-                        <button type="button" onclick="addVenueTimeField()">+</button>
+                        <input id="class_end_time{{ forloop.counter }}" type="time" name="class_end_time{{ forloop.counter }}" value="{{ class.class_end_time }}" required {% if request.session.user_role == 'student' or request.session.user_role == 'lecturer' %} readonly {% endif %}>
+                        {% if request.session.user_role == 'admin'%}
+                            <button type="button" onclick="addVenueTimeField()">+</button>
+                        {% endif %}
                         <br>
                         {% endfor %}
-                        <button type="submit" class="btn btn-primary">Update</button>
+                        {% if request.session.user_role == 'admin'%}
+                            <button type="submit" class="btn btn-primary">Update Course</button>
+                        {% endif %}
                     </div>
                 </form>
                 
-                <form method="POST" action="{% url 'delete-course' semester_year=course.semester_year course_code=course_code %}">
-                    {% csrf_token %}
-                    <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this course?');">Delete</button>
-                </form>
+                {% if request.session.user_role == 'admin'%}
+                    <form method="POST" action="{% url 'delete-course' semester_year=course.semester_year course_code=course_code %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this course?');">Delete Course</button>
+                    </form>
+                {% elif request.session.user_role == 'student'%}
+                    <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this course?');">Delete My Course</button>
+                {% endif %}
                 {% endfor %}
             {% endif %}
         </section>
