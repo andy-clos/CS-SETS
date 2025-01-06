@@ -891,8 +891,8 @@ def submit_comment(request, post_id):
             content = request.POST.get('content')  # Get the comment content
             user_email = request.POST.get('author_email')
             # Get current timestamp
-            current_timestamp = int(datetime.now(pytz.UTC).timestamp() * 1000)
-            formatted_date = datetime.fromtimestamp(current_timestamp / 1000).strftime('%d/%m/%Y %H:%M:%S')
+            current_timestamp = int(datetime.datetime.now(pytz.UTC).timestamp() * 1000)
+            formatted_date = datetime.datetime.fromtimestamp(current_timestamp / 1000).strftime('%d/%m/%Y %H:%M:%S')
 
             # Reference to the specific post in Firebase using post_id
             post_data = database.child("forum").child("posts").order_by_child("PostID").equal_to(post_id).get().val()
