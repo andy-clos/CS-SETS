@@ -801,13 +801,14 @@ def verify_token(request):
 
 def createpost_view(request):
     if request.method == 'POST':
+        print(request.POST)
         try:
             # Get form data
             subject = request.POST.get('subject')
             title = request.POST.get('title')
             content = request.POST.get('content')
             tags = json.loads(request.POST.get('tags', '[]'))
-            author_email = request.POST.get('author_email')
+            author_email = get_current_user(request)
             
             # Get current timestamp
             current_timestamp =int(datetime.datetime.now(pytz.UTC).timestamp() * 1000)
@@ -889,7 +890,7 @@ def submit_comment(request, post_id):
         try:
             # Get the comment content from the request
             content = request.POST.get('content')  # Get the comment content
-            user_email = request.POST.get('author_email')
+            user_email = get_current_user(request)
             # Get current timestamp
             current_timestamp = int(datetime.datetime.now(pytz.UTC).timestamp() * 1000)
             formatted_date = datetime.datetime.fromtimestamp(current_timestamp / 1000).strftime('%d/%m/%Y %H:%M:%S')

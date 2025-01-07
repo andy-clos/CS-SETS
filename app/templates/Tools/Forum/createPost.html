@@ -126,21 +126,7 @@
           const subject = document.getElementById("subject").value.trim();
           const title = document.getElementById("title").value.trim();
           const content = quill.root.innerHTML.trim();
-          // Get email from sessionStorage
 
-          const authorEmail = sessionStorage.getItem("userEmail");
-
-          // Create hidden input for author email if it doesn't exist
-          let authorInput = document.getElementById("author_email");
-          if (!authorInput) {
-            authorInput = document.createElement("input");
-            authorInput.type = "hidden";
-            authorInput.id = "author_email";
-            authorInput.name = "author_email";
-            this.appendChild(authorInput);
-          }
-
-          authorInput.value = authorEmail;
           // Get all tags from the label container
           const tagLabels = document.querySelectorAll(".tag-label span");
           const tags = Array.from(tagLabels).map((label) => label.textContent);
