@@ -96,13 +96,12 @@
                     </div>
                 </form>
                 
-                {% if request.session.user_role == 'admin'%}
+                {% if request.session.user_role == 'admin' or request.session.user_role == 'student'%}
                     <form method="POST" action="{% url 'delete-course' semester_year=course.semester_year course_code=course_code %}">
                         {% csrf_token %}
-                        <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this course?');">Delete Course</button>
+                        <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this course?');">{% if request.session.user_role == 'admin'%}Delete Course {% else %}Delete My Course{% endif %}</button>
                     </form>
-                {% elif request.session.user_role == 'student'%}
-                    <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this course?');">Delete My Course</button>
+                
                 {% endif %}
                 {% endfor %}
             {% endif %}

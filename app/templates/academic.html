@@ -207,11 +207,24 @@
                                 <button type="button" onclick="addVenueTimeField()">+</button>
                                 <br>
                             </div>
+                            <div id="coursework-container">
+                                <label>Coursework Type 1: </label>
+                                <input type="text" id="coursework_type1" name="coursework_type1" 
+                                       placeholder="Enter coursework type" required>
+                                <br>
+                                <label>Total Mark 1: </label>
+                                <input type="number" id="total_mark1" name="total_mark1" 
+                                       placeholder="Enter total mark" min="0" max="100" required>
+                                <button type="button" onclick="addCourseworkField()">+</button>
+                                <br>
+                            </div>
+                            
                             <button type="submit" class="btn btn-primary">Add</button>
                         </form>
                       {% elif request.session.user_role == 'student' %}
                         <form method="POST" action="{% url 'academic' %}">
                           {% csrf_token %}
+                          <h4 class="mb-4">Add course for Academic Session {{ latest_year|slice:"0:4" }}/{{ latest_year|slice:"5:9" }}, Semester {{ latest_semester }}</h4>
                           <input type="hidden" name="action" value="add_student_course">
                           <label>Available Courses:</label>
                           <select name="selected_course" required>
@@ -236,31 +249,36 @@
             </div>
 
             {% if request.session.user_role == 'admin' %}
-              {% for academic_year, data in courses.items %}
-                <h2>Academic Session {{ data.display }}</h2>
-                {% for semester, semester_courses in data.semesters.items %}
-                  <button class="accordion">Semester {{ semester }}</button>
-                  <div class="panel">
-                    <div class="courses-grid">
-                      {% for course in semester_courses %}
-                        <div class="course-card">
-                          <a href="{% url 'course-detail' semester_year='sem'|add:semester|add:'year'|add:academic_year course_code=course.course_code %}" style="text-decoration: none;">
-                            <img src="{% static 'image/cat304.png' %}" alt="{{ course.course_code }}">
-                          </a>
-                          <a href="{% url 'course-detail' semester_year='sem'|add:semester|add:'year'|add:academic_year course_code=course.course_code %}" style="text-decoration: none;">
-                            <h2>{{ course.course_code }} {{ course.course_name }}</h2>
-                          </a>
-                          <p>👥 Student: 201 👨‍🏫 Lecturer: {{ course.lecturer_count }}</p>
-                          <a href="{% url 'course-detail' semester_year='sem'|add:semester|add:'year'|add:academic_year course_code=course.course_code %}">
-                            <button>View Details</button>
-                          </a>
-                        </div>
-                      {% endfor %}
+              {% if courses %}
+                {% for academic_year, data in courses.items %}
+                  <h2>Academic Session {{ data.display }}</h2>
+                  {% for semester, semester_courses in data.semesters.items %}
+                    <button class="accordion">Semester {{ semester }}</button>
+                    <div class="panel">
+                      <div class="courses-grid">
+                        {% for course in semester_courses %}
+                          <div class="course-card">
+                            <a href="{% url 'course-detail' semester_year='sem'|add:semester|add:'year'|add:academic_year course_code=course.course_code %}" style="text-decoration: none;">
+                              <img src="{% static 'image/cat304.png' %}" alt="{{ course.course_code }}">
+                            </a>
+                            <a href="{% url 'course-detail' semester_year='sem'|add:semester|add:'year'|add:academic_year course_code=course.course_code %}" style="text-decoration: none;">
+                              <h2>{{ course.course_code }} {{ course.course_name }}</h2>
+                            </a>
+                            <p>👥 Student: {{ course.student_count }} 👨‍🏫 Lecturer: {{ course.lecturer_count }}</p>
+                            <a href="{% url 'course-detail' semester_year='sem'|add:semester|add:'year'|add:academic_year course_code=course.course_code %}">
+                              <button>View Details</button>
+                            </a>
+                          </div>
+                        {% endfor %}
+                      </div>
                     </div>
-                  </div>
+                  {% endfor %}
                 {% endfor %}
-              {% endfor %}
+              {% else %}
+                <p>No courses added yet.</p>
+              {% endif %}
             
+
             {% elif request.session.user_role == 'student' %}
               {% if student_courses %}
                 {% with first_course=student_courses.0 %}
@@ -272,7 +290,7 @@
                           <div class="panel">
                           {% for course in semester_courses %}
                             {% for student_course in student_courses %}
-                              {% if course.course_code == student_course.course_code %}
+                              {% if course.course_code == student_course.course_code and semester == student_course.semester %}
                                 <div class="courses-grid">
                                   <div class="course-card">
                                     <a href="{% url 'course-detail' semester_year='sem'|add:semester|add:'year'|add:academic_year course_code=course.course_code %}" style="text-decoration: none;">
@@ -281,7 +299,7 @@
                                     <a href="{% url 'course-detail' semester_year='sem'|add:semester|add:'year'|add:academic_year course_code=course.course_code %}" style="text-decoration: none;">
                                       <h2>{{ course.course_code }} {{ course.course_name }}</h2>
                                     </a>
-                                    <p>👥 Student: 201 👨‍🏫 Lecturer: {{ course.lecturer_count }}</p>
+                                    <p>👥 Student: {{ course.student_count }} 👨‍🏫 Lecturer: {{ course.lecturer_count }}</p>
                                     <a href="{% url 'course-detail' semester_year='sem'|add:semester|add:'year'|add:academic_year course_code=course.course_code %}">
                                       <button>View Details</button>
                                     </a>
@@ -316,7 +334,7 @@
                               <a href="{% url 'course-detail' semester_year='sem'|add:semester|add:'year'|add:academic_year course_code=course.course_code %}" style="text-decoration: none;">
                                 <h2>{{ course.course_code }} {{ course.course_name }}</h2>
                               </a>
-                              <p>👥 Student: 201 👨‍🏫 Lecturer: {{ course.lecturer_count }}</p>
+                              <p>👥 Student: {{ course.student_count }} 👨‍🏫 Lecturer: {{ course.lecturer_count }}</p>
                               <a href="{% url 'course-detail' semester_year='sem'|add:semester|add:'year'|add:academic_year course_code=course.course_code %}">
                                 <button>View Details</button>
                               </a>

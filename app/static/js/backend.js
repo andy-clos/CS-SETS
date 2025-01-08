@@ -210,3 +210,70 @@ for (i = 0; i < acc.length; i++) {
     }
   });
 }
+
+let courseworkCount = 1;
+
+function addCourseworkField() {
+    //Remove the minus button from the previous field, if it exists
+    if (courseworkCount > 1) {
+        const previousButton = document.querySelector(
+            `#coursework-container div:last-child button.remove-btn`
+        );
+        if (previousButton) {
+            previousButton.remove();
+        }
+    }
+
+    courseworkCount++;
+    const container = document.getElementById('coursework-container');
+    const newField = document.createElement('div');
+    newField.setAttribute('id', `coursework${courseworkCount}`);
+    newField.innerHTML = `
+        <label>Coursework Type ${courseworkCount}: </label>
+        <input type="text" id="coursework_type${courseworkCount}" 
+               name="coursework_type${courseworkCount}" 
+               placeholder="Enter coursework type" required>
+        <br>
+        <label>Total Mark ${courseworkCount}: </label>
+        <input type="number" id="total_mark${courseworkCount}" 
+               name="total_mark${courseworkCount}" 
+               placeholder="Enter total mark" min="0" max="100" required>
+        <button type="button" class="remove-btn" 
+                onclick="removeCourseworkField(${courseworkCount})">-</button>
+        <br>
+    `;
+    container.appendChild(newField);
+}
+
+function removeCourseworkField(id) {
+    const field = document.getElementById(`coursework${id}`);
+    field.remove();
+    courseworkCount--;
+
+    // Add the minus button to the new last field, if there are still fields left
+    if (courseworkCount > 1) {
+        const lastField = document.querySelector(
+            `#coursework-container div:last-child`
+        );
+        if (lastField) {
+            // Remove any existing remove button first
+            const existingRemoveBtn = lastField.querySelector('.remove-btn');
+            if (existingRemoveBtn) {
+                existingRemoveBtn.remove();
+            }
+            const newButton = document.createElement('button');
+            newButton.type = 'button';
+            newButton.textContent = '-';
+            newButton.className = 'remove-btn';
+            newButton.setAttribute(
+                'onclick',
+                `removeCourseworkField(${courseworkCount})`
+            );
+            // Insert the button after the total mark input
+            const totalMarkInput = lastField.querySelector(`input[name="total_mark${courseworkCount}"]`);
+            if (totalMarkInput) {
+                totalMarkInput.insertAdjacentElement('afterend', newButton);
+            }
+        }
+    }
+}

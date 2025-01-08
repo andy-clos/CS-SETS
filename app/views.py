@@ -314,36 +314,9 @@ def dashboard_view(request):
 
 def academic_view(request):
     if request.method == 'POST':
-        if request.POST.get('action') == 'add_student_course':
+        if 'action' not in request.POST:  # This is for admin adding a course
             try:
-                # Handle student course addition
-                user_email = get_current_user(request)
-                encoded_email = user_email.replace('.', '-dot-').replace('@', '-at-')
-                selected_course = request.POST.get('selected_course')
-                
-                # Get latest academic year and semester
-                courses_data = database.child("course").get().val()
-                latest_year = sorted(courses_data.keys(), reverse=True)[0]
-                latest_semester = max(range(len(courses_data[latest_year])), 
-                                   key=lambda x: x if isinstance(courses_data[latest_year][x], dict) else -1)
-
-                # Store course info in user's data
-                course_info = {
-                    'academic_year': latest_year,
-                    'semester': str(latest_semester),
-                    'course_code': selected_course
-                }
-                
-                # Add to user's courses list
-                database.child("users").child(encoded_email).child("courses").push(course_info)
-                
-                return redirect('academic')
-                
-            except Exception as e:
-                return redirect('academic')
-        else:
-            # Handle admin course addition
-            try:
+                # Get form data
                 semester = request.POST.get('semester')
                 academic_year = request.POST.get('academic_year').replace('/', '-')
                 course_code = request.POST.get('course_code').upper()
@@ -381,17 +354,61 @@ def academic_view(request):
                     }
                     venue_time_index += 1
 
+                # Process courseworks
+                courseworks = {}
+                coursework_index = 1
+                while True:
+                    coursework_type = request.POST.get(f'coursework_type{coursework_index}')
+                    total_mark = request.POST.get(f'total_mark{coursework_index}')
+                    
+                    if not coursework_type or not total_mark:
+                        break
+                        
+                    courseworks[f'coursework{coursework_index}'] = {
+                        'type': coursework_type,
+                        'total_mark': int(total_mark)
+                    }
+                    coursework_index += 1
+
+                # Create course data structure
                 course_data = {
                     "course_name": course_name,
                     "lecturers": lecturers,
-                    "venue and time": venue_time
+                    "venue and time": venue_time,
+                    "courseworks": courseworks
                 }
 
+                # Save to Firebase
                 database.child("course").child(academic_year).child(semester).child(course_code).set(course_data)
                 return redirect('academic')
 
             except Exception as e:
                 print(f"Error adding course: {e}")
+                return redirect('academic')
+
+        else:
+            # Handle student course addition
+            try:
+                user_email = get_current_user(request)
+                encoded_email = user_email.replace('.', '-dot-').replace('@', '-at-')
+                selected_course = request.POST.get('selected_course')
+                
+                courses_data = database.child("course").get().val()
+                latest_year = sorted(courses_data.keys(), reverse=True)[0]
+                latest_semester = max(range(len(courses_data[latest_year])), 
+                                   key=lambda x: x if isinstance(courses_data[latest_year][x], dict) else -1)
+
+                course_info = {
+                    'academic_year': latest_year,
+                    'semester': str(latest_semester),  # Make sure to store the semester
+                    'course_code': selected_course
+                }
+                
+                database.child("users").child(encoded_email).child("courses").push(course_info)
+                
+                return redirect('academic')
+                
+            except Exception as e:
                 return redirect('academic')
 
     # Get latest courses for student selection
@@ -404,6 +421,23 @@ def academic_view(request):
     try:
         courses_data = database.child("course").get().val()
         if courses_data:
+            # Get all users to count students per course
+            users_data = database.child("users").get().val()
+            course_student_counts = {}
+            
+            # Count students for each course, considering semester
+            if users_data:
+                for user_key, user_info in users_data.items():
+                    if user_info.get('role') == 'student' and 'courses' in user_info:
+                        for course_key, course_info in user_info['courses'].items():
+                            course_code = course_info.get('course_code')
+                            course_semester = course_info.get('semester')
+                            course_year = course_info.get('academic_year')
+                            if course_code and course_semester and course_year:
+                                # Create a unique key combining course code, year, and semester
+                                unique_course_key = f"{course_code}_{course_year}_{course_semester}"
+                                course_student_counts[unique_course_key] = course_student_counts.get(unique_course_key, 0) + 1
+
             # Get latest academic year
             sorted_years = sorted(courses_data.keys(), reverse=True)
             latest_year = sorted_years[0]
@@ -423,6 +457,7 @@ def academic_view(request):
                     if isinstance(semester_data, dict):
                         semester_courses = []
                         for code, course_info in semester_data.items():
+                            unique_course_key = f"{code}_{academic_year}_{semester_index}"
                             lecturers = course_info.get('lecturers', {})
                             lecturers = [lecturer for lecturer in lecturers if lecturer is not None]
                             venue_time = course_info.get('venue and time', {})
@@ -433,7 +468,8 @@ def academic_view(request):
                                 'course_name': course_info.get('course_name', ''),
                                 'lecturers': lecturers,
                                 'lecturer_count': lecturer_count,
-                                'venue_time': venue_time
+                                'venue_time': venue_time,
+                                'student_count': course_student_counts.get(unique_course_key, 0)  # Use the semester-specific count
                             })
                             
                         if semester_courses:
@@ -448,8 +484,6 @@ def academic_view(request):
                             'course_code': code,
                             'course_name': course_info.get('course_name', '')
                         })
-
-            print("This is andy", semester_courses)
             
             # Get student's courses if user is a student
             if request.session.get('user_role') == 'student':
@@ -461,7 +495,8 @@ def academic_view(request):
                     for course in user_courses.values():
                         student_courses.append({
                             'course_code': course.get('course_code', ''),
-                            'academic_year': course.get('academic_year', '')
+                            'academic_year': course.get('academic_year', ''),
+                            'semester': course.get('semester', '')  # Add semester to the data structure
                         })
                     # Sort by academic year to get the earliest year first
                     student_courses.sort(key=lambda x: x['academic_year'])
@@ -478,7 +513,9 @@ def academic_view(request):
         'latest_year': latest_year,
         'latest_semester': latest_semester
     }
-    
+
+    print("this is student courses", student_courses)
+
     return render(request, 'academic.html', context)
 
 def course_detail_view(request, semester_year, course_code):
@@ -637,19 +674,42 @@ def analytics_detail_view(request, semester_year, course_code):
         return render(request, 'analytics-detail.html', {'error': 'An error occurred while fetching course details'})
 
 def delete_course_view(request, semester_year, course_code):
-    try:
-        print(f"Deleting course: semester_year={semester_year}, course_code={course_code}")
-        academic_year, semester = semester_year.split('sem')
-        semester = semester[0]
-        academic_year = semester_year[semester_year.index("year") + 4:]
+    if request.method == 'POST':
+        try:
+            # Extract academic year and semester from semester_year
+            academic_year = semester_year.replace('sem1year', '').replace('sem2year', '')
+            semester = '1' if 'sem1year' in semester_year else '2'
+            
+            # 1. First, get all users
+            users = database.child("users").get().val()
+            if users:
+                # Iterate through all users
+                for user_email, user_data in users.items():
+                    if 'courses' in user_data:
+                        courses = user_data['courses']
+                        # Iterate through user's courses
+                        for course_key, course_info in courses.items():
+                            # Check if this is the course to be deleted
+                            if (course_info.get('course_code') == course_code and 
+                                course_info.get('academic_year') == academic_year and 
+                                course_info.get('semester') == semester):
+                                # Delete this course from user's data
+                                database.child("users").child(user_email).child("courses").child(course_key).remove()
 
-        database.child("course").child(academic_year).child(semester).child(course_code).remove()
+            # Check user role using dictionary syntax
+            if request.session.get('user_role') == 'admin':
+                # 2. Then delete the course from courses database
+                database.child("course").child(academic_year).child(semester).child(course_code).remove()
+            
+            messages.success(request, f'Course {course_code} has been successfully deleted.')
+            return redirect('academic')
 
-        return redirect('academic')
-    except Exception as e:
-        print(f"Error deleting course: {e}")
-        return render(request, 'course-detail.html', {'error': str(e)})
-    
+        except Exception as e:
+            messages.error(request, f'Error deleting course: {str(e)}')
+            return redirect('course-detail', semester_year=semester_year, course_code=course_code)
+
+    return redirect('course-detail', semester_year=semester_year, course_code=course_code)
+
 def tools_view(request):
     return render(request, 'Tools/tools.html')
 
