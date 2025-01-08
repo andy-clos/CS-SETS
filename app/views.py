@@ -592,7 +592,28 @@ def course_detail_view(request, semester_year, course_code):
 
         courses_data = database.child("course").get().val()
         courses = []
+        enrolled_students = []
         
+        # Get enrolled students
+        users = database.child("users").get().val()
+        if users:
+            for email_key, user_data in users.items():
+                if user_data.get('role') == 'student' and 'courses' in user_data:
+                    for course_key, course_info in user_data['courses'].items():
+                        if (course_info.get('course_code') == course_code and 
+                            course_info.get('academic_year') == academic_year and 
+                            course_info.get('semester') == semester):
+                            enrolled_students.append({
+                                'name': user_data.get('name', ''),
+                                'matrix': user_data.get('matrix', ''),
+                                'email': user_data.get('email', '')
+                            })
+                            break
+
+        # Sort enrolled students by name
+        enrolled_students.sort(key=lambda x: x['name'])
+        
+        # Get course details
         for year, semesters in courses_data.items():
             if year == academic_year:
                 for semester_index, courses_in_semester in enumerate(semesters):
@@ -619,7 +640,14 @@ def course_detail_view(request, semester_year, course_code):
         if not courses:
             return render(request, 'course-detail.html', {'error': 'Course not found'})
         
-        return render(request, 'course-detail.html', {'courses': courses, 'course_code': course_code, 'academic_year': academic_year, 'semester': semester})
+        return render(request, 'course-detail.html', {
+            'courses': courses, 
+            'course_code': course_code, 
+            'academic_year': academic_year, 
+            'semester': semester,
+            'enrolled_students': enrolled_students
+        })
+        
     except Exception as e:
         print(f"Error fetching course details: {e}")
         return render(request, 'course-detail.html', {'error': 'An error occurred while fetching course details'})
