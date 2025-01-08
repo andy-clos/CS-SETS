@@ -625,6 +625,8 @@ def course_detail_view(request, semester_year, course_code):
                                     lecturers = [lecturer for lecturer in lecturers if lecturer is not None]
                                     venue_time = course_info.get('venue and time', {})
                                     venue_time = [vt for vt in venue_time if vt is not None]
+                                    courseworks = course_info.get('courseworks', {})
+                                    courseworks = [cw for cw in courseworks.values() if cw is not None]
                                     lecturer_count = len(lecturers)
                                     courses.append({
                                         'semester_year': semester_year,
@@ -634,7 +636,8 @@ def course_detail_view(request, semester_year, course_code):
                                         'course_name': course_info.get('course_name', ''),
                                         'lecturers': lecturers,
                                         'lecturer_count': lecturer_count,
-                                        'venue_time': venue_time
+                                        'venue_time': venue_time,
+                                        'courseworks': courseworks
                                     })
 
         if not courses:

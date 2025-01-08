@@ -150,6 +150,9 @@
                                     <th>Name</th>
                                     <th>Matrix Number</th>
                                     <th>Email</th>
+                                    {% for coursework in course.courseworks %}
+                                        <th>{{ coursework.type }} ({{ coursework.total_mark }}%)</th>
+                                    {% endfor %}
                                 </tr>
                             </thead>
                             <tbody>
@@ -160,11 +163,14 @@
                                             <td>{{ student.name }}</td>
                                             <td>{{ student.matrix }}</td>
                                             <td>{{ student.email }}</td>
+                                            {% for coursework in course.courseworks %}
+                                                <td></td>
+                                            {% endfor %}
                                         </tr>
                                     {% endfor %}
                                 {% else %}
                                     <tr>
-                                        <td colspan="4" class="text-center">No students enrolled in this course</td>
+                                        <td colspan="{{ 4|add:course.courseworks|length }}" class="text-center">No students enrolled in this course</td>
                                     </tr>
                                 {% endif %}
                             </tbody>
