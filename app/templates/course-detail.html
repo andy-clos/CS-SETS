@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="{% static 'css/header.css' %}">  
     <link rel="stylesheet" href="{% static 'css/style.css' %}">  
     <link rel="stylesheet" href="{% static 'css/footer.css' %}">
+    <link rel="stylesheet" href="{% static 'css/bootstrap.css' %}">
     <style>
     .enrolled-students-section {
         margin-top: 2rem;
@@ -153,6 +154,8 @@
                                     {% for coursework in course.courseworks %}
                                         <th>{{ coursework.type }} ({{ coursework.total_mark }}%)</th>
                                     {% endfor %}
+                                    <th>Total Coursework Mark ({{ total_marks }}%)</th>
+                                    <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -163,16 +166,95 @@
                                             <td>{{ student.name }}</td>
                                             <td>{{ student.matrix }}</td>
                                             <td>{{ student.email }}</td>
+
                                             {% for coursework in course.courseworks %}
-                                                <td></td>
+                                                {% for key, value in student.marks.items %}
+                                                    {% if key == coursework.type %}
+                                                        <td>{{ value }}</td>
+                                                    {% endif %}
+                                                {% endfor %}
                                             {% endfor %}
+                                            <td>{{ student.total_mark }}</td>
+                                            <td>
+                                                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#marksModal{{ student.email|slugify }}">
+                                                    Edit Marks
+                                                </button>
+                                            </td>
                                         </tr>
+
+                                        <!-- Marks Modal for each student -->
+                                        <div class="modal fade" id="marksModal{{ student.email|slugify }}" tabindex="-1" aria-labelledby="marksModalLabel{{ student.email|slugify }}" aria-hidden="true">
+                                            <div class="modal-dialog">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title" id="marksModalLabel{{ student.email|slugify }}">
+                                                            Update Marks for {{ student.name }}
+                                                        </h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <form method="POST" action="{% url 'update-marks' semester_year=semester_year course_code=course_code student_email=student.email %}">
+                                                            {% csrf_token %}
+                                                            {% for coursework in course.courseworks %}
+                                                                <div class="mb-3">
+                                                                    <label for="mark_{{ coursework.type|slugify }}" class="form-label">
+                                                                        {{ coursework.type }} (Max: {{ coursework.total_mark }}%)
+                                                                    </label>
+                                                                    <input type="number" 
+                                                                           class="form-control" 
+                                                                           id="mark_{{ coursework.type|slugify }}"
+                                                                           name="mark_{{ coursework.type|slugify }}"
+                                                                           min="0" 
+                                                                           max="{{ coursework.total_mark }}"
+                                                                           step="0.01"
+                                                                           value="{% for key, value in student.marks.items %}{% if key == coursework.type %}{{ value }}{% endif %}{% endfor %}">
+                                                                </div>
+                                                            {% endfor %}
+                                                            <div class="modal-footer">
+                                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                                                <button type="submit" class="btn btn-primary">Save Changes</button>
+                                                            </div>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
                                     {% endfor %}
                                 {% else %}
                                     <tr>
-                                        <td colspan="{{ 4|add:course.courseworks|length }}" class="text-center">No students enrolled in this course</td>
+                                        <td colspan="{{ 5|add:course.courseworks|length }}" class="text-center">No students enrolled in this course</td>
                                     </tr>
                                 {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% elif request.session.user_role == 'student' %}
+                    <div class="enrolled-students-section">
+                        <h3>Your Course Marks</h3>
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    {% for coursework in course.courseworks %}
+                                        <th>{{ coursework.type }} ({{ coursework.total_mark }}%)</th>
+                                    {% endfor %}
+                                    <th>Total Coursework Mark ({{ total_marks }}%)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for student in enrolled_students %}
+                                    {% if student.email == request.session.user_email %}
+                                        <tr>
+                                            {% for coursework in course.courseworks %}
+                                                {% for key, value in student.marks.items %}
+                                                    {% if key == coursework.type %}
+                                                        <td>{{ value }}</td>
+                                                    {% endif %}
+                                                {% endfor %}
+                                            {% endfor %}
+                                            <td>{{ student.total_mark }}</td>
+                                        </tr>
+                                    {% endif %}
+                                {% endfor %}
                             </tbody>
                         </table>
                     </div>
@@ -186,6 +268,7 @@
     </div>
     <script src="{% static 'js/backend.js' %}"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
     <script>
     function confirmDelete() {
         Swal.fire({
@@ -256,27 +339,35 @@
                 method: 'POST',
                 body: formData,
                 headers: {
-                    'X-CSRFToken': formData.get('csrfmiddlewaretoken')
+                    'X-CSRFToken': formData.get('csrfmiddlewaretoken'),
+                    'Accept': 'application/json'
                 }
             });
             
-            const data = await response.json();
-            
-            if (data.status === 'success') {
-                await Swal.fire({
-                    icon: 'success',
-                    title: 'Success!',
-                    text: data.message,
-                    timer: 2000,
-                    showConfirmButton: false
-                });
-                window.location.reload();
+            const contentType = response.headers.get('content-type');
+            if (contentType && contentType.includes('application/json')) {
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    await Swal.fire({
+                        icon: 'success',
+                        title: 'Success!',
+                        text: data.message,
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+                    window.location.reload();
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: data.message || 'An error occurred while updating the course.'
+                    });
+                }
             } else {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: data.message || 'An error occurred while updating the course.'
-                });
+                const text = await response.text();
+                console.error('Non-JSON response:', text);
+                throw new Error('Server returned non-JSON response');
             }
         } catch (error) {
             console.error('Error:', error);
@@ -286,6 +377,7 @@
                 text: 'An error occurred while processing your request.'
             });
         }
+        return false;
     }
     </script>
 </body>

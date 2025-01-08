@@ -529,62 +529,6 @@ def academic_view(request):
     return render(request, 'academic.html', context)
 
 def course_detail_view(request, semester_year, course_code):
-    if request.method == 'POST':
-        try:
-            academic_year = request.POST.get('academic_year').replace('/', '-')
-            semester = request.POST.get('semester')
-            course_code = request.POST.get('course_code').upper()
-            course_name = request.POST.get('course_name').title()
-
-            lecturers = {}
-            lecturer_index = 1
-            while True:
-                lecturer_name = request.POST.get(f'lecturer_name{lecturer_index}')
-                lecturer_email = request.POST.get(f'lecturer_email{lecturer_index}')
-                if not lecturer_name or not lecturer_email:
-                    break
-                lecturers[lecturer_index] = {
-                    "lecturer_name": lecturer_name.title(),
-                    "lecturer_email": lecturer_email.lower()
-                }
-                lecturer_index += 1
-
-            venue_time = {}
-            venue_time_index = 1
-            while True:
-                class_venue = request.POST.get(f'class_venue{venue_time_index}')
-                class_day = request.POST.get(f'class_day{venue_time_index}')
-                class_start_time = request.POST.get(f'class_start_time{venue_time_index}')
-                class_end_time = request.POST.get(f'class_end_time{venue_time_index}')
-                if not class_venue or not class_day or not class_start_time or not class_end_time:
-                    break
-                venue_time[venue_time_index] = {
-                    "class_venue": class_venue.upper(),
-                    "class_day": class_day.title(),
-                    "class_start_time": class_start_time,
-                    "class_end_time": class_end_time
-                }
-                venue_time_index += 1
-
-            course_data = {
-                "course_name": course_name,
-                "lecturers": lecturers,
-                "venue and time": venue_time
-            }
-
-            database.child("course").child(academic_year).child(semester).child(course_code).update(course_data)
-
-            return JsonResponse({
-                'status': 'success',
-                'message': f'Course {course_code} has been successfully updated.'
-            })
-
-        except Exception as e:
-            return JsonResponse({
-                'status': 'error',
-                'message': str(e)
-            }, status=500)
-
     try:
         academic_year, semester = semester_year.split('sem')
         semester = semester[0] 
@@ -593,8 +537,95 @@ def course_detail_view(request, semester_year, course_code):
         courses_data = database.child("course").get().val()
         courses = []
         enrolled_students = []
-        
-        # Get enrolled students
+        courseworks_data = {}
+        processed_courseworks = []
+
+        # Handle POST request for course update
+        if request.method == 'POST':
+            try:
+                # Get form data
+                course_name = request.POST.get('course_name')
+                
+                # Get lecturer data
+                lecturers = []
+                i = 1
+                while f'lecturer_name{i}' in request.POST:
+                    lecturer = {
+                        'lecturer_name': request.POST.get(f'lecturer_name{i}'),
+                        'lecturer_email': request.POST.get(f'lecturer_email{i}')
+                    }
+                    lecturers.append(lecturer)
+                    i += 1
+
+                # Get venue and time data
+                venue_time = []
+                i = 1
+                while f'class_venue{i}' in request.POST:
+                    class_info = {
+                        'class_venue': request.POST.get(f'class_venue{i}'),
+                        'class_day': request.POST.get(f'class_day{i}'),
+                        'class_start_time': request.POST.get(f'class_start_time{i}'),
+                        'class_end_time': request.POST.get(f'class_end_time{i}')
+                    }
+                    venue_time.append(class_info)
+                    i += 1
+
+                # Update course in Firebase
+                course_ref = database.child("course").child(academic_year).child(semester).child(course_code)
+                
+                update_data = {
+                    'course_name': course_name,
+                    'lecturers': lecturers,
+                    'venue and time': venue_time
+                }
+                
+                course_ref.update(update_data)
+
+                return JsonResponse({
+                    'status': 'success',
+                    'message': 'Course updated successfully!'
+                }, safe=False)
+
+            except Exception as e:
+                print(f"Error updating course: {e}")
+                return JsonResponse({
+                    'status': 'error',
+                    'message': str(e)
+                }, safe=False)
+
+        # Process course data
+        if courses_data:
+            for year, semesters in courses_data.items():
+                if year == academic_year:
+                    for semester_index, courses_in_semester in enumerate(semesters):
+                        if str(semester_index) == semester:
+                            if isinstance(courses_in_semester, dict):
+                                for code, course_info in courses_in_semester.items():
+                                    if code == course_code:
+                                        # Process courseworks
+                                        courseworks_data = course_info.get('courseworks', {})
+                                        if isinstance(courseworks_data, dict):
+                                            for coursework_id, cw in courseworks_data.items():
+                                                if cw and isinstance(cw, dict):
+                                                    processed_courseworks.append({
+                                                        'type': cw['type'],
+                                                        'total_mark': cw['total_mark'],
+                                                        'field_name': cw['type'].replace(' ', '_')
+                                                    })
+
+                                        # Process course details
+                                        courses.append({
+                                            'semester_year': semester_year,
+                                            'academic_year': year.replace('-', '/'),
+                                            'semester': str(semester_index),
+                                            'course_code': code,
+                                            'course_name': course_info.get('course_name', ''),
+                                            'lecturers': [l for l in course_info.get('lecturers', []) if l],
+                                            'venue_time': [vt for vt in course_info.get('venue and time', []) if vt],
+                                            'courseworks': processed_courseworks
+                                        })
+
+        # Process enrolled students
         users = database.child("users").get().val()
         if users:
             for email_key, user_data in users.items():
@@ -603,57 +634,43 @@ def course_detail_view(request, semester_year, course_code):
                         if (course_info.get('course_code') == course_code and 
                             course_info.get('academic_year') == academic_year and 
                             course_info.get('semester') == semester):
-                            enrolled_students.append({
+                            
+                            student_data = {
                                 'name': user_data.get('name', ''),
                                 'matrix': user_data.get('matrix', ''),
-                                'email': user_data.get('email', '')
-                            })
-                            break
+                                'email': user_data.get('email', ''),
+                                'marks': {},
+                                'total_mark': 0
+                            }
+                            
+                            coursework_data = course_info.get('coursework', {})
+                            
+                            if isinstance(coursework_data, dict):
+                                for coursework_type, mark in coursework_data.items():
+                                    student_data['marks'][coursework_type] = mark
+                            
+                            student_data['total_mark'] = sum(student_data['marks'].values())
 
-        # Sort enrolled students by name
-        enrolled_students.sort(key=lambda x: x['name'])
-        
-        # Get course details
-        for year, semesters in courses_data.items():
-            if year == academic_year:
-                for semester_index, courses_in_semester in enumerate(semesters):
-                    if str(semester_index) == semester:
-                        if isinstance(courses_in_semester, dict):
-                            for code, course_info in courses_in_semester.items():
-                                if code == course_code: 
-                                    lecturers = course_info.get('lecturers', {})
-                                    lecturers = [lecturer for lecturer in lecturers if lecturer is not None]
-                                    venue_time = course_info.get('venue and time', {})
-                                    venue_time = [vt for vt in venue_time if vt is not None]
-                                    courseworks = course_info.get('courseworks', {})
-                                    courseworks = [cw for cw in courseworks.values() if cw is not None]
-                                    lecturer_count = len(lecturers)
-                                    courses.append({
-                                        'semester_year': semester_year,
-                                        'academic_year': year.replace('-', '/'),
-                                        'semester': str(semester_index),
-                                        'course_code': code,
-                                        'course_name': course_info.get('course_name', ''),
-                                        'lecturers': lecturers,
-                                        'lecturer_count': lecturer_count,
-                                        'venue_time': venue_time,
-                                        'courseworks': courseworks
-                                    })
-
-        if not courses:
-            return render(request, 'course-detail.html', {'error': 'Course not found'})
-        
-        return render(request, 'course-detail.html', {
-            'courses': courses, 
-            'course_code': course_code, 
-            'academic_year': academic_year, 
+                            enrolled_students.append(student_data)
+        print("enrolled students", enrolled_students)
+        # Always return a response
+        context = {
+            'courses': courses,
+            'course_code': course_code,
+            'academic_year': academic_year,
             'semester': semester,
-            'enrolled_students': enrolled_students
-        })
-        
+            'semester_year': semester_year,
+            'enrolled_students': enrolled_students,
+            'error': None if courses else 'Course not found'
+        }
+        return render(request, 'course-detail.html', context)
+
     except Exception as e:
-        print(f"Error fetching course details: {e}")
-        return render(request, 'course-detail.html', {'error': 'An error occurred while fetching course details'})
+        print(f"Error in course detail view: {e}")
+        return render(request, 'course-detail.html', {
+            'error': f'An error occurred: {str(e)}'
+        })
+    
 
 def analytics_detail_view(request, semester_year, course_code):
     model_path = os.path.join(os.path.dirname(__file__), 'ml_models', 'model.pkl')
@@ -1329,3 +1346,76 @@ def check_student_course(request):
         return JsonResponse({
             'error': str(e)
         }, status=500)
+
+def update_marks(request, semester_year, course_code, student_email):
+    if request.method == 'POST':
+        try:
+            # Debug prints
+            print("POST data:", request.POST)
+            
+            # Parse academic year and semester
+            academic_year = semester_year[semester_year.index("year") + 4:]
+            semester = semester_year[semester_year.index("sem") + 3:semester_year.index("year")]
+            
+            # Get student reference
+            encoded_email = student_email.replace('.', '-dot-').replace('@', '-at-')
+            
+            # Get course data to get coursework types
+            course_data = database.child("course").child(academic_year).child(semester).child(course_code).get().val()
+            print("Course data:", course_data)
+            
+            if not course_data or 'courseworks' not in course_data:
+                raise ValueError("Course or coursework data not found")
+            
+            # Get all student courses
+            student_courses = database.child("users").child(encoded_email).child("courses").get().val()
+            
+            # Find the target course
+            target_course_key = None
+            for key, course in student_courses.items():
+                if (course.get('course_code') == course_code and 
+                    course.get('academic_year') == academic_year and 
+                    course.get('semester') == semester):
+                    target_course_key = key
+                    break
+            
+            # Get the marks from POST data using the actual coursework types
+            marks = {}
+            print("Processing courseworks:", course_data['courseworks'])
+            
+            for coursework in course_data['courseworks'].values():
+                coursework_type = coursework['type']
+                # Change underscore to hyphen in the mark_key
+                mark_key = f"mark_{coursework_type.lower().replace(' ', '-')}"
+                print(f"Looking for mark_key: {mark_key}")
+                print(f"Available POST keys: {request.POST.keys()}")
+                
+                if mark_key in request.POST and request.POST[mark_key].strip():
+                    try:
+                        mark_value = float(request.POST[mark_key])
+                        print(f"Found value for {coursework_type}: {mark_value}")
+                        if 0 <= mark_value <= float(coursework['total_mark']):
+                            marks[coursework_type] = mark_value
+                        else:
+                            messages.error(request, f'Mark for {coursework_type} must be between 0 and {coursework["total_mark"]}')
+                            return redirect('course-detail', semester_year=semester_year, course_code=course_code)
+                    except ValueError:
+                        messages.error(request, f'Invalid mark value for {coursework_type}')
+                        return redirect('course-detail', semester_year=semester_year, course_code=course_code)
+            
+            print("Final marks dict:", marks)
+            
+            # Update the marks in database
+            if marks:
+                database.child("users").child(encoded_email).child("courses").child(target_course_key).child("coursework").update(marks)
+                messages.success(request, 'Marks updated successfully')
+            else:
+                messages.warning(request, 'No marks to update')
+            
+        except Exception as e:
+            print(f"Error updating marks: {str(e)}")
+            messages.error(request, f'Error updating marks: {str(e)}')
+            
+        return redirect('course-detail', semester_year=semester_year, course_code=course_code)
+    
+    return redirect('course-detail', semester_year=semester_year, course_code=course_code)
