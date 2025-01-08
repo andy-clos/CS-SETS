@@ -380,14 +380,18 @@ def academic_view(request):
 
                 # Save to Firebase
                 database.child("course").child(academic_year).child(semester).child(course_code).set(course_data)
-                return redirect('academic')
+                return JsonResponse({
+                    'status': 'success',
+                    'message': f'Course {course_code} has been successfully added.'
+                })
 
             except Exception as e:
-                print(f"Error adding course: {e}")
-                return redirect('academic')
+                return JsonResponse({
+                    'status': 'error',
+                    'message': str(e)
+                }, status=500)
 
-        else:
-            # Handle student course addition
+        else:  # This is for student adding a course
             try:
                 user_email = get_current_user(request)
                 encoded_email = user_email.replace('.', '-dot-').replace('@', '-at-')
@@ -406,10 +410,16 @@ def academic_view(request):
                 
                 database.child("users").child(encoded_email).child("courses").push(course_info)
                 
-                return redirect('academic')
+                return JsonResponse({
+                    'status': 'success',
+                    'message': f'Successfully enrolled in {selected_course}.'
+                })
                 
             except Exception as e:
-                return redirect('academic')
+                return JsonResponse({
+                    'status': 'error',
+                    'message': str(e)
+                }, status=500)
 
     # Get latest courses for student selection
     latest_courses = []
@@ -564,12 +574,16 @@ def course_detail_view(request, semester_year, course_code):
 
             database.child("course").child(academic_year).child(semester).child(course_code).update(course_data)
 
-            success_message = "Course updated successfully!"
+            return JsonResponse({
+                'status': 'success',
+                'message': f'Course {course_code} has been successfully updated.'
+            })
 
-            return redirect('course-detail', semester_year=semester_year, course_code=course_code)
         except Exception as e:
-            print(f"Error updating course: {e}")
-            return render(request, 'course-detail.html', {'error': str(e)})
+            return JsonResponse({
+                'status': 'error',
+                'message': str(e)
+            }, status=500)
 
     try:
         academic_year, semester = semester_year.split('sem')
@@ -601,7 +615,7 @@ def course_detail_view(request, semester_year, course_code):
                                         'lecturer_count': lecturer_count,
                                         'venue_time': venue_time
                                     })
-        print(courses)
+
         if not courses:
             return render(request, 'course-detail.html', {'error': 'Course not found'})
         
@@ -696,19 +710,29 @@ def delete_course_view(request, semester_year, course_code):
                                 # Delete this course from user's data
                                 database.child("users").child(user_email).child("courses").child(course_key).remove()
 
-            # Check user role using dictionary syntax
+            # Check user role
             if request.session.get('user_role') == 'admin':
                 # 2. Then delete the course from courses database
                 database.child("course").child(academic_year).child(semester).child(course_code).remove()
+                message = f'Course {course_code} has been successfully deleted.'
+            else:
+                message = f'You have been successfully unenrolled from {course_code}.'
             
-            messages.success(request, f'Course {course_code} has been successfully deleted.')
-            return redirect('academic')
+            return JsonResponse({
+                'status': 'success',
+                'message': message
+            })
 
         except Exception as e:
-            messages.error(request, f'Error deleting course: {str(e)}')
-            return redirect('course-detail', semester_year=semester_year, course_code=course_code)
+            return JsonResponse({
+                'status': 'error',
+                'message': str(e)
+            }, status=500)
 
-    return redirect('course-detail', semester_year=semester_year, course_code=course_code)
+    return JsonResponse({
+        'status': 'error',
+        'message': 'Invalid request method'
+    }, status=400)
 
 def tools_view(request):
     return render(request, 'Tools/tools.html')
@@ -1225,3 +1249,52 @@ def delete_profile(request):
         'status': 'error',
         'message': 'Invalid request method'
     })
+
+def check_course(request):
+    try:
+        code = request.GET.get('code')
+        semester = request.GET.get('semester')
+        year = request.GET.get('year').replace('/', '-')
+        
+        # Check if course exists in database
+        course_ref = database.child("course").child(year).child(semester).child(code).get()
+        
+        return JsonResponse({
+            'exists': bool(course_ref.val())
+        })
+        
+    except Exception as e:
+        return JsonResponse({
+            'error': str(e)
+        }, status=500)
+
+def check_student_course(request):
+    try:
+        code = request.GET.get('code')
+        semester = request.GET.get('semester')
+        year = request.GET.get('year')
+        
+        user_email = get_current_user(request)
+        encoded_email = user_email.replace('.', '-dot-').replace('@', '-at-')
+        
+        # Get user's courses
+        user_courses = database.child("users").child(encoded_email).child("courses").get().val()
+        
+        # Check if course exists in user's courses for the specific semester and year
+        exists = False
+        if user_courses:
+            for course in user_courses.values():
+                if (course.get('course_code') == code and 
+                    course.get('semester') == semester and 
+                    course.get('academic_year') == year):
+                    exists = True
+                    break
+                    
+        return JsonResponse({
+            'exists': exists
+        })
+        
+    except Exception as e:
+        return JsonResponse({
+            'error': str(e)
+        }, status=500)

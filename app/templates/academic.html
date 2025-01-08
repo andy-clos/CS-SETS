@@ -129,6 +129,7 @@
       }
 
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
     <div class="container">
@@ -142,7 +143,7 @@
             <h2 class="section-title">Academic Management</h2>
             {% if request.session.user_role == 'admin' or request.session.user_role == 'student' %}
               <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
-                {% if request.session.user_role == 'admin' %}Add Course{% elif request.session.user_role == 'student' %}Add My Course{% endif %}
+                {% if request.session.user_role == 'admin' %}Add Course{% elif request.session.user_role == 'student' %}Enroll Course{% endif %}
               </button>
 
               <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
@@ -150,13 +151,13 @@
                   <div class="modal-content">
                     <div class="modal-header">
                       <h5 class="modal-title" id="exampleModalLabel">
-                        {% if request.session.user_role == 'admin' %}ADD COURSE{% elif request.session.user_role == 'student' %}ADD MY COURSE{% endif %}
+                        {% if request.session.user_role == 'admin' %}ADD COURSE{% elif request.session.user_role == 'student' %}ENROLL COURSE{% endif %}
                       </h5>
                       <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
                       {% if request.session.user_role == 'admin' %}
-                        <form method="POST" action="{% url 'academic' %}">
+                        <form method="POST" action="{% url 'academic' %}" id="adminCourseForm" onsubmit="return validateAdminForm(event)">
                             {% csrf_token %}
                             <label>Semester: </label>
                             <select name="semester" id="semester" required>
@@ -169,7 +170,8 @@
                             <input id="academic_year" type="text" name="academic_year" placeholder="Enter academic year" maxlength="9" required>
                             <br>
                             <label>Course Code: </label>
-                            <input id="course_code" type="text" name="course_code" placeholder="Enter course code" required>
+                            <input id="course_code" type="text" name="course_code" placeholder="Enter course code" 
+                                   pattern="[A-Za-z]{3}[0-9]{3}" title="Course code must be 3 letters followed by 3 numbers" required>
                             <br>
                             <label>Course Name: </label>
                             <input id="course_name" type="text" name="course_name" placeholder="Enter course name" required>
@@ -222,10 +224,12 @@
                             <button type="submit" class="btn btn-primary">Add</button>
                         </form>
                       {% elif request.session.user_role == 'student' %}
-                        <form method="POST" action="{% url 'academic' %}">
+                        <form method="POST" action="{% url 'academic' %}" id="studentCourseForm" onsubmit="return validateStudentForm(event)">
                           {% csrf_token %}
-                          <h4 class="mb-4">Add course for Academic Session {{ latest_year|slice:"0:4" }}/{{ latest_year|slice:"5:9" }}, Semester {{ latest_semester }}</h4>
+                          <h4 class="mb-4">Enroll course for Academic Session {{ latest_year|slice:"0:4" }}/{{ latest_year|slice:"5:9" }}, Semester {{ latest_semester }}</h4>
                           <input type="hidden" name="action" value="add_student_course">
+                          <input type="hidden" name="academic_year" value="{{ latest_year }}">
+                          <input type="hidden" name="semester" value="{{ latest_semester }}">
                           <label>Available Courses:</label>
                           <select name="selected_course" required>
                             <option value="">Select a course</option>
@@ -235,7 +239,7 @@
                               </option>
                             {% endfor %}
                           </select>
-                          <button type="submit" class="btn btn-primary">Add Course</button>
+                          <button type="submit" class="btn btn-primary">Enroll</button>
                         </form>
                       {% endif %}
                     </div>
@@ -357,5 +361,130 @@
     </div>
     <script src="{% static 'js/backend.js' %}"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+    <script>
+      async function validateAdminForm(event) {
+          event.preventDefault();
+          
+          const courseCode = document.getElementById('course_code').value.toUpperCase();
+          const semester = document.getElementById('semester').value;
+          const academicYear = document.getElementById('academic_year').value;
+
+          // Validate academic year format (YYYY/YYYY)
+          const yearPattern = /^\d{4}\/\d{4}$/;
+          if (!yearPattern.test(academicYear)) {
+              Swal.fire({
+                  icon: 'error',
+                  title: 'Invalid Academic Year',
+                  text: 'Please enter academic year in format YYYY/YYYY'
+              });
+              return false;
+          }
+
+          // Check for duplicate course
+          try {
+              const response = await fetch(`/check-course/?code=${courseCode}&semester=${semester}&year=${academicYear}`);
+              const data = await response.json();
+              
+              if (data.exists) {
+                  Swal.fire({
+                      icon: 'error',
+                      title: 'Duplicate Course',
+                      text: 'This course code already exists for the selected semester and academic year'
+                  });
+                  return false;
+              }
+              
+              // Submit form data using fetch
+              const formData = new FormData(event.target);
+              const submitResponse = await fetch("{% url 'academic' %}", {
+                  method: 'POST',
+                  body: formData
+              });
+              
+              const result = await submitResponse.json();
+              
+              if (result.status === 'success') {
+                  await Swal.fire({
+                      icon: 'success',
+                      title: 'Success!',
+                      text: result.message,
+                      timer: 2000,
+                      showConfirmButton: false
+                  });
+                  window.location.reload();
+              } else {
+                  Swal.fire({
+                      icon: 'error',
+                      title: 'Error',
+                      text: result.message
+                  });
+              }
+              
+          } catch (error) {
+              console.error('Error:', error);
+              Swal.fire({
+                  icon: 'error',
+                  title: 'Error',
+                  text: 'An error occurred while processing your request'
+              });
+          }
+      }
+
+      async function validateStudentForm(event) {
+          event.preventDefault();
+          
+          const selectedCourse = document.querySelector('select[name="selected_course"]').value;
+          const semester = document.querySelector('input[name="semester"]').value;
+          const academicYear = document.querySelector('input[name="academic_year"]').value;
+          
+          try {
+              const response = await fetch(`/check-student-course/?code=${selectedCourse}&semester=${semester}&year=${academicYear}`);
+              const data = await response.json();
+              
+              if (data.exists) {
+                  Swal.fire({
+                      icon: 'error',
+                      title: 'Already Enrolled',
+                      text: 'You are already enrolled in this course for this semester'
+                  });
+                  return false;
+              }
+              
+              // Submit form data using fetch
+              const formData = new FormData(event.target);
+              const submitResponse = await fetch("{% url 'academic' %}", {
+                  method: 'POST',
+                  body: formData
+              });
+              
+              const result = await submitResponse.json();
+              
+              if (result.status === 'success') {
+                  await Swal.fire({
+                      icon: 'success',
+                      title: 'Success!',
+                      text: result.message,
+                      timer: 2000,
+                      showConfirmButton: false
+                  });
+                  window.location.reload();
+              } else {
+                  Swal.fire({
+                      icon: 'error',
+                      title: 'Error',
+                      text: result.message
+                  });
+              }
+              
+          } catch (error) {
+              console.error('Error:', error);
+              Swal.fire({
+                  icon: 'error',
+                  title: 'Error',
+                  text: 'An error occurred while processing your request'
+              });
+          }
+      }
+    </script>
 </body>
 </html>

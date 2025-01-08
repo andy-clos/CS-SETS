@@ -26,4 +26,6 @@ urlpatterns = [
     path('download-timetable/', views.download_timetable, name='download_timetable'),
     path('cgpa/', views.cgpa_view, name='cgpa'),
     path('delete-profile/', views.delete_profile, name='delete-profile'),
+    path('check-course/', views.check_course, name='check-course'),
+    path('check-student-course/', views.check_student_course, name='check-student-course'),
 ]
