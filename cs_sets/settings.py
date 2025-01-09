@@ -74,8 +74,7 @@ TEMPLATES = [
             ],
             
             'libraries':{
-            'custom_filters': 'app.custom_filters',
-            
+                'custom_filters': 'app.custom_filters',
             }
         },
     },
