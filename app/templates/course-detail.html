@@ -222,8 +222,6 @@
                                                     <input type="file" class="form-control" id="csvFile" name="csvFile" accept=".csv" required>
                                                 </div>
                                                 <div class="mb-3">
-                                                    <p><strong>CSV Format:</strong></p>
-                                                    <p>Matrix Number{% for coursework in course.courseworks.values %}, {{ coursework.type }}{% endfor %}</p>
                                                     <small class="text-muted">Note: First row should be headers. Marks should be numbers between 0 and the maximum mark for each coursework.</small>
                                                 </div>
                                                 <div class="modal-footer">
