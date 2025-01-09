@@ -272,13 +272,15 @@
                                     {% if student.email == request.session.user_email %}
                                         <tr>
                                             {% for coursework in course.courseworks %}
-                                                {% for key, value in student.marks.items %}
-                                                    {% if key == coursework.type %}
-                                                        <td>{{ value }}</td>
+                                                <td style="text-align: center;">
+                                                    {% if coursework.type in student.marks %}
+                                                        {{ student.marks|get_item:coursework.type }}
+                                                    {% else %}
+                                                        0
                                                     {% endif %}
-                                                {% endfor %}
+                                                </td>
                                             {% endfor %}
-                                            <td>{{ student.total_mark }}</td>
+                                            <td style="text-align: center;">{{ student.total_mark|default:0 }}</td>
                                         </tr>
                                     {% endif %}
                                 {% endfor %}
