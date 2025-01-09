@@ -10,177 +10,11 @@
     <link rel="stylesheet" href="/static/css/style.css">  
     <link rel="stylesheet" href="/static/css/footer.css">
     <link rel="stylesheet" href="/static/css/dashboard.css">
+    <link rel="stylesheet" href="{% static 'css/bootstrap.css' %}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-    <link href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css" rel="stylesheet" />
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
 </head>
-
-<style>
-    .modal {
-        display: none;
-        position: fixed;
-        z-index: 1;
-        left: 0;
-        top: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(0,0,0,0.4);
-        opacity: 0;
-        transition: opacity 0.3s ease-in-out;
-        overflow-y: auto;
-        padding: 20px;
-    }
-
-    .modal.show {
-        opacity: 1;
-        display: block;
-    }
-
-    .modal-content {
-        background-color: #fefefe;
-        margin: 5vh 30%;
-        padding: 20px;
-        border: 1px solid #888;
-        width: 90%;
-        max-width: 800px;
-        border-radius: 5px;
-        transform: translateY(-50px);
-        opacity: 0;
-        transition: all 0.3s ease-in-out;
-        position: relative;
-    }
-
-    .modal.show .modal-content {
-        transform: translateY(0);
-        opacity: 1;
-    }
-
-    .close {
-        color: #aaa;
-        float: right;
-        font-size: 28px;
-        font-weight: bold;
-        cursor: pointer;
-    }
-
-    .close:hover {
-        color: black;
-    }
-
-    .form-group {
-        margin-bottom: 20px;
-    }
-
-    .form-group label {
-        display: block;
-        margin-bottom: 8px;
-        font-weight: bold;
-    }
-
-    .form-group input,
-    .form-group textarea {
-        width: 100%;
-        padding: 8px;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-    }
-
-    .form-group #editor {
-        height: 300px;
-        margin-bottom: 20px;
-    }
-
-    .submit-btn {
-        background-color: #4CAF50;
-        color: white;
-        padding: 10px 15px;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-    }
-
-    .submit-btn:hover {
-        background-color: #45a049;
-    }
-
-    /* Quill editor container */
-    .ql-container {
-        font-size: 16px;
-    }
-
-    /* Ensure toolbar is visible */
-    .ql-toolbar {
-        background: white;
-        position: sticky;
-        top: 0;
-        z-index: 1000;
-    }
-
-    /* Tooltip styles */
-    [data-tooltip] {
-        position: relative;
-    }
-
-    [data-tooltip]:before {
-        content: attr(data-tooltip);
-        position: absolute;
-        bottom: 100%;
-        left: 50%;
-        transform: translateX(-50%);
-        padding: 5px 10px;
-        background-color: #333;
-        color: white;
-        border-radius: 4px;
-        font-size: 12px;
-        white-space: nowrap;
-        opacity: 0;
-        visibility: hidden;
-        transition: opacity 0.2s ease;
-        transition-delay: 500ms;
-        z-index: 1000;
-    }
-
-    [data-tooltip]:hover:before {
-        opacity: 1;
-        visibility: visible;
-    }
-
-    .fade-message {
-        animation: fadeOut 5s ease-in-out forwards;
-    }
-
-    @keyframes fadeOut {
-        0% { opacity: 1; }
-        70% { opacity: 1; }
-        100% { opacity: 0; }
-    }
-
-    .alert-success {
-        color: #155724;
-        background-color: #d4edda;
-        border: 1px solid #c3e6cb;
-        padding: 1rem;
-        margin-bottom: 1rem;
-        border-radius: 0.25rem;
-    }
-
-    .fade-message {
-        position: fixed;
-        top: 20px;
-        left: 55%;
-        transform: translateX(-50%);
-        z-index: 1000;
-        min-width: 300px;
-        text-align: center;
-        opacity: 1;
-        transition: opacity 0.5s ease-in-out;
-    }
-
-    .fade-out {
-        opacity: 0;
-        visibility: hidden;
-        transition: opacity 0.5s ease-in-out;
-    }
-</style>
 
 <body>
     <div class="container">
@@ -188,32 +22,8 @@
 
         {% include 'header.html' %} 
 
+        {% if request.session.user_role == 'student' %}
         <main style="padding-top: 0%;">
-            <button class="btn btn-add-announce">
-                Create Announcement
-            </button>
-
-            <div id="addannounce" class="modal">
-                <div class="modal-content">
-                    <span class="close">&times;</span>
-                    <h2>Create New Announcement</h2>
-                    <form method="POST" action="{% url 'dashboard' %}">
-                        {% csrf_token %}
-                        <div class="form-group">
-                            <label for="title">Title:</label>
-                            <input type="text" id="add-title" name="add-title" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="content">Content:</label>
-                            <div id="editor"></div>
-                            <input type="hidden" id="add-content" name="add-content" />
-                        </div>
-                        <button type="submit" class="submit-btn">Post Announcement</button>
-                        <p style="display: none;"></p>
-                    </form>
-                </div>
-            </div>
-            
             <div class="main-content">
                 <div class="announcement-card">
                     <div class="announcement-content">
@@ -231,152 +41,256 @@
                                 <p class="posted-info">posted 11.00PM 11 Aug 2024</p>
                             </div>
                         </div>
+
+                    </div>
+                </div>
+                
+                <div class="leaderboard-card">
+                    <h2>Leaderboard</h2>
+                    <div class="leaderboard-content">
+                        <div class="leaderboard-header">
+                            <ul>
+                                <li class="list-item">
+                                    <div class="list-item-content">
+                                        <p>1.</p>
+                                        <img src="/static/image/user.png" alt="Profile Picture" class="profile-img">
+                                        <p>AndyClos A/L Boon Mee</p>
+                                        <button class="leaderboard-details"><i class="fa fa-file-text"></i></button>
+                                    </div>
+                                    
+                                </li>
+                                <li class="list-item">
+                                    <div class="list-item-content">
+                                        <p>2.</p>
+                                        <img src="/static/image/user.png" alt="Profile Picture" class="profile-img">
+                                        <p>Muhammad Ezzat Haziq Bin Elhan</p>
+                                        <button class="leaderboard-details"><i class="fa fa-file-text"></i></button>
+                                    </div>
+                                    
+                                </li>
+                                <li class="list-item">
+                                    <div class="list-item-content">
+                                        <p>3.</p>
+                                        <img src="/static/image/user.png" alt="Profile Picture" class="profile-img">
+                                        <p>Kam Weng Xuan</p>
+                                        <button class="leaderboard-details"><i class="fa fa-file-text"></i></button>
+                                    </div>
+                                    
+                                </li>
+                                <li class="list-item">
+                                    <div class="list-item-content">
+                                        <p>4.</p>
+                                        <img src="/static/image/user.png" alt="Profile Picture" class="profile-img">
+                                        <p>Loh Wei Ting</p>
+                                        <button class="leaderboard-details"><i class="fa fa-file-text"></i></button>
+                                    </div>
+                                    
+                                </li>
+                                <li class="list-item">
+                                    <div class="list-item-content">
+                                        <p>5.</p>
+                                        <img src="/static/image/user.png" alt="Profile Picture" class="profile-img">
+                                        <p>John</p>
+                                        <button class="leaderboard-details"><i class="fa fa-file-text"></i></button>
+                                    </div>
+                                    
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="academic-card">
+                    <h2>Academic Result</h2>
+                    <div class="academic-outsider">
+                        <div class="academic-content">
+                            <!-- CGPA Section -->
+                            <div class="academic-cgpa-section">
+                                <p class="progress-text">Progress to target: 92.89%</p>
+                                <div class="progress-bar-container">
+                                    <div class="progress-bar"></div>
+                                </div>
+                                <div class="cgpa-container">
+                                    <div class="cgpa-box">
+                                        <h3 class="cgpa-title">Current CGPA</h3>
+                                        <p class="cgpa-value">3.53</p>
+                                        <button class="btn-dashboard">Check current result</button>
+                                    </div>
+                                    <div class="cgpa-box">
+                                        <h3 class="cgpa-title">Targeted CGPA</h3>
+                                        <p class="cgpa-value">3.80</p>
+                                        <button class="btn-dashboard">Check targeted result</button>
+                                    </div>
+                                </div>
+                            </div>
+                
+                            <!-- Feedback Section -->
+                            <div class="academic-feedback-section">
+                                <ul class="feedback-list">
+                                    <li class="feedback-item">
+                                        <p class="feedback-text subject">Subject that has risk to fail: 0</p>
+                                    </li>
+                                    <li class="feedback-item">
+                                        <button class="btn-dashboard" style="margin-left: auto;margin-right: auto;">View details</button>
+                                    </li>
+                                    <li class="feedback-item feedback">
+                                        <span class="feedback-icon positive-icon">&#128077;</span>
+                                        <p class="feedback-text">Maintain your academic result</p>
+                                    </li>
+                                    <li class="feedback-item feedback">
+                                        <span class="feedback-icon neutral-icon">&#128200;</span>
+                                        <p class="feedback-text">You still have the chance to improve</p>
+                                    </li>
+                                    <li class="feedback-item feedback">
+                                        <span class="feedback-icon warning-icon">&#10060;</span>
+                                        <p class="feedback-text">You might fail if next CPT123 test is below 50 marks</p>
+                                    </li>
+                                    <li class="feedback-item feedback">
+                                        <span class="feedback-icon encouragement-icon">&#127800;</span>
+                                        <p class="feedback-text">Work harder to achieve more</p>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </main>
+        {% elif request.session.user_role == 'lecturer' %}
+            <main style="padding-top: 0%;">
+                <button class="btn-dashboard btn-add-announce" data-toggle="modal" data-target="#createAnnouncement">
+                    Create Announcement
+                </button>
+
+                <div id="addannounce" class="modal">
+                    <div class="modal-content">
+                        <span class="close">&times;</span>
+                        <h2>Create New Announcement</h2>
+                        <form method="POST" action="{% url 'dashboard' %}">
+                            {% csrf_token %}
+                            <div class="form-group">
+                                <label for="add-title">Title:</label>
+                                <input type="text" id="add-title" name="add-title" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="add-content">Content:</label>
+                                <div id="editor"></div>
+                                <input type="hidden" id="add-content" name="add-content" />
+                            </div>
+                            <button type="submit" class="submit-btn">Post Announcement</button>
+                            <p style="display: none;"></p>
+                        </form>
+                    </div>
+                </div>
+                
+                <div class="main-content">
+                    <div class="announcement-card">
+                        <div class="announcement-content">
+                            <div class="announcement-header">
+                                <div class="profile-container">
+                                    <img src="/static/image/user.png" alt="Profile Picture" class="profile-img">
+                                    <p>Mr. Bean</p>
+                                </div>
+                                <div class="announcement-details">
+                                    <h3>Changes venue for event application</h3>
+                                    <p class="announcement-body">
+                                        Dear student, today due to emergency reason, hall B are closed until 14/11/2025, thus student need to register your application at hall A...
+                                        <span class="expand-text">[expand]</span>
+                                    </p>
+                                    <p class="posted-info">posted 11.00PM 11 Aug 2024</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        {% elif request.session.user_role == 'admin' %}
+            <div id="admin-dashboard">
+                <main style="padding-top: 0%;">
+                    <div class="main-content">
+                        <!-- Admin-specific content -->
+                        {{ admin_content }}
+                    </div>
+                </main>
+            </div>
+        {% endif %}
 
         {% include 'footer.html' %} 
     </div>
 
     <script src="{% static 'js/backend.js' %}"></script>
-    <script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"></script>
-    <script>
-        // Quill toolbar configuration with tooltips
-        const toolbarOptions = [
-            // Essential formatting options
-            [
-                'bold',
-                'italic',
-                'underline',
-                'strike'
-            ],
-            
-            // Headers and text style
-            [{ 'header': [1, 2, 3, false] }],
-            
-            // Lists
-            [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-            
-            // Indentation
-            [{ 'indent': '-1'}, { 'indent': '+1' }],
-            
-            // Text alignment
-            [{ 'align': [] }],
-            
-            // Links and media
-            ['link', 'image'],
-            
-            // Color options
-            [{ 'color': [] }, { 'background': [] }],
-            
-            // Clean formatting
-            ['clean']
-        ];
-
-        // Initialize Quill
-        const quill = new Quill('#editor', {
-            modules: {
-                toolbar: toolbarOptions
-            },
-            theme: 'snow'
-        });
-
-        // Add tooltips after Quill is initialized
-        const tooltips = {
-            'bold': 'Bold (Ctrl+B)',
-            'italic': 'Italic (Ctrl+I)',
-            'underline': 'Underline (Ctrl+U)',
-            'strike': 'Strikethrough',
-            'header': 'Heading',
-            'list': 'List',
-            'indent-1': 'Indent Left',
-            'indent+1': 'Indent Right',
-            'align': 'Align',
-            'link': 'Insert Link',
-            'image': 'Insert Image',
-            'color': 'Text Color',
-            'background': 'Background Color',
-            'clean': 'Clear Formatting'
-        };
-
-        // Apply tooltips to toolbar buttons
-        setTimeout(() => {
-            const buttons = document.querySelectorAll('.ql-toolbar button, .ql-toolbar select');
-            buttons.forEach(button => {
-                const className = Array.from(button.classList)
-                    .find(cls => cls.startsWith('ql-'));
-                if (className) {
-                    const format = className.replace('ql-', '');
-                    // Special handling for indent buttons
-                    if (format === 'indent') {
-                        const value = button.value;
-                        if (value === '-1') {
-                            button.setAttribute('data-tooltip', 'Indent Left');
-                        } else if (value === '+1') {
-                            button.setAttribute('data-tooltip', 'Indent Right');
-                        }
-                    } else if (tooltips[format]) {
-                        button.setAttribute('data-tooltip', tooltips[format]);
-                    }
-                }
-            });
-        }, 100);
-
-        // Modal and form handling
-        const modal = document.getElementById('addannounce');
-        
-        document.querySelector('.btn-add-announce').onclick = function() {
-            modal.style.display = 'block';
-            setTimeout(() => {
-                modal.classList.add('show');
-                quill.focus();
-            }, 10);
-        }
-
-        document.querySelector('.close').onclick = function() {
-            modal.classList.remove('show');
-            setTimeout(() => {
-                modal.style.display = 'none';
-            }, 300);
-        }
-
-        window.onclick = function(event) {
-            if (event.target == modal) {
-                modal.classList.remove('show');
-                setTimeout(() => {
-                    modal.style.display = 'none';
-                }, 300);
-            }
-        }
-
-        // Form submission
-        document.querySelector('form').addEventListener('submit', function(event) {
-            event.preventDefault();
-            const content = quill.root.innerHTML;
-            document.getElementById('add-content').value = content;
-            this.submit();
-        });
-
-        document.addEventListener('DOMContentLoaded', function() {
-            const welcomeAlert = document.getElementById('welcomeAlert');
-            if (welcomeAlert) {
-                // Wait 3 seconds before starting fade out
-                setTimeout(() => {
-                    welcomeAlert.classList.add('fade-out');
-                    // Remove from DOM after fade completes
-                    setTimeout(() => {
-                        welcomeAlert.remove();
-                    }, 500);
-                }, 3000);
-            }
-        });
-    </script>
 
     {% if welcome_message %}
     <div class="alert alert-success fade-message" id="welcomeAlert">
         {{ welcome_message }}
     </div>
     {% endif %}
+
+<!-- Modal for creating announcement -->
+<div id="createAnnouncement" class="modal fade modal-lg" tabindex="-1" aria-labelledby="createAnnouncementLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="createAnnouncementLabel">Create New Announcement</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form method="POST" action="{% url 'dashboard' %}">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="add-title">Title:</label>
+                        <input type="text" id="add-title" name="add-title" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="add-content">Content:</label>
+                        <div id="editor"></div>
+                        <input type="hidden" id="add-content" name="add-content" />
+                    </div>
+                    <button type="submit" class="btn btn-primary">Post Announcement</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if request.session.user_role == 'student' %}
+<script>
+    const progressBarContainer = document.querySelector('.progress-bar-container');
+
+    function createGlitterEffect() {
+        const glitter = document.createElement('div');
+        glitter.classList.add('glitter');
+        
+        const maxWidth = progressBarContainer.offsetWidth;
+        const randomPositionX = Math.random() * maxWidth;
+        const randomDelay = Math.random() * 2;
+
+        glitter.style.left = `${randomPositionX}px`;
+        glitter.style.animationDelay = `-${randomDelay}s`;
+
+        progressBarContainer.appendChild(glitter);
+
+        setTimeout(() => {
+            glitter.remove();
+        }, 2000); 
+    }
+
+    setInterval(createGlitterEffect, 100);
+</script>
+{% endif %}
+
+<script>
+    document.querySelector('.btn-add-announce').addEventListener('click', function() {
+        var myModal = new bootstrap.Modal(document.getElementById('createAnnouncement'));
+        myModal.show();
+    });
+</script>
+
+<script>
+    document.querySelector('.close').addEventListener('click', function() {
+        var myModal = bootstrap.Modal.getInstance(document.getElementById('createAnnouncement'));
+        myModal.hide();
+    });
+</script>
 </body>
 </html>
+
