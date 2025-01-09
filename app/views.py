@@ -21,6 +21,7 @@ import firebase_admin
 from firebase_admin import credentials
 import re
 from firebase_admin import auth, firestore, credentials, initialize_app
+from django.views.decorators.http import require_POST
 
 logger = logging.getLogger(__name__)
 
@@ -1549,3 +1550,40 @@ def update_marks(request, semester_year, course_code, student_email):
         return redirect('course-detail', semester_year=semester_year, course_code=course_code)
     
     return redirect('course-detail', semester_year=semester_year, course_code=course_code)
+
+@require_POST
+def unenroll_student(request):
+    try:
+        data = json.loads(request.body)
+        student_email = data.get('student_email')
+        course_code = data.get('course_code')
+        academic_year = data.get('academic_year')
+        semester = data.get('semester')
+
+        # Encode the email address to match Firebase structure
+        encoded_email = student_email.replace('.', '-dot-').replace('@', '-at-')
+
+        # Get the user's courses
+        user_courses = database.child("users").child(encoded_email).child("courses").get().val()
+        
+        if user_courses:
+            # Find and delete the specific course
+            for course_key, course_info in user_courses.items():
+                # Print debug information
+                print(f"Checking course: {course_info}")
+                print(f"Looking for: code={course_code}, year={academic_year}, sem={semester}")
+                
+                # Match exact values from the database structure
+                if (course_info.get('course_code') == course_code and 
+                    course_info.get('academic_year') == academic_year.replace('/', '-') and  # Convert 2025/2026 to 2025-2026
+                    str(course_info.get('semester')) == str(semester)):  # Ensure both are strings
+                    
+                    # Delete this specific course
+                    database.child("users").child(encoded_email).child("courses").child(course_key).remove()
+                    return JsonResponse({'status': 'success', 'message': 'Student unenrolled successfully'})
+        
+        return JsonResponse({'status': 'error', 'message': 'Course not found'})
+
+    except Exception as e:
+        print(f"Error in unenroll_student: {str(e)}")
+        return JsonResponse({'status': 'error', 'message': str(e)})

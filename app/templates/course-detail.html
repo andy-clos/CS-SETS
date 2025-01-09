@@ -11,6 +11,10 @@
     <link rel="stylesheet" href="{% static 'css/style.css' %}">  
     <link rel="stylesheet" href="{% static 'css/footer.css' %}">
     <link rel="stylesheet" href="{% static 'css/bootstrap.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js"></script>
     <style>
     .enrolled-students-section {
         margin-top: 2rem;
@@ -33,6 +37,7 @@
     .table thead th {
         background-color: #f8f9fa;
         border-bottom: 2px solid #dee2e6;
+        text-align: center;
     }
 
     .table tbody tr:nth-of-type(odd) {
@@ -145,7 +150,20 @@
                 {% if request.session.user_role == 'admin' or request.session.user_role == 'lecturer' %}
                     <div class="enrolled-students-section">
                         <h3>Enrolled Students</h3>
-                        <table class="table">
+                        <div class="export-buttons mb-3">
+                            <div class="btn-group" role="group" aria-label="Export Options">
+                                <button type="button" class="btn btn-secondary" onclick="exportTable('csv')">
+                                    <i class="fas fa-file-csv"></i> Export CSV
+                                </button>
+                                <button type="button" class="btn btn-success" onclick="exportTable('excel')">
+                                    <i class="fas fa-file-excel"></i> Export Excel
+                                </button>
+                                <button type="button" class="btn btn-danger" onclick="exportTable('pdf')">
+                                    <i class="fas fa-file-pdf"></i> Export PDF
+                                </button>
+                            </div>
+                        </div>
+                        <table class="table" id="marksTable">
                             <thead>
                                 <tr>
                                     <th>No.</th>
@@ -163,13 +181,13 @@
                                 {% if enrolled_students %}
                                     {% for student in enrolled_students %}
                                         <tr>
-                                            <td>{{ forloop.counter }}</td>
+                                            <td style="text-align: center;">{{ forloop.counter }}</td>
                                             <td>{{ student.name }}</td>
-                                            <td>{{ student.matrix }}</td>
+                                            <td style="text-align: center;">{{ student.matrix }}</td>
                                             <td>{{ student.email }}</td>
 
                                             {% for coursework in course.courseworks %}
-                                                <td>
+                                                <td style="text-align: center;">
                                                     {% if coursework.type in student.marks %}
                                                         {{ student.marks|get_item:coursework.type }}
                                                     {% else %}
@@ -177,11 +195,17 @@
                                                     {% endif %}
                                                 </td>
                                             {% endfor %}
-                                            <td>{{ student.total_mark|default:0 }}</td>
-                                            <td>
+                                            <td style="text-align: center;">{{ student.total_mark|default:0 }}</td>
+                                            <td style="text-align: center;">
                                                 <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#marksModal{{ student.email|slugify }}">
                                                     Edit Marks
                                                 </button>
+                                                {% if request.session.user_role == 'admin' %}
+                                                    <button type="button" class="btn btn-danger" 
+                                                        onclick="confirmUnenroll('{{ student.email }}', '{{ course_code }}', '{{ course.academic_year }}', '{{ semester }}')">
+                                                        Unenroll
+                                                    </button>
+                                                {% endif %}
                                             </td>
                                         </tr>
 
@@ -381,6 +405,132 @@
             });
         }
         return false;
+    }
+
+    function exportTable(format) {
+        const table = document.getElementById('marksTable');
+        const courseCode = '{{ course_code }}';
+        const fileName = `${courseCode}_marks`;
+
+        // Get headers (exclude last column - Actions)
+        const headers = Array.from(table.querySelectorAll('thead th'))
+            .slice(0, -1)  // Remove last header
+            .map(th => th.textContent.trim());
+        
+        // Get data (exclude last column - Actions)
+        const rows = Array.from(table.querySelectorAll('tbody tr')).map(row => 
+            Array.from(row.querySelectorAll('td'))
+                .slice(0, -1)  // Remove last cell
+                .map(cell => cell.textContent.trim())
+        );
+
+        switch(format) {
+            case 'csv':
+                exportCSV(headers, rows, fileName);
+                break;
+            case 'excel':
+                exportExcel(headers, rows, fileName);
+                break;
+            case 'pdf':
+                exportPDF(headers, rows, fileName);
+                break;
+        }
+    }
+
+    function exportCSV(headers, rows, fileName) {
+        const csvContent = [
+            headers.join(','),
+            ...rows.map(row => row.join(','))
+        ].join('\n');
+
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = `${fileName}.csv`;
+        link.click();
+    }
+
+    function exportExcel(headers, rows, fileName) {
+        const worksheet = XLSX.utils.aoa_to_sheet([headers, ...rows]);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'Marks');
+        XLSX.writeFile(workbook, `${fileName}.xlsx`);
+    }
+
+    function exportPDF(headers, rows, fileName) {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+
+        doc.autoTable({
+            head: [headers],
+            body: rows,
+            theme: 'grid',
+            styles: { fontSize: 8 },
+            headStyles: { fillColor: [66, 139, 202] }
+        });
+
+        doc.save(`${fileName}.pdf`);
+    }
+
+    function confirmUnenroll(studentEmail, courseCode, academicYear, semester) {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "This will unenroll the student from this course!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, unenroll!',
+            cancelButtonText: 'Cancel'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                unenrollStudent(studentEmail, courseCode, academicYear, semester);
+            }
+        });
+    }
+
+    async function unenrollStudent(studentEmail, courseCode, academicYear, semester) {
+        try {
+            const response = await fetch('/unenroll-student/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                },
+                body: JSON.stringify({
+                    student_email: studentEmail,
+                    course_code: courseCode,
+                    academic_year: academicYear,
+                    semester: semester
+                })
+            });
+
+            const data = await response.json();
+            
+            if (data.status === 'success') {
+                await Swal.fire({
+                    icon: 'success',
+                    title: 'Success!',
+                    text: 'Student has been unenrolled from the course.',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+                window.location.reload();
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: data.message || 'An error occurred while unenrolling the student.'
+                });
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'An error occurred while processing your request.'
+            });
+        }
     }
     </script>
 </body>
