@@ -1235,6 +1235,7 @@ def timetable_view(request):
     if request.method == 'POST':
         selected_courses = request.POST.getlist('course')
         if selected_courses:
+            #call function  generate_timetable
             timetable_html = generate_timetable(selected_courses, subject_codes, request)
             return render(request, 'Tools/Timetable/index.html', {
                 'courses': subject_codes,
@@ -1248,25 +1249,35 @@ def timetable_view(request):
     })
 
 def generate_timetable(selected_courses, subject_codes, request):
-    days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday","Saturday","Sunday"]
+    days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
     
-    # Function to generate random pastel color
     def generate_pastel_color():
         hue = random.random()
         saturation = 0.3 + random.random() * 0.2
         value = 0.9 + random.random() * 0.1
         rgb = colorsys.hsv_to_rgb(hue, saturation, value)
-        return '#{:02x}{:02x}{:02x}'.format(int(rgb[0]*255), int(rgb[1]*255), int(rgb[2]*255))
+        return '#{:02x}{:02x}{:02x}'.format(int(rgb[0] * 255), int(rgb[1] * 255), int(rgb[2] * 255))
     
     course_colors = {course: generate_pastel_color() for course in selected_courses}
-    time_slots = set()
+    #create empty set(timeslots)
+    time_slots = set() 
+
+    # Create time slots from selected courses
+    for course_code in selected_courses:
+        #for loop course in subject_codes if the course_code(subject code ) same as the request course code
+        course_info = next((course for course in subject_codes if course['course_code'] == course_code), None)
+        if course_info:
+            for vt in course_info.get('venue_time'):
+                #if both start &end time exist add to the timeslot
+                if 'class_start_time' in vt and 'class_end_time' in vt:
+                    time_slots.add(f"{vt['class_start_time']} - {vt['class_end_time']}")
     
-    for course in subject_codes:
-        for vt in course.get('venue_time', []):
-            if 'class_start_time' in vt and 'class_end_time' in vt:
-                time_slots.add(f"{vt['class_start_time']} - {vt['class_end_time']}")
+    #sort in ascending order
     time_slots = sorted(list(time_slots))
 
+    print(time_slots)
+    
+    #defines a dictionary for loop the days and slot 
     timetable = {day: {slot: [] for slot in time_slots} for day in days}
 
     for course_code in selected_courses:
@@ -1284,6 +1295,7 @@ def generate_timetable(selected_courses, subject_codes, request):
                         'color': course_colors[course_code]
                     })
 
+    # Generate HTML for the timetable
     table_html = '<table class="timetable-colored">'
     table_html += '<tr><th class="time-column">Time</th>'
     for day in days:
