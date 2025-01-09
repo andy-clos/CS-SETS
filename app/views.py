@@ -22,6 +22,8 @@ from firebase_admin import credentials
 import re
 from firebase_admin import auth, firestore, credentials, initialize_app
 from django.views.decorators.http import require_POST
+import csv
+from io import TextIOWrapper
 
 logger = logging.getLogger(__name__)
 
@@ -1538,7 +1540,7 @@ def update_marks(request, semester_year, course_code, student_email):
             
             # Update the marks in database
             if marks:
-                database.child("users").child(encoded_email).child("courses").child(target_course_key).child("coursework").update(marks)
+                database.child("users").child(encoded_email).child("courses").child(target_course_key).child("marks").update(marks)
                 messages.success(request, 'Marks updated successfully')
             else:
                 messages.warning(request, 'No marks to update')
@@ -1586,4 +1588,115 @@ def unenroll_student(request):
 
     except Exception as e:
         print(f"Error in unenroll_student: {str(e)}")
+        return JsonResponse({'status': 'error', 'message': str(e)})
+
+@require_POST
+def upload_marks(request, semester_year, course_code):
+    try:
+        if 'csvFile' not in request.FILES:
+            return JsonResponse({'status': 'error', 'message': 'No file uploaded'})
+
+        csv_file = TextIOWrapper(request.FILES['csvFile'].file, encoding='utf-8')
+        reader = csv.DictReader(csv_file)
+        
+        # Parse semester_year format
+        try:
+            semester = semester_year[3:4]
+            academic_year = semester_year[8:]
+        except Exception as e:
+            return JsonResponse({
+                'status': 'error', 
+                'message': f'Invalid semester_year format: {semester_year}. Expected format: sem[1-2]year[YYYY-YYYY]'
+            })
+        
+        # Get course data
+        course = database.child("course").child(academic_year).child(semester).child(course_code).get().val()
+        if not course:
+            return JsonResponse({'status': 'error', 'message': f'Course not found: {semester}, {academic_year}, {course_code}'})
+
+        # Get coursework types and clean them
+        courseworks = {}
+        if 'courseworks' in course:
+            for cw_key, cw_data in course['courseworks'].items():
+                if isinstance(cw_data, dict) and 'type' in cw_data and 'total_mark' in cw_data:
+                    courseworks[cw_data['type']] = float(cw_data['total_mark'])
+
+        # Clean CSV headers by removing percentages
+        cleaned_headers = {}
+        for header in reader.fieldnames:
+            if '(' in header:
+                clean_header = header.split('(')[0].strip()
+                if clean_header in ['Assignment 1', 'Assignment 2', 'Test 1', 'Test 2']:
+                    cleaned_headers[header] = clean_header
+            elif header == 'Matrix Number':
+                cleaned_headers[header] = header
+
+        success_count = 0
+        errors = []
+
+        for row in reader:
+            try:
+                matrix = row['Matrix Number'].strip()
+                
+                # Find student by matrix number
+                student_ref = None
+                students = database.child("users").get().val()
+                for email, data in students.items():
+                    if 'matrix' in data and data['matrix'] == matrix:
+                        student_ref = email
+                        break
+
+                if not student_ref:
+                    errors.append(f"Student with matrix {matrix} not found")
+                    continue
+
+                # Update marks
+                marks = {}
+                for original_header, clean_header in cleaned_headers.items():
+                    if clean_header != 'Matrix Number' and original_header in row:
+                        try:
+                            mark = float(row[original_header])
+                            if clean_header in courseworks:
+                                max_mark = courseworks[clean_header]
+                                if 0 <= mark <= max_mark:
+                                    marks[clean_header] = mark
+                                else:
+                                    errors.append(f"Invalid mark for {matrix}: {clean_header} mark must be between 0 and {max_mark}")
+                                    continue
+                        except ValueError:
+                            errors.append(f"Invalid mark format for {matrix}: {clean_header}")
+                            continue
+
+                # Find the course key in student's courses
+                student_courses = database.child("users").child(student_ref).child("courses").get().val()
+                course_key = None
+                if student_courses:
+                    for key, course_data in student_courses.items():
+                        if (course_data.get('course_code') == course_code and 
+                            course_data.get('academic_year') == academic_year and 
+                            str(course_data.get('semester')) == semester):
+                            course_key = key
+                            break
+
+                if course_key:
+                    # Update marks in database
+                    database.child("users").child(student_ref).child("courses").child(course_key).child("coursework").update(marks)
+                    success_count += 1
+                else:
+                    errors.append(f"Student {matrix} is not enrolled in this course")
+
+            except Exception as e:
+                errors.append(f"Error processing student {matrix}: {str(e)}")
+
+        # Prepare response message
+        message = f"Successfully updated marks for {success_count} students."
+        if errors:
+            message += f"\nErrors encountered:\n" + "\n".join(errors)
+
+        return JsonResponse({
+            'status': 'success' if success_count > 0 else 'error',
+            'message': message
+        })
+
+    except Exception as e:
         return JsonResponse({'status': 'error', 'message': str(e)})

@@ -201,6 +201,41 @@
                                     <i class="fas fa-file-pdf"></i> Export PDF
                                 </button>
                             </div>
+                            {% if request.session.user_role == 'admin' or request.session.user_role == 'lecturer' %}
+                            <div class="upload-button ms-2">
+                                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#uploadMarksModal">
+                                    <i class="fas fa-upload"></i> Upload Marks CSV
+                                </button>
+                            </div>
+                            <div class="modal fade" id="uploadMarksModal" tabindex="-1" aria-labelledby="uploadMarksModalLabel" aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="uploadMarksModalLabel">Upload Marks CSV</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <form id="uploadMarksForm" method="POST" action="{% url 'upload-marks' semester_year=semester_year course_code=course_code %}" enctype="multipart/form-data">
+                                                {% csrf_token %}
+                                                <div class="mb-3">
+                                                    <label for="csvFile" class="form-label">Choose CSV File</label>
+                                                    <input type="file" class="form-control" id="csvFile" name="csvFile" accept=".csv" required>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <p><strong>CSV Format:</strong></p>
+                                                    <p>Matrix Number{% for coursework in course.courseworks.values %}, {{ coursework.type }}{% endfor %}</p>
+                                                    <small class="text-muted">Note: First row should be headers. Marks should be numbers between 0 and the maximum mark for each coursework.</small>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                                    <button type="submit" class="btn btn-primary">Upload</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
                         </div>
                         <div class="search-bar mb-3">
                             <input 
@@ -214,16 +249,16 @@
                         <table class="table" id="marksTable">
                             <thead>
                                 <tr>
-                                    <th onclick="sortTable(0, 'number')" style="cursor: pointer;">
+                                    <th data-column="0" data-type="number" style="cursor: pointer;">
                                         No. <span class="sort-icon"></span>
                                     </th>
-                                    <th onclick="sortTable(1, 'text')" style="cursor: pointer;">
+                                    <th data-column="1" data-type="text" style="cursor: pointer;">
                                         Name <span class="sort-icon"></span>
                                     </th>
-                                    <th onclick="sortTable(2, 'text')" style="cursor: pointer;">
+                                    <th data-column="2" data-type="text" style="cursor: pointer;">
                                         Matrix Number <span class="sort-icon"></span>
                                     </th>
-                                    <th onclick="sortTable(3, 'text')" style="cursor: pointer;">
+                                    <th data-column="3" data-type="text" style="cursor: pointer;">
                                         Email <span class="sort-icon"></span>
                                     </th>
                                     {% for coursework in course.courseworks %}
@@ -667,9 +702,9 @@
         // Reorder rows in the table
         rows.forEach(row => tbody.appendChild(row));
 
-        // Update row numbers
+        // Update row numbers based on sort direction
         rows.forEach((row, index) => {
-            row.cells[0].textContent = index + 1;
+            row.cells[0].textContent = isAscending ? index + 1 : rows.length - index;
         });
     }
 
@@ -683,6 +718,48 @@
                     sortTable(parseInt(this.dataset.column), this.dataset.type);
                 });
             }
+        }
+    });
+
+    document.getElementById('uploadMarksForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(this);
+        
+        try {
+            const response = await fetch(this.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': formData.get('csrfmiddlewaretoken')
+                }
+            });
+            
+            const data = await response.json();
+            
+            if (data.status === 'success') {
+                await Swal.fire({
+                    icon: 'success',
+                    title: 'Success!',
+                    text: data.message,
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+                window.location.reload();
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: data.message || 'An error occurred while uploading marks.'
+                });
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'An error occurred while processing your request.'
+            });
         }
     });
     </script>

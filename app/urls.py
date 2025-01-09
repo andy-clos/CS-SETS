@@ -30,4 +30,5 @@ urlpatterns = [
     path('check-student-course/', views.check_student_course, name='check-student-course'),
     path('academic/<str:semester_year>/<str:course_code>/update-marks/<str:student_email>/', views.update_marks, name='update-marks'),
     path('unenroll-student/', views.unenroll_student, name='unenroll-student'),
+    path('upload-marks/<str:semester_year>/<str:course_code>/', views.upload_marks, name='upload-marks'),
 ]
