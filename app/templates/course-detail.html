@@ -286,11 +286,11 @@
                                                     {% if coursework.type in student.marks %}
                                                         {{ student.marks|get_item:coursework.type }}
                                                     {% else %}
-                                                        0
+                                                        0.0
                                                     {% endif %}
                                                 </td>
                                             {% endfor %}
-                                            <td style="text-align: center;">{{ student.total_mark|default:0 }}</td>
+                                            <td style="text-align: center;">{{ student.total_mark|default:0.0 }}</td>
                                             <td style="text-align: center;">
                                                 <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#marksModal{{ student.email|slugify }}">
                                                     Edit Marks
