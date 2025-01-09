@@ -9,6 +9,42 @@
     <link rel="stylesheet" href="{% static 'css/header.css' %}">  
     <link rel="stylesheet" href="{% static 'css/style.css' %}">  
     <link rel="stylesheet" href="{% static 'css/footer.css' %}">
+    <style>
+        .enrolled-students-section {
+            margin-top: 2rem;
+            margin-bottom: 2rem;
+        }
+    
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+    
+        .table th,
+        .table td {
+            padding: 0.75rem;
+            border: 1px solid #dee2e6;
+            text-align: left;
+        }
+    
+        .table thead th {
+            background-color: #f8f9fa;
+            border-bottom: 2px solid #dee2e6;
+        }
+    
+        .table tbody tr:nth-of-type(odd) {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+    
+        .table tbody tr:hover {
+            background-color: rgba(0, 0, 0, 0.075);
+        }
+    
+        .text-center {
+            text-align: center;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
@@ -63,8 +99,6 @@
                       </table>
                       <button type="submit" class="btn btn-primary">Analyze</button>
                   </form>
-                {% endfor %}
-            {% endif %}
 
             <h3>Predictions</h3>
             <ul>
@@ -72,6 +106,53 @@
                     <li>{{ prediction }} - Good</li>
                 {% endfor %}
             </ul>
+
+            {% if request.session.user_role == 'lecturer' %}
+                <div class="enrolled-students-section">
+                    <h3>Enrolled Students</h3>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>No.</th>
+                                <th>Name</th>
+                                <th>Matrix Number</th>
+                                <th>Email</th>
+                                {% for coursework in course.courseworks %}
+                                    <th>{{ coursework.type }} ({{ coursework.total_mark }}%)</th>
+                                {% endfor %}
+                                <th>Total Coursework Mark ({{ total_marks }}%)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if enrolled_students %}
+                                {% for student in enrolled_students %}
+                                    <tr>
+                                        <td>{{ forloop.counter }}</td>
+                                        <td>{{ student.name }}</td>
+                                        <td>{{ student.matrix }}</td>
+                                        <td>{{ student.email }}</td>
+
+                                        {% for coursework in course.courseworks %}
+                                            {% for key, value in student.marks.items %}
+                                                {% if key == coursework.type %}
+                                                    <td>{{ value }}</td>
+                                                {% endif %}
+                                            {% endfor %}
+                                        {% endfor %}
+                                        <td>{{ student.total_mark }}</td>
+                                    </tr>        
+                                {% endfor %}
+                            {% else %}
+                                <tr>
+                                    <td colspan="{{ 5|add:course.courseworks|length }}" class="text-center">No students enrolled in this course</td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            {% endif %}
+            {% endfor %}
+            {% endif %}
         </section>
         </main>
 

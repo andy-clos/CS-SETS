@@ -652,7 +652,9 @@ def course_detail_view(request, semester_year, course_code):
                             student_data['total_mark'] = sum(student_data['marks'].values())
 
                             enrolled_students.append(student_data)
-        print("enrolled students", enrolled_students)
+        
+        total_marks = sum(cw['total_mark'] for cw in courses[0]['courseworks'])
+
         # Always return a response
         context = {
             'courses': courses,
@@ -661,7 +663,8 @@ def course_detail_view(request, semester_year, course_code):
             'semester': semester,
             'semester_year': semester_year,
             'enrolled_students': enrolled_students,
-            'error': None if courses else 'Course not found'
+            'error': None if courses else 'Course not found',
+            'total_marks': total_marks
         }
         return render(request, 'course-detail.html', context)
 
@@ -702,38 +705,91 @@ def analytics_detail_view(request, semester_year, course_code):
 
         courses_data = database.child("course").get().val()
         courses = []
-        
-        for year, semesters in courses_data.items():
-            if year == academic_year:
-                for semester_index, courses_in_semester in enumerate(semesters):
-                    if str(semester_index) == semester:
-                        if isinstance(courses_in_semester, dict):
-                            for code, course_info in courses_in_semester.items():
-                                if code == course_code: 
-                                    lecturers = course_info.get('lecturers', {})
-                                    lecturers = [lecturer for lecturer in lecturers if lecturer is not None]
-                                    venue_time = course_info.get('venue and time', {})
-                                    venue_time = [vt for vt in venue_time if vt is not None]
-                                    lecturer_count = len(lecturers)
+        enrolled_students = []
+        courseworks_data = {}
+        processed_courseworks = []
 
-                                    courses.append({
-                                        'semester_year': semester_year,
-                                        'academic_year': year.replace('-', '/'),
-                                        'semester': str(semester_index),
-                                        'course_code': code,
-                                        'course_name': course_info.get('course_name', ''),
-                                        'lecturers': lecturers,
-                                        'lecturer_count': lecturer_count,
-                                        'venue_time': venue_time
-                                    })
+        # Process course data
+        if courses_data:
+            for year, semesters in courses_data.items():
+                if year == academic_year:
+                    for semester_index, courses_in_semester in enumerate(semesters):
+                        if str(semester_index) == semester:
+                            if isinstance(courses_in_semester, dict):
+                                for code, course_info in courses_in_semester.items():
+                                    if code == course_code:
+                                        # Process courseworks
+                                        courseworks_data = course_info.get('courseworks', {})
+                                        if isinstance(courseworks_data, dict):
+                                            for coursework_id, cw in courseworks_data.items():
+                                                if cw and isinstance(cw, dict):
+                                                    processed_courseworks.append({
+                                                        'type': cw['type'],
+                                                        'total_mark': cw['total_mark'],
+                                                        'field_name': cw['type'].replace(' ', '_')
+                                                    })
 
-        if not courses:
-            return render(request, 'analytics-detail.html', {'error': 'Course not found'})
-        
-        return render(request, 'analytics-detail.html', {'courses': courses, 'course_code': course_code, 'academic_year': academic_year, 'semester': semester, 'predictions': predictions})
+                                        # Process course details
+                                        courses.append({
+                                            'semester_year': semester_year,
+                                            'academic_year': year.replace('-', '/'),
+                                            'semester': str(semester_index),
+                                            'course_code': code,
+                                            'course_name': course_info.get('course_name', ''),
+                                            'lecturers': [l for l in course_info.get('lecturers', []) if l],
+                                            'venue_time': [vt for vt in course_info.get('venue and time', []) if vt],
+                                            'courseworks': processed_courseworks
+                                        })
+
+        # Process enrolled students
+        users = database.child("users").get().val()
+        if users:
+            for email_key, user_data in users.items():
+                if user_data.get('role') == 'student' and 'courses' in user_data:
+                    for course_key, course_info in user_data['courses'].items():
+                        if (course_info.get('course_code') == course_code and 
+                            course_info.get('academic_year') == academic_year and 
+                            course_info.get('semester') == semester):
+                            
+                            student_data = {
+                                'name': user_data.get('name', ''),
+                                'matrix': user_data.get('matrix', ''),
+                                'email': user_data.get('email', ''),
+                                'marks': {},
+                                'total_mark': 0
+                            }
+                            
+                            coursework_data = course_info.get('coursework', {})
+                            
+                            if isinstance(coursework_data, dict):
+                                for coursework_type, mark in coursework_data.items():
+                                    student_data['marks'][coursework_type] = mark
+                            
+                            student_data['total_mark'] = sum(student_data['marks'].values())
+
+                            enrolled_students.append(student_data)
+
+        total_marks = sum(cw['total_mark'] for cw in courses[0]['courseworks'])
+
+        # Always return a response
+        context = {
+            'courses': courses,
+            'course_code': course_code,
+            'academic_year': academic_year,
+            'semester': semester,
+            'semester_year': semester_year,
+            'enrolled_students': enrolled_students,
+            'error': None if courses else 'Course not found',
+            'predictions': predictions,
+            'total_marks': total_marks
+        }
+        return render(request, 'analytics-detail.html', context)
+
     except Exception as e:
-        print(f"Error fetching course details: {e}")
-        return render(request, 'analytics-detail.html', {'error': 'An error occurred while fetching course details'})
+        print(f"Error in course detail view: {e}")
+        return render(request, 'analytics-detail.html', {
+            'error': f'An error occurred: {str(e)}'
+        })
 
 def delete_course_view(request, semester_year, course_code):
     if request.method == 'POST':
@@ -803,38 +859,112 @@ def getSubject():
     subject = database.child("forum").child("posts").get()
 
 def analytics_view(request):
+    # Get latest courses for student selection
+    latest_courses = []
+    student_courses = []
     courses = {}
+    latest_year = None
+    latest_semester = None
+
     try:
         courses_data = database.child("course").get().val()
-        sorted_courses_data = dict(sorted(courses_data.items(), key=lambda item: item[0], reverse=True))
-        for academic_year, semesters in sorted_courses_data.items():
-            academic_year_slash = academic_year.replace('-', '/')  # Replace dash with slash for display
-            if academic_year not in courses:
-                courses[academic_year] = {'display': academic_year_slash, 'semesters': {}}
-            for semester_index, courses_in_semester in enumerate(semesters):
-                semester = str(semester_index)
-                if isinstance(courses_in_semester, dict):
-                    semester_courses = []
-                    for course_code, course_info in courses_in_semester.items():
-                        lecturers = course_info.get('lecturers', {})
-                        lecturers = [lecturer for lecturer in lecturers if lecturer is not None]
-                        venue_time = course_info.get('venue and time', {})
-                        venue_time = [vt for vt in venue_time if vt is not None]
-                        lecturer_count = len(lecturers)
-                        semester_courses.append({
-                            'course_code': course_code,
-                            'course_name': course_info.get('course_name', ''),
-                            'lecturers': lecturers,
-                            'lecturer_count': lecturer_count,
-                            'venue and time': venue_time
+        if courses_data:
+            # Get all users to count students per course
+            users_data = database.child("users").get().val()
+            course_student_counts = {}
+            
+            # Count students for each course, considering semester
+            if users_data:
+                for user_key, user_info in users_data.items():
+                    if user_info.get('role') == 'student' and 'courses' in user_info:
+                        for course_key, course_info in user_info['courses'].items():
+                            course_code = course_info.get('course_code')
+                            course_semester = course_info.get('semester')
+                            course_year = course_info.get('academic_year')
+                            if course_code and course_semester and course_year:
+                                # Create a unique key combining course code, year, and semester
+                                unique_course_key = f"{course_code}_{course_year}_{course_semester}"
+                                course_student_counts[unique_course_key] = course_student_counts.get(unique_course_key, 0) + 1
+
+            # Get latest academic year
+            sorted_years = sorted(courses_data.keys(), reverse=True)
+            latest_year = sorted_years[0]
+            
+            # Get latest semester
+            latest_semester = None
+            for i in range(len(courses_data[latest_year])):
+                if isinstance(courses_data[latest_year][i], dict):
+                    latest_semester = i
+
+            # Process all courses for display
+            for academic_year in sorted_years:
+                year_display = academic_year.replace('-', '/')
+                courses[academic_year] = {'display': year_display, 'semesters': {}}
+                
+                for semester_index, semester_data in enumerate(courses_data[academic_year]):
+                    if isinstance(semester_data, dict):
+                        semester_courses = []
+                        for code, course_info in semester_data.items():
+                            unique_course_key = f"{code}_{academic_year}_{semester_index}"
+                            lecturers = course_info.get('lecturers', {})
+                            lecturers = [lecturer for lecturer in lecturers if lecturer is not None]
+                            venue_time = course_info.get('venue and time', {})
+                            venue_time = [vt for vt in venue_time if vt is not None]
+                            lecturer_count = len(lecturers)
+                            semester_courses.append({
+                                'course_code': code,
+                                'course_name': course_info.get('course_name', ''),
+                                'lecturers': lecturers,
+                                'lecturer_count': lecturer_count,
+                                'venue_time': venue_time,
+                                'student_count': course_student_counts.get(unique_course_key, 0)  # Use the semester-specific count
+                            })
+                            
+                        if semester_courses:
+                            courses[academic_year]['semesters'][str(semester_index)] = semester_courses
+
+            # Get latest courses for dropdown
+            if latest_semester is not None:
+                latest_semester_courses = courses_data[latest_year][latest_semester]
+                if isinstance(latest_semester_courses, dict):
+                    for code, course_info in latest_semester_courses.items():
+                        latest_courses.append({
+                            'course_code': code,
+                            'course_name': course_info.get('course_name', '')
                         })
-                    if semester_courses:
-                        courses[academic_year]['semesters'][semester] = semester_courses
+            
+            # Get student's courses if user is a student
+            if request.session.get('user_role') == 'student':
+                user_email = get_current_user(request)
+                encoded_email = user_email.replace('.', '-dot-').replace('@', '-at-')
+                user_courses = database.child("users").child(encoded_email).child("courses").get().val()
+                student_courses = []
+                if user_courses and isinstance(user_courses, dict):
+                    for course in user_courses.values():
+                        student_courses.append({
+                            'course_code': course.get('course_code', ''),
+                            'academic_year': course.get('academic_year', ''),
+                            'semester': course.get('semester', '')  # Add semester to the data structure
+                        })
+                    # Sort by academic year to get the earliest year first
+                    student_courses.sort(key=lambda x: x['academic_year'])
 
     except Exception as e:
         print(f"Error fetching courses: {e}")
+        print(f"Latest year: {latest_year}")
+        print(f"Latest semester: {latest_semester}")
+   
+    context = {
+        'courses': courses,
+        'latest_courses': latest_courses,
+        'student_courses': student_courses,
+        'latest_year': latest_year,
+        'latest_semester': latest_semester
+    }
 
-    return render(request, 'analytics.html', {'courses': courses})
+    print("this is student courses", student_courses)
+
+    return render(request, 'analytics.html', context)
 
 def users_management_view(request):
     return render(request, 'users-management.html')
