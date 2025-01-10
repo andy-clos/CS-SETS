@@ -160,47 +160,8 @@
                 <button class="btn-dashboard btn-add-announce" data-toggle="modal" data-target="#createAnnouncement">
                     Create Announcement
                 </button>
-
-                <div id="addannounce" class="modal">
-                    <div class="modal-content">
-                        <span class="close">&times;</span>
-                        <h2>Create New Announcement</h2>
-                        <form method="POST" action="{% url 'dashboard' %}">
-                            {% csrf_token %}
-                            <div class="form-group">
-                                <label for="add-title">Title:</label>
-                                <input type="text" id="add-title" name="add-title" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="add-content">Content:</label>
-                                <div id="editor"></div>
-                                <input type="hidden" id="add-content" name="add-content" />
-                            </div>
-                            <button type="submit" class="submit-btn">Post Announcement</button>
-                            <p style="display: none;"></p>
-                        </form>
-                    </div>
-                </div>
-                
                 <div class="main-content">
-                    <div class="announcement-card">
-                        <div class="announcement-content">
-                            <div class="announcement-header">
-                                <div class="profile-container">
-                                    <img src="/static/image/user.png" alt="Profile Picture" class="profile-img">
-                                    <p>Mr. Bean</p>
-                                </div>
-                                <div class="announcement-details">
-                                    <h3>Changes venue for event application</h3>
-                                    <p class="announcement-body">
-                                        Dear student, today due to emergency reason, hall B are closed until 14/11/2025, thus student need to register your application at hall A...
-                                        <span class="expand-text">[expand]</span>
-                                    </p>
-                                    <p class="posted-info">posted 11.00PM 11 Aug 2024</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    
                 </div>
             </main>
         {% elif request.session.user_role == 'admin' %}
@@ -226,26 +187,35 @@
     {% endif %}
 
 <!-- Modal for creating announcement -->
-<div id="createAnnouncement" class="modal fade modal-lg" tabindex="-1" aria-labelledby="createAnnouncementLabel" aria-hidden="true">
-    <div class="modal-dialog">
+<div id="createAnnouncement" class="modal fade" tabindex="-1" aria-labelledby="createAnnouncementLabel" aria-hidden="true">
+    <div class="modal-xl modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="createAnnouncementLabel">Create New Announcement</h5>
+                <h5 class="modal-title form-title" id="createAnnouncementLabel">Create New Announcement</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form method="POST" action="{% url 'dashboard' %}">
+                <form method="POST" action="{% url 'dashboard' %}" class="container-fluid">
                     {% csrf_token %}
                     <div class="form-group">
+                        <label for="exampleSelect">Select a Course:</label>
+                        <select class="select-width form-select form-control" id="exampleSelect" name="selected_course" aria-label="Default select example" required>
+                            <option selected disabled>Select Course</option>
+                            {% for course in latest_courses %}
+                                <option value="{{ course.course_code }}">{{ course.course_code }} - {{ course.course_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
                         <label for="add-title">Title:</label>
-                        <input type="text" id="add-title" name="add-title" required>
+                        <input type="text" id="add-title" name="add-title" class="form-control" required>
                     </div>
                     <div class="form-group">
                         <label for="add-content">Content:</label>
-                        <div id="editor"></div>
-                        <input type="hidden" id="add-content" name="add-content" />
+                        <textarea id="add-content" name="add-content" class="form-control" rows="10"></textarea>
                     </div>
-                    <button type="submit" class="btn btn-primary">Post Announcement</button>
+                    <button type="submit" class="btn-dashboard w-100">Post Announcement</button>
+                    <p style="display: none;"></p>
                 </form>
             </div>
         </div>

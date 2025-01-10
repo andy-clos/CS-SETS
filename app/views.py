@@ -262,37 +262,97 @@ def register_view(request):
 # Dashboard page
 @login_required
 def dashboard_view(request):
-    # Debug logging
-    logger.debug(f"Session contents: {dict(request.session)}")
     
     welcome_message = request.session.pop('welcome_message', None)
-    logger.debug(f"Welcome message retrieved: {welcome_message}")  # Debug log
     
+    latest_courses = []
+    latest_year = None
+    latest_semester = None
+    current_user_email = request.session.get('user_email')
+
+    try:
+        courses_data = database.child("course").get().val()
+        if courses_data:
+            sorted_years = sorted(courses_data.keys(), reverse=True)
+            latest_year = sorted_years[0]
+            latest_semester = get_latest_semester(courses_data, latest_year)
+
+            if latest_semester is not None:
+                latest_semester_courses = courses_data[latest_year][latest_semester]
+                
+                if isinstance(latest_semester_courses, dict):
+                    for code, course_info in latest_semester_courses.items():
+                        # Check if lecturers exists and is a dictionary
+                        lecturers = course_info.get('lecturers', {})
+                        if isinstance(lecturers, dict):
+                            # Handle dictionary structure
+                            for lecturer_id, lecturer_info in lecturers.items():
+                                if isinstance(lecturer_info, dict) and lecturer_info.get('lecturer_email') == current_user_email:
+                                    latest_courses.append({
+                                        'course_code': code,
+                                        'course_name': course_info.get('course_name', '')
+                                    })
+                                    break
+                        elif isinstance(lecturers, list):
+                            # Handle list structure
+                            for lecturer in lecturers:
+                                if isinstance(lecturer, dict) and lecturer.get('lecturer_email') == current_user_email:
+                                    latest_courses.append({
+                                        'course_code': code,
+                                        'course_name': course_info.get('course_name', '')
+                                    })
+                                    break
+
+
+    except Exception as e:
+        logger.error(f"Error fetching courses: {e}")
+
     if request.method == 'POST':
         try:
             title = request.POST.get('add-title').upper()
             content = request.POST.get('add-content')
+            course_code = request.POST.get('selected_course')
+            current_user_email = request.session.get('user_email')
             
-            # Get current time in Malaysia timezone
+            # Get current academic year and semester
+            courses_data = database.child("course").get().val()
+            if courses_data:
+                sorted_years = sorted(courses_data.keys(), reverse=True)
+                current_year = sorted_years[0]  # Get latest year
+                current_semester = get_latest_semester(courses_data, current_year)
+            
             malaysia_tz = pytz.timezone('Asia/Kuala_Lumpur')
             current_time = datetime.datetime.now(malaysia_tz)
             formatted_time = current_time.strftime("%I:%M %p, %d %b %Y")
 
-            # Create announcement data with user email
+            # Create announcement data
             announcement_data = {
+                "lecturer_email": current_user_email,
                 "title": title,
                 "content": content,
-                "timestamp": formatted_time,
-                "author": get_current_user(request)  # Use session email
+                "timestamp": formatted_time
             }
 
-            # Save to Firebase
-            database.child("announcements").push(announcement_data)
+            # Get existing announcements to determine next ID
+            existing_announcements = database.child("announcements").child(current_year).child(str(current_semester)).child(course_code).get().val()
+            
+            # Determine the next announcement number
+            next_num = 1
+            if existing_announcements:
+                # Get the highest existing number
+                existing_nums = [int(k[1:]) for k in existing_announcements.keys() if k.startswith('a')]
+                if existing_nums:
+                    next_num = max(existing_nums) + 1
+
+            # Create the new announcement ID
+            announcement_id = f'a{next_num}'
+
+            # Save the announcement with the sequential ID
+            database.child("announcements").child(current_year).child(str(current_semester)).child(course_code).child(announcement_id).set(announcement_data)
 
         except Exception as e:
             print(f"Error adding announcement: {e}")
 
-    # Fetch announcements to display
     try:
         announcements = []
         announcements_data = database.child("announcements").get()
@@ -300,7 +360,6 @@ def dashboard_view(request):
             for announcement in announcements_data.each():
                 announcements.append(announcement.val())
         
-        # Sort announcements by timestamp (newest first)
         announcements.sort(key=lambda x: datetime.datetime.strptime(x['timestamp'], "%I:%M %p, %d %b %Y"), reverse=True)
         
     except Exception as e:
@@ -309,10 +368,10 @@ def dashboard_view(request):
 
     context = {
         'announcements': announcements,
-        'user_email': get_current_user(request),
-        'welcome_message': welcome_message
+        'user_email': current_user_email,
+        'welcome_message': welcome_message,
+        'latest_courses': latest_courses
     }
-    logger.debug(f"Context being sent to template: {context}")  # Debug log
     return render(request, 'dashboard.html', context)
 
 def academic_view(request):
@@ -456,10 +515,8 @@ def academic_view(request):
             latest_year = sorted_years[0]
             
             # Get latest semester
-            latest_semester = None
-            for i in range(len(courses_data[latest_year])):
-                if isinstance(courses_data[latest_year][i], dict):
-                    latest_semester = i
+            latest_semester = get_latest_semester(courses_data, latest_year)
+
 
             # Process all courses for display
             for academic_year in sorted_years:
@@ -894,10 +951,7 @@ def analytics_view(request):
             latest_year = sorted_years[0]
             
             # Get latest semester
-            latest_semester = None
-            for i in range(len(courses_data[latest_year])):
-                if isinstance(courses_data[latest_year][i], dict):
-                    latest_semester = i
+            latest_semester = get_latest_semester(courses_data, latest_year)
 
             # Process all courses for display
             for academic_year in sorted_years:
@@ -1700,3 +1754,21 @@ def upload_marks(request, semester_year, course_code):
 
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': str(e)})
+
+def get_latest_semester(courses_data, latest_year):
+    """
+    Retrieve the latest semester index from the courses data for the given year.
+
+    Args:
+        courses_data (dict): The data structure containing course information.
+        latest_year (int): The year for which to find the latest semester.
+
+    Returns:
+        int or None: The index of the latest semester, or None if not found.
+    """
+    latest_semester = None
+    if latest_year in courses_data:
+        for i in range(len(courses_data[latest_year])):
+            if isinstance(courses_data[latest_year][i], dict):
+                latest_semester = i
+    return latest_semester

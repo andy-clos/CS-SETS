@@ -448,11 +448,11 @@
 
 .modal-content {
     background-color: #fefefe;
-    margin: 5vh 30%;
+    margin: 0;
     padding: 20px;
     border: 1px solid #888;
-    width: 90%;
-    max-width: 800px;
+    width: 100%;
+    max-width: none;
     border-radius: 5px;
     transform: translateY(-50px);
     opacity: 0;
@@ -590,4 +590,23 @@
     opacity: 0;
     visibility: hidden;
     transition: opacity 0.5s ease-in-out;
+}
+
+.form-control {
+    border: 2px solid black !important;
+    border-radius: 4px;
+    padding: 10px;
+    transition: border-color 0.3s;
+}
+
+.form-title {
+    font-size: 20px;
+    font-weight: bold;
+    color: #4E598C;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.select-width{
+    width: 100%;
 }
