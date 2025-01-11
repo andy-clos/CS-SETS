@@ -197,9 +197,142 @@
         overflow-y: auto;
         padding-right: 1rem;
     }
+
+    .personality-section {
+        background: white;
+        border-radius: 8px;
+        padding: 2rem;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .personality-traits {
+        margin: 2rem 0;
+    }
+
+    .trait-bar {
+        display: flex;
+        align-items: center;
+        margin: 1rem 0;
+        gap: 1rem;
+    }
+
+    .trait-bar .progress {
+        flex: 1;
+        height: 10px;
+    }
+
+    .trait-bar span {
+        width: 100px;
+        text-align: right;
+    }
+
+    .trait-bar span:last-child {
+        text-align: left;
+    }
+
+    .personality-description {
+        margin-top: 1rem;
+        padding: 1rem;
+        background: #f8f9fa;
+        border-radius: 4px;
+    }
+
+    #questionContainer {
+        min-height: 200px;
+    }
+
+    .question-item {
+        margin-bottom: 2rem;
+    }
+
+    .answer-options {
+        display: flex;
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+
+    .answer-option {
+        flex: 1;
+        padding: 1rem;
+        border: 1px solid #dee2e6;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .answer-option:hover {
+        background: #f8f9fa;
+        border-color: #0d6efd;
+    }
+
+    .answer-option.selected {
+        background: #0d6efd;
+        color: white;
+        border-color: #0d6efd;
+    }
+
+    .personality-results {
+        padding: 20px;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .predictions-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+        gap: 10px;
+        margin-top: 10px;
+    }
+
+    .prediction-item {
+        padding: 10px;
+        background: #f8f9fa;
+        border-radius: 4px;
+        text-align: center;
+    }
+
+    .traits-section {
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 4px;
+    }
+
+    .traits-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 10px;
+        margin-top: 10px;
+    }
+
+    .trait-item {
+        padding: 8px;
+        background: white;
+        border-radius: 4px;
+        border: 1px solid #dee2e6;
+    }
+
+    .test-info .btn-group {
+        gap: 10px;
+    }
+
+    .test-info .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .test-info .btn i {
+        font-size: 0.9em;
+    }
     </style>
 </head>
 <body>
+    <script>
+        // Pass user personality status from Django template to JavaScript
+        const hasPersonality = {% if user.personality %}true{% else %}false{% endif %};
+    </script>
+
     <div class="container">
         {% include 'navbar.html' %} 
         {% include 'header.html' %} 
@@ -347,6 +480,76 @@
                                     <button type="button" class="btn btn-primary" onclick="submitAchievement()">Save Achievement</button>
                                 </div>
                             </div>
+                        </div>
+                    </div>
+                
+                    <div class="profile-container">
+                        <div class="personality-section">
+                            <h3 class="section-title">Personality Test</h3>
+                            
+                            {% if user.personality %}
+                                <!-- Display personality results -->
+                                <div class="personality-results">
+                                    <h4>Your MBTI Type: {{ user.personality.type }}</h4>
+                                    
+                                    <!-- Display Predictions -->
+                                    <div class="predictions-section mt-4">
+                                        <h5>Type Predictions</h5>
+                                        <div class="predictions-grid">
+                                            {% for type, score in user.personality.predictions.items %}
+                                                <div class="prediction-item">
+                                                    <span class="type">{{ type }}</span>
+                                                    <div class="score">{{ score }}</div>
+                                                </div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+
+                                    <!-- Display Conscious Traits -->
+                                    <div class="traits-section mt-4">
+                                        <h5>Conscious Traits</h5>
+                                        <div class="traits-list">
+                                            <div class="trait-item">Hero: {{ user.personality.conscious_traits.hero }}</div>
+                                            <div class="trait-item">Parent: {{ user.personality.conscious_traits.parent }}</div>
+                                            <div class="trait-item">Child: {{ user.personality.conscious_traits.child }}</div>
+                                            <div class="trait-item">Inferior: {{ user.personality.conscious_traits.inferior }}</div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Display Shadow Traits -->
+                                    <div class="traits-section mt-4">
+                                        <h5>Shadow Traits</h5>
+                                        <div class="traits-list">
+                                            <div class="trait-item">Nemesis: {{ user.personality.shadow_traits.nemesis }}</div>
+                                            <div class="trait-item">Critic: {{ user.personality.shadow_traits.critic }}</div>
+                                            <div class="trait-item">Trickster: {{ user.personality.shadow_traits.trickster }}</div>
+                                            <div class="trait-item">Demon: {{ user.personality.shadow_traits.demon }}</div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Display Test Date and Results Link -->
+                                    <div class="test-info mt-4">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <p class="mb-2">Test taken on: {{ user.personality.result_date }}</p>
+                                                <div class="btn-group">
+                                                    <a href="{{ user.personality.results_page }}" target="_blank" class="btn btn-primary">
+                                                        View Detailed Results
+                                                    </a>
+                                                    <button type="button" class="btn btn-outline-primary" onclick="startPersonalityTest()">
+                                                        <i class="fas fa-redo"></i> Retake Test
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% else %}
+                                <!-- Take test button -->
+                                <button type="button" class="btn btn-primary" onclick="startPersonalityTest()">
+                                    Take MBTI Test
+                                </button>
+                            {% endif %}
                         </div>
                     </div>
                 {% endif %}
@@ -588,6 +791,196 @@
                     });
                 }
             });
+        }
+
+        async function startPersonalityTest() {
+            try {
+                const confirmResult = await Swal.fire({
+                    title: hasPersonality ? 'Retake Test?' : 'Start Test',
+                    text: hasPersonality ? 'This will replace your current personality results.' : 'Ready to discover your personality type?',
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonText: hasPersonality ? 'Yes, retake test' : 'Start test',
+                    cancelButtonText: 'Cancel'
+                });
+
+                if (!confirmResult.isConfirmed) {
+                    return;
+                }
+
+                Swal.fire({
+                    title: 'Starting Test...',
+                    allowOutsideClick: false,
+                    showConfirmButton: false,
+                    willOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+
+                const response = await fetch('/start-mbti-test/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                    }
+                });
+                
+                const data = await response.json();
+                if (data.status === 'success') {
+                    // Store test ID and timestamp
+                    sessionStorage.setItem('mbti_test_id', data.test_id);
+                    sessionStorage.setItem('mbti_test_start', Date.now());
+                    
+                    // Redirect to test
+                    window.location.href = data.test_url;
+                } else {
+                    throw new Error(data.message || 'Failed to start test');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                Swal.fire({
+                    title: 'Error!',
+                    text: error.message || 'Failed to start personality test',
+                    icon: 'error'
+                });
+            }
+        }
+
+        function showQuestion(index) {
+            const questionContainer = document.getElementById('questionContainer');
+            const question = questions[index];
+            
+            questionContainer.innerHTML = `
+                <div class="question-item">
+                    <h4>Question ${index + 1} of ${questions.length}</h4>
+                    <p>${question.text}</p>
+                    <div class="answer-options">
+                        ${question.options.map((option, i) => `
+                            <div class="answer-option" onclick="selectAnswer(${i})">
+                                ${option}
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        function selectAnswer(optionIndex) {
+            const options = document.querySelectorAll('.answer-option');
+            options.forEach(option => option.classList.remove('selected'));
+            options[optionIndex].classList.add('selected');
+            answers[currentQuestion] = optionIndex;
+        }
+
+        async function handleNextQuestion() {
+            if (answers[currentQuestion] === undefined) {
+                Swal.fire({
+                    title: 'Please select an answer',
+                    icon: 'warning'
+                });
+                return;
+            }
+
+            if (currentQuestion < questions.length - 1) {
+                currentQuestion++;
+                showQuestion(currentQuestion);
+            } else {
+                // Submit test results
+                try {
+                    Swal.fire({
+                        title: 'Analyzing Results...',
+                        allowOutsideClick: false,
+                        showConfirmButton: false,
+                        willOpen: () => {
+                            Swal.showLoading();
+                        }
+                    });
+
+                    const response = await fetch('/submit-mbti-test/', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                        },
+                        body: JSON.stringify({ answers })
+                    });
+
+                    if (!response.ok) throw new Error('Failed to submit test');
+
+                    const result = await response.json();
+                    if (result.status === 'success') {
+                        Swal.fire({
+                            title: 'Success!',
+                            text: 'Your personality test results have been saved',
+                            icon: 'success'
+                        }).then(() => {
+                            window.location.reload();
+                        });
+                    } else {
+                        throw new Error(result.message);
+                    }
+                } catch (error) {
+                    console.error('Error submitting test:', error);
+                    Swal.fire({
+                        title: 'Error!',
+                        text: 'Failed to submit test results',
+                        icon: 'error'
+                    });
+                }
+            }
+        }
+
+        // Check test results when returning from Devil.ai
+        document.addEventListener('DOMContentLoaded', function() {
+            const testId = sessionStorage.getItem('mbti_test_id');
+            const testStart = sessionStorage.getItem('mbti_test_start');
+            
+            if (testId && testStart) {
+                // Only check if test was started recently (within last hour)
+                const hourAgo = Date.now() - (60 * 60 * 1000);
+                if (parseInt(testStart) > hourAgo) {
+                    checkTestResult(testId);
+                }
+                // Clear test data
+                sessionStorage.removeItem('mbti_test_id');
+                sessionStorage.removeItem('mbti_test_start');
+            }
+        });
+
+        async function checkTestResult(testId) {
+            try {
+                const response = await fetch('/check-test-result/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                    },
+                    body: JSON.stringify({ test_id: testId })
+                });
+                
+                const data = await response.json();
+                if (data.status === 'success') {
+                    Swal.fire({
+                        title: 'Success!',
+                        text: 'Your personality test results have been saved',
+                        icon: 'success'
+                    }).then(() => {
+                        window.location.reload();
+                    });
+                } else if (data.status === 'pending') {
+                    // Test not completed yet, could retry after delay
+                    console.log('Test pending:', data.message);
+                } else {
+                    throw new Error(data.message);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                Swal.fire({
+                    title: 'Error!',
+                    text: error.message || 'Failed to save test results',
+                    icon: 'error'
+                });
+            }
         }
     </script>
 </body>

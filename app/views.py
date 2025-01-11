@@ -29,6 +29,7 @@ import base64
 from django.core.files.base import ContentFile
 from django.views.decorators.http import require_GET
 import uuid
+import requests
 
 logger = logging.getLogger(__name__)
 
@@ -1987,3 +1988,133 @@ def view_certificate(request, achievement_key):
     except Exception as e:
         print(f"Error: {str(e)}")  # Debug print
         return HttpResponse(f'Error: {str(e)}', status=500)
+
+DEVIL_AI_API_KEY = '693550-4bddea-2efd1e-e5badd'
+DEVIL_AI_BASE_URL = 'https://api.devil.ai/v1'
+
+@require_POST
+def start_mbti_test(request):
+    try:
+        # Generate new test link from Devil.ai
+        response = requests.get(
+            f'{DEVIL_AI_BASE_URL}/new_test',
+            params={
+                'api_key': DEVIL_AI_API_KEY,
+                'notify_url': request.build_absolute_uri('/test-complete/'),
+                'return_url': request.build_absolute_uri('/profile/'),
+            }
+        )
+
+        if not response.ok:
+            raise Exception('Failed to generate test')
+
+        data = response.json()
+        if data['meta']['success']:
+            return JsonResponse({
+                'status': 'success',
+                'test_url': data['data']['test_url'],
+                'test_id': data['data']['test_id']
+            })
+        else:
+            raise Exception('API returned error')
+
+    except Exception as e:
+        print(f"Error starting test: {str(e)}")
+        return JsonResponse({
+            'status': 'error',
+            'message': str(e)
+        })
+
+@require_POST
+def check_test_result(request):
+    try:
+        data = json.loads(request.body)
+        test_id = data.get('test_id')
+        if not test_id:
+            return JsonResponse({'status': 'error', 'message': 'No test ID provided'})
+
+        # Check test result from Devil.ai
+        response = requests.get(
+            f'{DEVIL_AI_BASE_URL}/check_test',
+            params={
+                'api_key': DEVIL_AI_API_KEY,
+                'test_id': test_id
+            }
+        )
+
+        if not response.ok:
+            raise Exception('Failed to check test result')
+
+        result_data = response.json()
+        if result_data['meta']['success']:
+            # Get the current user's email
+            user_email = get_current_user(request)
+            if not user_email:
+                return JsonResponse({'status': 'error', 'message': 'User not authenticated'})
+
+            # Extract and format personality data
+            personality_data = {
+                'type': result_data['data']['prediction'],
+                'predictions': result_data['data']['predictions'],
+                'conscious_traits': result_data['data']['trait_order_conscious'],
+                'shadow_traits': result_data['data']['trait_order_shadow'],
+                'matches': result_data['data']['matches'],
+                'result_date': result_data['data']['result_date'],
+                'results_page': result_data['data']['results_page']
+            }
+
+            # Save to Firebase
+            try:
+                encoded_email = user_email.replace('.', '-dot-').replace('@', '-at-')
+                database.child("users").child(encoded_email).update({
+                    'personality': personality_data
+                })
+                print(f"Saved personality data for user {encoded_email}: {personality_data}")  # Debug log
+
+                return JsonResponse({
+                    'status': 'success',
+                    'message': 'Personality test results saved successfully'
+                })
+            except Exception as e:
+                print(f"Firebase error: {str(e)}")
+                return JsonResponse({
+                    'status': 'error',
+                    'message': 'Failed to save results to database'
+                })
+        else:
+            return JsonResponse({
+                'status': 'error',
+                'message': 'API returned unsuccessful response'
+            })
+
+    except Exception as e:
+        print(f"Error checking test result: {str(e)}")
+        return JsonResponse({
+            'status': 'error',
+            'message': str(e)
+        })
+
+@require_POST
+def get_mbti_questions(request):
+    try:
+        # Fetch questions from Devil.ai API
+        response = requests.get(
+            f'{DEVIL_AI_BASE_URL}/questions',
+            headers={'Authorization': f'Bearer {DEVIL_AI_API_KEY}'}
+        )
+
+        if not response.ok:
+            raise Exception('Failed to fetch MBTI questions')
+
+        questions = response.json()
+        return JsonResponse({
+            'status': 'success',
+            'questions': questions
+        })
+
+    except Exception as e:
+        print(f"Error fetching questions: {str(e)}")  # Debug print
+        return JsonResponse({
+            'status': 'error',
+            'message': str(e)
+        })
