@@ -9,8 +9,8 @@
     <link rel="stylesheet" href="{% static 'css/header.css' %}">  
     <link rel="stylesheet" href="{% static 'css/style.css' %}">  
     <link rel="stylesheet" href="{% static 'css/footer.css' %}">  
-
-    <!-- Add SweetAlert2 CSS and JS -->
+    <link rel="stylesheet" href="{% static 'css/bootstrap.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.32/dist/sweetalert2.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.32/dist/sweetalert2.all.min.js"></script>
 
@@ -166,6 +166,37 @@
         outline: none;
         border-color: #007bff;
     }
+
+    .achievements-section {
+        margin-top: 2rem;
+    }
+
+    .achievement-card {
+        background: white;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    .achievement-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+
+    .achievement-header h4 {
+        margin: 0;
+        color: #2a5298;
+    }
+
+    .achievements-list {
+        max-height: 500px;
+        overflow-y: auto;
+        padding-right: 1rem;
+    }
     </style>
 </head>
 <body>
@@ -248,12 +279,84 @@
                         </div>
                     </form>
                 </div>
+
+                {% if request.session.user_role == 'student' %} 
+                    <div class="profile-container">
+                        <div class="achievements-section">
+                            <h3 class="section-title">Achievements</h3>
+                            
+                            <!-- Add Achievement Button -->
+                            <button type="button" class="btn btn-primary mb-4" data-bs-toggle="modal" data-bs-target="#addAchievementModal">
+                                <i class="fas fa-plus"></i> Add Achievement
+                            </button>
+
+                            <!-- Achievements List -->
+                            <div class="achievements-list">
+                                {% if user.achievements %}
+                                    {% for key, achievement in user.achievements.items %}
+                                    <div class="achievement-card">
+                                        <div class="achievement-header">
+                                            <h4>{{ achievement.title }}</h4>
+                                            <button class="btn btn-link text-danger" onclick="deleteAchievement('{{ key }}')">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                        <p>{{ achievement.description }}</p>
+                                        {% if achievement.proof %}
+                                            <a href="{% url 'view-certificate' achievement_key=key %}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                                <i class="fas fa-certificate"></i> View Certificate
+                                            </a>
+                                        {% endif %}
+                                    </div>
+                                    {% endfor %}
+                                {% else %}
+                                    <p class="text-muted">No achievements added yet.</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Add Achievement Modal -->
+                    <div class="modal fade" id="addAchievementModal" tabindex="-1">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Add Achievement</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <form id="achievementForm" enctype="multipart/form-data">
+                                        {% csrf_token %}
+                                        <div class="mb-3">
+                                            <label class="form-label">Achievement Title</label>
+                                            <input type="text" class="form-control" name="title" required>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">Description</label>
+                                            <textarea class="form-control" name="description" rows="3" required></textarea>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">Proof (Certificate)</label>
+                                            <input type="file" class="form-control" name="proof" accept=".pdf,.jpg,.jpeg,.png">
+                                            <small class="text-muted">Upload PDF or image files only</small>
+                                        </div>
+                                    </form>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                    <button type="button" class="btn btn-primary" onclick="submitAchievement()">Save Achievement</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
             </section>
         </main>
 
         {% include 'footer.html' %} 
     </div>
     <script src="{% static 'js/backend.js' %}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -394,6 +497,94 @@
                             icon: 'error',
                             confirmButtonColor: '#d33'
                         });
+                    });
+                }
+            });
+        }
+
+        function submitAchievement() {
+            const form = document.getElementById('achievementForm');
+            const formData = new FormData(form);
+
+            // Show loading state
+            Swal.fire({
+                title: 'Uploading...',
+                text: 'Please wait while we save your achievement',
+                allowOutsideClick: false,
+                showConfirmButton: false,
+                willOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            fetch('/add-achievement/', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    Swal.fire({
+                        title: 'Success!',
+                        text: 'Achievement added successfully',
+                        icon: 'success'
+                    }).then(() => {
+                        window.location.reload();
+                    });
+                } else {
+                    Swal.fire({
+                        title: 'Error!',
+                        text: data.message,
+                        icon: 'error'
+                    });
+                }
+            })
+            .catch(error => {
+                Swal.fire({
+                    title: 'Error!',
+                    text: 'An unexpected error occurred',
+                    icon: 'error'
+                });
+            });
+        }
+
+        function deleteAchievement(achievementKey) {
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "This achievement will be permanently deleted",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Yes, delete it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    fetch(`/delete-achievement/${achievementKey}/`, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            Swal.fire(
+                                'Deleted!',
+                                'Achievement has been deleted.',
+                                'success'
+                            ).then(() => {
+                                window.location.reload();
+                            });
+                        } else {
+                            Swal.fire(
+                                'Error!',
+                                data.message,
+                                'error'
+                            );
+                        }
                     });
                 }
             });
