@@ -2047,10 +2047,8 @@ def check_test_result(request):
 
         result_data = response.json()
         if result_data['meta']['success']:
-            # Get the current user's email
-            user_email = get_current_user(request)
-            if not user_email:
-                return JsonResponse({'status': 'error', 'message': 'User not authenticated'})
+            # Get current time in the required format
+            current_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
             # Extract and format personality data
             personality_data = {
@@ -2059,13 +2057,13 @@ def check_test_result(request):
                 'conscious_traits': result_data['data']['trait_order_conscious'],
                 'shadow_traits': result_data['data']['trait_order_shadow'],
                 'matches': result_data['data']['matches'],
-                'result_date': result_data['data']['result_date'],
+                'result_date': current_time,  # Use current time instead of API response
                 'results_page': result_data['data']['results_page']
             }
 
             # Save to Firebase
             try:
-                encoded_email = user_email.replace('.', '-dot-').replace('@', '-at-')
+                encoded_email = get_current_user(request).replace('.', '-dot-').replace('@', '-at-')
                 database.child("users").child(encoded_email).update({
                     'personality': personality_data
                 })

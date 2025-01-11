@@ -328,9 +328,64 @@
     </style>
 </head>
 <body>
+    <div id="personalityStatus" 
+         data-has-personality="{% if user.personality %}true{% else %}false{% endif %}" 
+         style="display: none;"></div>
+
     <script>
-        // Pass user personality status from Django template to JavaScript
-        const hasPersonality = {% if user.personality %}true{% else %}false{% endif %};
+        // Get personality status from data attribute
+        const hasPersonality = document.getElementById('personalityStatus')
+            .getAttribute('data-has-personality') === 'true';
+
+        async function startPersonalityTest() {
+            try {
+                const confirmResult = await Swal.fire({
+                    title: hasPersonality ? 'Retake Test?' : 'Start Test',
+                    text: hasPersonality ? 'This will replace your current personality results.' : 'Ready to discover your personality type?',
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonText: hasPersonality ? 'Yes, retake test' : 'Start test',
+                    cancelButtonText: 'Cancel'
+                });
+
+                if (!confirmResult.isConfirmed) {
+                    return;
+                }
+
+                Swal.fire({
+                    title: 'Starting Test...',
+                    allowOutsideClick: false,
+                    showConfirmButton: false,
+                    willOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+
+                const response = await fetch('/start-mbti-test/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                    }
+                });
+                
+                const data = await response.json();
+                if (data.status === 'success') {
+                    sessionStorage.setItem('mbti_test_id', data.test_id);
+                    sessionStorage.setItem('mbti_test_start', Date.now());
+                    window.location.href = data.test_url;
+                } else {
+                    throw new Error(data.message || 'Failed to start test');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                Swal.fire({
+                    title: 'Error!',
+                    text: error.message || 'Failed to start personality test',
+                    icon: 'error'
+                });
+            }
+        }
     </script>
 
     <div class="container">
@@ -791,143 +846,6 @@
                     });
                 }
             });
-        }
-
-        async function startPersonalityTest() {
-            try {
-                const confirmResult = await Swal.fire({
-                    title: hasPersonality ? 'Retake Test?' : 'Start Test',
-                    text: hasPersonality ? 'This will replace your current personality results.' : 'Ready to discover your personality type?',
-                    icon: 'question',
-                    showCancelButton: true,
-                    confirmButtonText: hasPersonality ? 'Yes, retake test' : 'Start test',
-                    cancelButtonText: 'Cancel'
-                });
-
-                if (!confirmResult.isConfirmed) {
-                    return;
-                }
-
-                Swal.fire({
-                    title: 'Starting Test...',
-                    allowOutsideClick: false,
-                    showConfirmButton: false,
-                    willOpen: () => {
-                        Swal.showLoading();
-                    }
-                });
-
-                const response = await fetch('/start-mbti-test/', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
-                    }
-                });
-                
-                const data = await response.json();
-                if (data.status === 'success') {
-                    // Store test ID and timestamp
-                    sessionStorage.setItem('mbti_test_id', data.test_id);
-                    sessionStorage.setItem('mbti_test_start', Date.now());
-                    
-                    // Redirect to test
-                    window.location.href = data.test_url;
-                } else {
-                    throw new Error(data.message || 'Failed to start test');
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                Swal.fire({
-                    title: 'Error!',
-                    text: error.message || 'Failed to start personality test',
-                    icon: 'error'
-                });
-            }
-        }
-
-        function showQuestion(index) {
-            const questionContainer = document.getElementById('questionContainer');
-            const question = questions[index];
-            
-            questionContainer.innerHTML = `
-                <div class="question-item">
-                    <h4>Question ${index + 1} of ${questions.length}</h4>
-                    <p>${question.text}</p>
-                    <div class="answer-options">
-                        ${question.options.map((option, i) => `
-                            <div class="answer-option" onclick="selectAnswer(${i})">
-                                ${option}
-                            </div>
-                        `).join('')}
-                    </div>
-                </div>
-            `;
-        }
-
-        function selectAnswer(optionIndex) {
-            const options = document.querySelectorAll('.answer-option');
-            options.forEach(option => option.classList.remove('selected'));
-            options[optionIndex].classList.add('selected');
-            answers[currentQuestion] = optionIndex;
-        }
-
-        async function handleNextQuestion() {
-            if (answers[currentQuestion] === undefined) {
-                Swal.fire({
-                    title: 'Please select an answer',
-                    icon: 'warning'
-                });
-                return;
-            }
-
-            if (currentQuestion < questions.length - 1) {
-                currentQuestion++;
-                showQuestion(currentQuestion);
-            } else {
-                // Submit test results
-                try {
-                    Swal.fire({
-                        title: 'Analyzing Results...',
-                        allowOutsideClick: false,
-                        showConfirmButton: false,
-                        willOpen: () => {
-                            Swal.showLoading();
-                        }
-                    });
-
-                    const response = await fetch('/submit-mbti-test/', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
-                        },
-                        body: JSON.stringify({ answers })
-                    });
-
-                    if (!response.ok) throw new Error('Failed to submit test');
-
-                    const result = await response.json();
-                    if (result.status === 'success') {
-                        Swal.fire({
-                            title: 'Success!',
-                            text: 'Your personality test results have been saved',
-                            icon: 'success'
-                        }).then(() => {
-                            window.location.reload();
-                        });
-                    } else {
-                        throw new Error(result.message);
-                    }
-                } catch (error) {
-                    console.error('Error submitting test:', error);
-                    Swal.fire({
-                        title: 'Error!',
-                        text: 'Failed to submit test results',
-                        icon: 'error'
-                    });
-                }
-            }
         }
 
         // Check test results when returning from Devil.ai
