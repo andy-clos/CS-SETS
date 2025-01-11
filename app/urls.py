@@ -7,6 +7,8 @@ urlpatterns = [
     path('login/', views.login_view, name='login'),
     path('register/', views.register_view, name='register'),
     path('dashboard/', views.dashboard_view, name='dashboard'),
+    path('update_announcement/', views.update_announcement, name='update_announcement'),
+    path('delete_announcement/', views.delete_announcement, name='delete_announcement'),
     path('academic/', views.academic_view, name='academic'),
     path('academic/<str:semester_year>/<str:course_code>/', views.course_detail_view, name='course-detail'),
     path('academic/<str:semester_year>/<str:course_code>/delete/', views.delete_course_view, name='delete-course'),
@@ -31,4 +33,5 @@ urlpatterns = [
     path('academic/<str:semester_year>/<str:course_code>/update-marks/<str:student_email>/', views.update_marks, name='update-marks'),
     path('unenroll-student/', views.unenroll_student, name='unenroll-student'),
     path('upload-marks/<str:semester_year>/<str:course_code>/', views.upload_marks, name='upload-marks'),
+    
 ]

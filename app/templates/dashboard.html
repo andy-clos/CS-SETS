@@ -15,6 +15,7 @@
     <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 
 <body>
@@ -161,8 +162,46 @@
                 <button class="btn-dashboard btn-add-announce" data-toggle="modal" data-target="#createAnnouncement">
                     Create Announcement
                 </button>
-                <div class="main-content">
-                    
+                
+                <div class="modal-title">
+                    <h2>Academic Session {{current_year}}</h2><br>
+                    <h2>Semester {{current_semester}}</h2>
+                </div>
+
+                <div class="announcement-view">
+                    {% for latest_courses in latest_courses %}
+                        <button class="dashboard-accordion">{{ latest_courses.course_code }} - {{ latest_courses.course_name }}</button>
+                        <div class="dashboard-panel">
+                            {% for announcement in announcements %}
+                                {% if announcement.course_code == latest_courses.course_code %}
+                                    <button class="sub-dashboard-accordion">{{ announcement.title }}</button>
+                                    <div class="sub-dashboard-panel">
+                                        <div class="display-ann-details">
+                                            <div class="display-ann-details-header">
+                                                <div style="margin-bottom: 20px;">
+                                                    {% if request.session.user_name == announcement.author %}
+                                                        <p></p>
+                                                        <button class="btn btn-primary" 
+                                                                onclick="openUpdateModal('{{ announcement.id }}', '{{ announcement.course_code }}', '{{ announcement.title|escapejs }}', '{{ announcement.content|escapejs }}')">
+                                                            Update
+                                                        </button>
+                                                        <button class="btn btn-danger" 
+                                                                onclick="deleteAnnouncement('{{ announcement.id }}', '{{ announcement.course_code }}')">
+                                                            Delete
+                                                        </button>
+                                                    {% endif %}
+                                                </div>
+                                                <p class="announcement-author">Posted by: {{ announcement.author }}</p>
+                                                <p class="announcement-time">{{ announcement.timestamp }}</p>
+                                            
+                                            <div class="display-ann-content">{% spaceless %}{{ announcement.content }}{% endspaceless %}</div>
+                                        </div>
+                                        </div>
+                                    </div>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    {% endfor %}
                 </div>
             </main>
         {% elif request.session.user_role == 'admin' %}
@@ -196,11 +235,11 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form method="POST" action="{% url 'dashboard' %}" class="container-fluid" id="createAnnouncementForm" enctype="multipart/form-data">
+                <form method="POST" class="container-fluid" id="createAnnouncementForm" onsubmit="submitAnnouncement(event)">
                     {% csrf_token %}
                     <div class="form-group">
                         <label for="exampleSelect">Select a Course:</label>
-                        <select class="select-width form-select form-control" id="exampleSelect" name="selected_course" aria-label="Default select example" required>
+                        <select class="select-width form-select form-control" id="exampleSelect" name="selected_course" required>
                             <option selected disabled>Select Course</option>
                             {% for course in latest_courses %}
                                 <option value="{{ course.course_code }}">{{ course.course_code }} - {{ course.course_name }}</option>
@@ -215,71 +254,113 @@
                         <label for="add-content">Content:</label>
                         <textarea id="add-content" name="add-content" class="form-control" rows="10" required></textarea>
                     </div>
-                    {% comment %} <div class="form-group"> attachments function not working because of storage error, not included in operation first
-                        <label for="attachments">Upload Attachments (Max 3 files):</label>
-                        <input type="file" 
-                               id="attachments" 
-                               name="attachments[]" 
-                               class="form-control" 
-                               multiple
-                               accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png"
-                               onchange="validateFiles(this)">
-                        <div id="fileList"></div>
-                        <small class="text-muted">Allowed file types: PDF, DOC, DOCX, TXT, JPG, JPEG, PNG</small>
-                    </div> {% endcomment %}
                     <button type="submit" class="btn-dashboard w-100">Post Announcement</button>
                 </form>
 
+                <!-- Add this for displaying messages -->
+                {% if messages %}
+                <div class="messages">
+                    {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }}">
+                        {{ message }}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
                 <script>
-                    document.getElementById('createAnnouncementForm').addEventListener('submit', async function(e) {
-                        e.preventDefault();
+                    function submitAnnouncement(event) {
+                        event.preventDefault();
                         
-                        const formData = new FormData(this);
-                        
-                        try {
-                            console.log('Submitting form...');  // Debug log
-                            const response = await fetch("{% url 'dashboard' %}", {
-                                method: 'POST',
-                                body: formData,
-                                headers: {
-                                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
-                                }
-                            });
-                            
-                            console.log('Response received:', response);  // Debug log
-                            const result = await response.json();
-                            console.log('Result:', result);  // Debug log
-                            
-                            if (result.status === 'success') {
-                                await Swal.fire({
-                                    icon: 'success',
+                        const selectedCourse = document.getElementById('exampleSelect').value;
+                        const title = document.getElementById('add-title').value;
+                        const content = document.getElementById('add-content').value;
+                        const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+                        console.log('Submitting announcement:');
+                        console.log('Course:', selectedCourse);
+                        console.log('Title:', title);
+                        console.log('Content:', content);
+
+                        fetch('{% url "dashboard" %}', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRFToken': csrftoken,
+                            },
+                            body: JSON.stringify({
+                                selected_course: selectedCourse,
+                                'add-title': title,
+                                'add-content': content
+                            })
+                        })
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error(`HTTP error! status: ${response.status}`);
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            if (data.status === 'success') {
+                                Swal.fire({
                                     title: 'Success!',
-                                    text: result.message,
-                                    timer: 2000,
-                                    showConfirmButton: false
+                                    text: 'Announcement posted successfully',
+                                    icon: 'success'
+                                }).then(() => {
+                                    window.location.reload();
                                 });
-                                // Close the modal after success
-                                const modal = bootstrap.Modal.getInstance(document.getElementById('createAnnouncement'));
-                                modal.hide();
-                                window.location.reload();
                             } else {
                                 Swal.fire({
-                                    icon: 'error',
-                                    title: 'Error',
-                                    text: result.message || 'An error occurred'
+                                    title: 'Error!',
+                                    text: data.message || 'Failed to post announcement',
+                                    icon: 'error'
                                 });
                             }
-                            
-                        } catch (error) {
-                            console.error('Error:', error);  // Debug log
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
                             Swal.fire({
-                                icon: 'error',
-                                title: 'Error',
-                                text: 'An error occurred while processing your request'
+                                title: 'Error!',
+                                text: 'An error occurred while posting the announcement',
+                                icon: 'error'
                             });
-                        }
-                    });
+                        });
+                    }
                 </script>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Update Announcement Modal -->
+<div class="modal fade" id="updateAnnouncementModal" tabindex="-1" aria-labelledby="updateAnnouncementModalLabel" aria-hidden="true">
+    <div class="modal-xl modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="updateAnnouncementModalLabel">Update Announcement</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="updateAnnouncementForm" onsubmit="submitUpdateForm(event)" class="container-fluid">
+                    {% csrf_token %}
+                    <input type="hidden" id="update-announcement-id">
+                    <input type="hidden" id="update-course-code">
+                    <div class="form-group">
+                        <label for="update-title">Title:</label>
+                        <input type="text" 
+                               class="select-width form-select form-control" 
+                               id="update-title" 
+                               required>
+                    </div>
+                    <div class="form-group">
+                        <label for="update-content">Content:</label>
+                        <textarea class="form-control" 
+                                 id="update-content" 
+                                 rows="10" 
+                                 required></textarea>
+                    </div>
+                    <button type="submit" class="btn-dashboard w-100">Update Announcement</button>
+                </form>
             </div>
         </div>
     </div>
@@ -324,6 +405,236 @@
         myModal.hide();
     });
 </script>
+
+<script>
+    var mainAccordions = document.getElementsByClassName("dashboard-accordion");
+    var subAccordions = document.getElementsByClassName("sub-dashboard-accordion");
+
+    for (var i = 0; i < mainAccordions.length; i++) {
+        mainAccordions[i].addEventListener("click", function() {
+            this.classList.toggle("active");
+            var panel = this.nextElementSibling;
+            
+            if (panel.style.maxHeight) {
+                panel.style.maxHeight = null;
+            } else {
+                // Calculate total height including all sub-panels
+                var totalHeight = panel.scrollHeight;
+                var subPanels = panel.getElementsByClassName("sub-dashboard-panel");
+                for (var j = 0; j < subPanels.length; j++) {
+                    if (subPanels[j].style.maxHeight) {
+                        totalHeight += subPanels[j].scrollHeight;
+                    }
+                }
+                panel.style.maxHeight = totalHeight + "px";
+            }
+        });
+    }
+
+    for (var i = 0; i < subAccordions.length; i++) {
+        subAccordions[i].addEventListener("click", function(e) {
+            e.stopPropagation(); // Prevent triggering parent accordion
+            this.classList.toggle("active");
+            var subPanel = this.nextElementSibling;
+            var mainPanel = this.closest('.dashboard-panel');
+            
+            if (subPanel.style.maxHeight) {
+                subPanel.style.maxHeight = null;
+                // Adjust main panel height
+                if (mainPanel.style.maxHeight) {
+                    mainPanel.style.maxHeight = (parseInt(mainPanel.style.maxHeight) - subPanel.scrollHeight) + "px";
+                }
+            } else {
+                subPanel.style.maxHeight = subPanel.scrollHeight + "px";
+                // Adjust main panel height
+                if (mainPanel.style.maxHeight) {
+                    mainPanel.style.maxHeight = (parseInt(mainPanel.style.maxHeight) + subPanel.scrollHeight) + "px";
+                }
+            }
+        });
+    }
+</script>
+
+<script>
+// Make functions globally available
+window.openUpdateModal = function(announcementId, courseCode, announcementTitle, announcementContent) {
+
+    const idInput = document.getElementById('update-announcement-id');
+    const courseInput = document.getElementById('update-course-code');
+    const titleInput = document.getElementById('update-title');
+    const contentInput = document.getElementById('update-content');
+
+    idInput.value = announcementId;
+    courseInput.value = courseCode;
+    titleInput.value = announcementTitle;
+    contentInput.value = announcementContent;
+
+    const modal = new bootstrap.Modal(document.getElementById('updateAnnouncementModal'));
+    modal.show();
+};
+
+window.submitUpdateForm = function(event) {
+    event.preventDefault();
+    
+    // Get form data
+    const announcementId = document.getElementById('update-announcement-id').value;
+    const courseCode = document.getElementById('update-course-code').value;
+    const title = document.getElementById('update-title').value;
+    const content = document.getElementById('update-content').value;
+    
+    // Get current year and semester
+    const yearFull = document.getElementById('current_year').value;
+    const semesterFull = document.getElementById('current_semester').value;
+    const currentYear = yearFull.replace('Academic Session ', '').trim();
+    const currentSemester = semesterFull.replace('Semester ', '').trim();
+    
+    // Get CSRF token
+    const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+    console.log('Submitting update:', {
+        id: announcementId,
+        course: courseCode,
+        title: title,
+        content: content,
+        year: currentYear,
+        semester: currentSemester
+    });
+
+    fetch('/update_announcement/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrftoken
+        },
+        body: JSON.stringify({
+            announcement_id: announcementId,
+            course_code: courseCode,
+            title: title,
+            content: content,
+            year: currentYear,
+            semester: currentSemester
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            // Replace jQuery modal hide with vanilla JavaScript
+            document.getElementById('updateAnnouncementModal').style.display = 'none';
+            // Remove modal backdrop if it exists
+            const modalBackdrop = document.querySelector('.modal-backdrop');
+            if (modalBackdrop) {
+                modalBackdrop.remove();
+            }
+            // Remove modal-open class from body
+            document.body.classList.remove('modal-open');
+            
+            Swal.fire({
+                title: 'Success!',
+                text: 'Announcement updated successfully',
+                icon: 'success'
+            }).then(() => {
+                location.reload();
+            });
+        } else {
+            Swal.fire({
+                title: 'Error!',
+                text: data.message || 'Failed to update announcement',
+                icon: 'error'
+            });
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        Swal.fire({
+            title: 'Error!',
+            text: 'An error occurred while updating the announcement',
+            icon: 'error'
+        });
+    });
+};
+
+window.deleteAnnouncement = function(announcementId, courseCode) {
+    const yearFull = document.getElementById('current_year').value;
+    const semesterFull = document.getElementById('current_semester').value;
+    const currentYear = yearFull.replace('Academic Session ', '').trim();
+    const currentSemester = semesterFull.replace('Semester ', '').trim();
+    console.log('Delete function called with:', {
+        id: announcementId,
+        course: courseCode,
+        year: currentYear,
+        semester: currentSemester
+    });
+
+    Swal.fire({
+        title: 'Are you sure?',
+        text: "You won't be able to revert this!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Yes, delete it!'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+            const yearFull = document.getElementById('current_year').value;
+            const semesterFull = document.getElementById('current_semester').value;
+            
+            const cy = yearFull.replace('Academic Session ', '').trim();
+            const current_year = yearFull.replace('-', '/');
+            const currentSemester = semesterFull.replace('Semester ', '').trim();
+            
+            fetch('/delete_announcement/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrftoken
+                },
+                body: JSON.stringify({
+                    announcement_id: announcementId,
+                    course_code: courseCode,
+                    year: currentYear,
+                    semester: currentSemester
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    Swal.fire(
+                        'Deleted!',
+                        'Your announcement has been deleted.',
+                        'success'
+                    ).then(() => {
+                        location.reload();
+                    });
+                } else {
+                    Swal.fire(
+                        'Error!',
+                        data.message || 'An error occurred',
+                        'error'
+                    );
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                Swal.fire(
+                    'Error!',
+                    'An error occurred while deleting the announcement',
+                    'error'
+                );
+            });
+        }
+    });
+};
+
+// Make sure the document is loaded before attaching event listeners
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Scripts loaded and functions available');
+});
+</script>
+
+<!-- Add these hidden inputs with modified values -->
+<input type="hidden" id="current_year" value="{{ current_year|cut:'Academic Session ' }}">
+<input type="hidden" id="current_semester" value="{{ current_semester|cut:'Semester ' }}">
 </body>
 </html>
 

@@ -308,6 +308,7 @@
 
 .btn-add-announce {
     padding: 12px;
+    margin-bottom: 20px;
 }
 
 .btn-dashboard {
@@ -608,4 +609,181 @@
 
 .select-width{
     width: 100%;
+}
+
+.academic-title {
+    font-size: 24px;
+    color: #4E598C;
+    margin-bottom: 15px;
+}
+
+.semester-title {
+    font-size: 20px;
+    color: #666;
+    margin-bottom: 20px;
+}
+
+.announcement-item {
+    border-bottom: 1px solid #eee;
+    padding: 15px 0;
+}
+
+.announcement-item:last-child {
+    border-bottom: none;
+}
+
+.announcement-title {
+    font-size: 18px;
+    font-weight: bold;
+    color: #4E598C;
+    margin-bottom: 10px;
+}
+
+.announcement-content {
+    font-size: 14px;
+    color: #333;
+    margin-bottom: 10px;
+    padding-left: 15px;
+}
+
+.announcement-meta {
+    font-size: 12px;
+    color: #666;
+    padding-left: 15px;
+}
+
+.announcement-author {
+    font-weight: bold;
+    margin-right: 15px;
+}
+
+.announcement-time {
+    font-style: italic;
+}
+
+.no-announcements {
+    color: #666;
+    font-style: italic;
+    text-align: center;
+    padding: 20px;
+}
+
+.dashboard-accordion {
+    border-radius: 10px;
+    margin-top: 10px;
+    background-color: #F9C784;
+    color: #4E598C;
+    cursor: pointer;
+    padding: 18px;
+    width: 100%;
+    border: none;
+    text-align: left;
+    outline: none;
+    font-size: 15px;
+    transition: 0.4s;
+}
+
+.dashboard-accordion:after {
+    content: '\002B';
+    color: #777;
+    font-weight: bold;
+    float: right;
+    margin-left: 5px;
+}
+
+.dashboard-accordion.active:after {
+    content: "\2212";
+}
+
+.dashboard-accordion:hover {
+    background-color: #e39023;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.dashboard-panel {
+    color: #4E598C;
+    border-radius: 10px;
+    padding: 0 18px;
+    background-color: #F9C784;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.2s ease-out;
+    margin-top: 5px;
+}
+
+.sub-dashboard-accordion {
+    background-color: #f4f4f4;
+    color: #4E598C;
+    cursor: pointer;
+    padding: 12px;
+    width: 95%;
+    text-align: left;
+    border: none;
+    outline: none;
+    transition: 0.4s;
+    margin-top: 10px;
+    font-size: 0.9em;
+    border-radius: 5px;
+}
+
+.sub-dashboard-accordion:hover {
+    background-color: #f7b55f;
+    transform: translateX(5px);
+}
+
+.sub-dashboard-accordion:after {
+    content: '\002B';
+    color: #777;
+    font-weight: bold;
+    float: right;
+    margin-left: 5px;
+}
+
+.sub-dashboard-accordion.active:after {
+    content: "\2212";
+}
+
+.sub-dashboard-panel {
+    padding: 0;
+    background-color: #f9c784;
+    border: 0px solid #e09129;
+    max-height: 0;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    border-radius: 10px;
+    width: 95%;
+    margin-bottom: 15px;
+}
+
+.sub-dashboard-panel.active {
+    padding: 18px;
+    border: 1px solid #e09129;
+    max-height: 500px;
+}
+
+.display-ann-details{
+    padding: 15px;
+}
+
+.display-ann-details-header{
+    background-color: #ffffff;
+    border-radius: 10px;
+    padding: 10px;
+    border: 1px solid #4E598C;
+}
+
+.announcement-author {
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.announcement-time {
+    color: #666;
+    font-size: 0.8em;
+    margin-bottom: 10px;
+}
+
+.display-ann-content {
+    white-space: pre-wrap;
 }

@@ -263,154 +263,106 @@ def register_view(request):
 # Dashboard page
 @login_required
 def dashboard_view(request):
-    
-    welcome_message = request.session.pop('welcome_message', None)
-    
-    latest_courses = []
-    latest_year = None
-    latest_semester = None
-    current_user_email = request.session.get('user_email')
-
     try:
-        courses_data = database.child("course").get().val()
-        if courses_data:
-            sorted_years = sorted(courses_data.keys(), reverse=True)
-            latest_year = sorted_years[0]
-            latest_semester = get_latest_semester(courses_data, latest_year)
-
-            if latest_semester is not None:
-                latest_semester_courses = courses_data[latest_year][latest_semester]
+        # Handle POST request for creating announcement
+        if request.method == 'POST':
+            try:
+                data = json.loads(request.body)
+                selected_course = data.get('selected_course')
+                title = data.get('add-title')
+                content = data.get('add-content')
+                current_user = request.session.get('user_name')
                 
-                if isinstance(latest_semester_courses, dict):
-                    for code, course_info in latest_semester_courses.items():
-                        # Check if lecturers exists and is a dictionary
-                        lecturers = course_info.get('lecturers', {})
-                        if isinstance(lecturers, dict):
-                            # Handle dictionary structure
-                            for lecturer_id, lecturer_info in lecturers.items():
-                                if isinstance(lecturer_info, dict) and lecturer_info.get('lecturer_email') == current_user_email:
-                                    latest_courses.append({
-                                        'course_code': code,
-                                        'course_name': course_info.get('course_name', '')
-                                    })
-                                    break
-                        elif isinstance(lecturers, list):
-                            # Handle list structure
-                            for lecturer in lecturers:
-                                if isinstance(lecturer, dict) and lecturer.get('lecturer_email') == current_user_email:
-                                    latest_courses.append({
-                                        'course_code': code,
-                                        'course_name': course_info.get('course_name', '')
-                                    })
-                                    break
-
-
-    except Exception as e:
-        logger.error(f"Error fetching courses: {e}")
-
-    if request.method == 'POST':
-        try:
-            title = request.POST.get('add-title').upper()
-            content = request.POST.get('add-content')
-            course_code = request.POST.get('selected_course')
-            current_user_email = request.session.get('user_email')
-            files = request.FILES.getlist('attachments[]')
-            
-            # Get current academic year and semester
-            courses_data = database.child("course").get().val()
-            if courses_data:
+                # Get latest academic year and semester
+                courses_data = database.child("course").get().val()
                 sorted_years = sorted(courses_data.keys(), reverse=True)
                 current_year = sorted_years[0]  # Get latest year
                 current_semester = get_latest_semester(courses_data, current_year)
-            
-            # Get current timestamp
-            malaysia_tz = pytz.timezone('Asia/Kuala_Lumpur')
-            current_time = datetime.datetime.now(malaysia_tz)
-            formatted_time = current_time.strftime("%I:%M %p, %d %b %Y")
+                
+                # Create announcement data
+                announcement_data = {
+                    'title': title,
+                    'content': content,
+                    'author': current_user,
+                    'timestamp': datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                }
+                
+                print(f"Creating announcement:")
+                print(f"Course: {selected_course}")
+                print(f"Year: {current_year}")
+                print(f"Semester: {current_semester}")
+                print(f"Data: {announcement_data}")
+                
+                # Push the announcement to Firebase
+                database.child("course")\
+                       .child(current_year)\
+                       .child(current_semester)\
+                       .child(selected_course)\
+                       .child('announcements')\
+                       .push(announcement_data)
+                
+                return JsonResponse({
+                    'status': 'success',
+                    'message': 'Announcement posted successfully'
+                })
+                
+            except Exception as e:
+                print(f"Error posting announcement: {e}")
+                return JsonResponse({
+                    'status': 'error',
+                    'message': str(e)
+                })
 
-            # Get user's name from users table
-            user_data = database.child("users").get().val()
-            user_name = None
-            for user_id, user_info in user_data.items():
-                if user_info.get('email') == current_user_email:
-                    user_name = user_info.get('name')
-                    break
-
-            # Handle file uploads
-            file_urls = []
-            if files:
-                for file in files:
-                    unique_filename = f"{int(time.time())}_{file.name}"
-                    file_path = f"course/{current_year}/{current_semester}/{course_code}/announcements/{unique_filename}"
-                    
-                    # Upload file to Firebase Storage
-                    storage.child(file_path).put(file)
-                    
-                    # Get the download URL
-                    file_url = storage.child(file_path).get_url(None)
-                    
-                    file_urls.append({
-                        "name": file.name,
-                        "url": file_url
-                    })
-
-            # Create announcement data
-            announcement_data = {
-                "title": title,
-                "content": content,
-                "author": user_name,
-                "timestamp": formatted_time,
-            }
-
-            # Get existing announcements to determine next ID
-            course_path = f"course/{current_year}/{current_semester}/{course_code}/announcements"
-            existing_announcements = database.child(course_path).get().val()
-            
-            # Determine the next announcement number
-            next_num = 1
-            if existing_announcements:
-                existing_nums = [int(k[1:]) for k in existing_announcements.keys() if k.startswith('a')]
-                if existing_nums:
-                    next_num = max(existing_nums) + 1
-
-            # Create the new announcement ID
-            announcement_id = f'a{next_num}'
-
-            # Save the announcement directly under the course code
-            database.child("course").child(current_year).child(current_semester).child(course_code).child("announcements").child(announcement_id).set(announcement_data)
-
-            return JsonResponse({
-                'status': 'success',
-                'message': 'Announcement created successfully'
-            })
-
-        except Exception as e:
-            print(f"Error adding announcement: {e}")
-            return JsonResponse({
-                'status': 'error',
-                'message': str(e)
-            })
-
-    try:
+        # Handle GET request - Your existing code
+        courses_data = database.child("course").get().val()
+        latest_courses = []
         announcements = []
-        announcements_data = database.child("announcements").get()
-        if announcements_data.val():
-            for announcement in announcements_data.each():
-                announcements.append(announcement.val())
         
-        announcements.sort(key=lambda x: datetime.datetime.strptime(x['timestamp'], "%I:%M %p, %d %b %Y"), reverse=True)
+        if courses_data:
+            sorted_years = sorted(courses_data.keys(), reverse=True)
+            current_year = sorted_years[0]  # Get latest year
+            current_semester = get_latest_semester(courses_data, current_year)
+            
+            # Get courses for the latest semester
+            semester_courses = courses_data[current_year][current_semester]
+            
+            # Process each course
+            for course_code, course_info in semester_courses.items():
+                course_data = {
+                    'course_code': course_code,
+                    'course_name': course_info.get('course_name', '')
+                }
+                latest_courses.append(course_data)
+                
+                # Get announcements for this course
+                course_announcements = course_info.get('announcements', {})
+                if course_announcements:
+                    for ann_id, ann_data in course_announcements.items():
+                        announcement = {
+                            'id': ann_id,
+                            'course_code': course_code,
+                            'title': ann_data.get('title', ''),
+                            'content': ann_data.get('content', ''),
+                            'author': ann_data.get('author', ''),
+                            'timestamp': ann_data.get('timestamp', '')
+                        }
+                        announcements.append(announcement)
+        
+        # Sort announcements by timestamp (newest first)
+        announcements.sort(key=lambda x: x['timestamp'], reverse=True)
+        
+        context = {
+            'latest_courses': latest_courses,
+            'announcements': announcements,
+            'current_year': current_year,
+            'current_semester': current_semester
+        }
+        
+        return render(request, 'dashboard.html', context)
         
     except Exception as e:
-        print(f"Error fetching announcements: {e}")
-        announcements = []
-
-    context = {
-        'announcements': announcements,
-        'user_email': current_user_email,
-        'welcome_message': welcome_message,
-        'latest_courses': latest_courses
-    }
-    return render(request, 'dashboard.html', context)
+        print(f"Error in dashboard view: {e}")
+        return render(request, 'dashboard.html', {'error': str(e)})
 
 def academic_view(request):
     if request.method == 'POST':
@@ -1822,3 +1774,91 @@ def get_latest_semester(courses_data, latest_year):
             if isinstance(courses_data[latest_year][i], dict):
                 latest_semester = i
     return latest_semester
+
+@login_required
+def update_announcement(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            announcement_id = data.get('announcement_id')
+            course_code = data.get('course_code')
+            title = data.get('title')
+            content = data.get('content')
+            year = data.get('year').replace('/', '-')
+            semester = data.get('semester')
+            current_user = request.session.get('user_name')
+            
+            print(f"Updating announcement:")
+            print(f"ID: {announcement_id}")
+            print(f"Course: {course_code}")
+            print(f"Year: {year}")
+            print(f"Semester: {semester}")
+            
+            # Update the announcement
+            database.child("course")\
+                   .child(year)\
+                   .child(semester)\
+                   .child(course_code)\
+                   .child('announcements')\
+                   .child(announcement_id)\
+                   .update({
+                        'title': title,
+                        'content': content,
+                        'last_modified': datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                   })
+            
+            return JsonResponse({
+                'status': 'success',
+                'message': 'Announcement updated successfully'
+            })
+            
+        except Exception as e:
+            print(f"Error updating announcement: {e}")
+            import traceback
+            traceback.print_exc()
+            return JsonResponse({
+                'status': 'error',
+                'message': str(e)
+            })
+    
+    return JsonResponse({
+        'status': 'error',
+        'message': 'Invalid request method'
+    })
+
+@login_required
+def delete_announcement(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            announcement_id = data.get('announcement_id')
+            course_code = data.get('course_code')
+            year = data.get('year')
+            semester = data.get('semester')
+            
+            database.child("course")\
+                   .child(year)\
+                   .child(semester)\
+                   .child(course_code)\
+                   .child('announcements')\
+                   .child(announcement_id)\
+                   .remove()
+            
+            return JsonResponse({
+                'status': 'success',
+                'message': 'Announcement deleted successfully'
+            })
+                
+        except Exception as e:
+            print(f"Error in delete_announcement: {e}")
+            import traceback
+            traceback.print_exc()
+            return JsonResponse({
+                'status': 'error',
+                'message': f'Error: {str(e)}'
+            })
+    
+    return JsonResponse({
+        'status': 'error',
+        'message': 'Invalid request method'
+    })
