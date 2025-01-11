@@ -1,0 +1,413 @@
+.nav-bar {
+  display: flex;
+  justify-content: space-around;
+  background-color: #ff9900;
+  padding: 10px;
+  border-radius: 5px;
+}
+
+.nav-item {
+  color: white;
+  text-decoration: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  transition: background-color 0.3s;
+}
+
+.nav-item:hover {
+  background-color: #ffae4c;
+}
+
+.form-container {
+  background-color: white;
+  margin: 0 auto;
+  padding: 20px;
+  border-radius: 5px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+  max-width: 1200px;
+  padding: 20px;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+.form-group input,
+.form-group textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  margin-bottom: 10px;
+}
+
+.submit-button {
+  background-color: #ff9900;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.submit-button:hover {
+  background-color: #ff9900;
+}
+
+.profile-picture-container {
+  position: relative;
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  overflow: hidden;
+  margin: 0 auto;
+  cursor: pointer;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.profile-picture {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: filter 0.3s ease;
+}
+
+.profile-picture-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.profile-picture-container:hover .profile-picture {
+  filter: blur(2px);
+}
+
+.profile-picture-container:hover .profile-picture-overlay {
+  opacity: 1;
+}
+
+.profile-picture-text {
+  color: white;
+  font-size: 14px;
+  text-align: center;
+}
+
+.company-entry,
+.education-entry {
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  padding: 15px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.company-entry .form-group,
+.education-entry.form-group {
+  margin-bottom: 10px;
+}
+
+.company-entry .form-group label,
+.education-entry.form-group label {
+  font-weight: bold;
+  margin-bottom: 5px;
+  display: block;
+}
+
+.company-entry .form-group input,
+.education-entry.form-group input {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+button {
+  background-color: #ff9900;
+  color: white;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+button:hover {
+  background-color: #ff9900;
+}
+
+.om {
+  padding: 10px;
+}
+
+.language-entry,
+.technical-skill-entry,
+.soft-skill-entry {
+  margin-bottom: 10px; /* Space between entries */
+}
+
+h3 {
+  padding: 10px;
+}
+
+.achievement-entry,
+.skills-entry {
+  padding: 10px;
+}
+
+/* Resume */
+.resume-container {
+  max-width: 800px;
+  margin: auto;
+  background: white;
+  padding: 10px;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.resume-header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.resume-header h1 {
+  margin: 0;
+}
+
+.resume-section {
+  background-color: #f9f9f9; /* Background color for sections */
+  border-radius: 5px; /* Rounded corners */
+  padding: 5px; /* Padding inside sections */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Box shadow for depth */
+}
+
+.resume-section h3 {
+  border-bottom: 2px solid #007bff;
+  padding-bottom: 5px;
+  margin-bottom: 15px;
+}
+
+.education-entry,
+.experience-entry {
+  margin-bottom: 15px;
+  background-color: #f9f9f9;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  padding: 10px;
+  margin-bottom: 15px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s;
+}
+
+.skills-list,
+.achievements-list {
+  list-style-type: none;
+  padding: 0;
+}
+
+.skills-list li,
+.achievements-list li {
+  background: #e9ecef;
+  margin: 5px 0;
+  padding: 10px;
+  border-radius: 5px;
+}
+
+/* Resume */
+.resume-container {
+  max-width: 800px;
+  margin: auto;
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+}
+
+.resume-header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.resume-header h1 {
+  margin: 0;
+}
+
+.resume-section {
+  margin-bottom: 20px;
+}
+
+.resume-section h3 {
+  border-bottom: 2px solid #007bff;
+  padding-bottom: 5px;
+  padding-top: 10px;
+}
+
+.education-entry,
+.experience-entry {
+  margin-bottom: 15px;
+}
+
+.skills-list,
+.achievements-list {
+  list-style-type: none;
+  padding: 0;
+}
+
+.skills-list li,
+.achievements-list li {
+  background: #e9ecef;
+  margin: 5px 0;
+  padding: 10px;
+  border-radius: 5px;
+}
+
+.experience-entry:hover .education-entry:hover {
+  transform: translateY(-2px);
+}
+
+.job-title {
+  font-size: 15px;
+  color: black;
+}
+
+.job-position {
+  font-weight: bold;
+  color: #555;
+}
+
+.job-duration {
+  font-style: italic;
+  color: #777;
+}
+
+.button-container {
+  position: absolute; /* Positioning the container absolutely */
+  top: 50px; /* Adjust as needed */
+  right: 0px; /* Adjust as needed */
+  z-index: 1000; /* Ensure it appears above other elements */
+}
+.button {
+  padding: 10px 20px;
+  margin-right: 5px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+.edit-button {
+  background-color: #007bff;
+  color: white;
+}
+.download-button {
+  background-color: #28a745;
+  color: white;
+}
+.resumeGenerate-container {
+  max-width: 800px; /* Set a maximum width for the resume */
+  margin: auto; /* Center the container */
+  background: white; /* Background color */
+  padding: 20px; /* Padding inside the container */
+  border-radius: 8px; /* Rounded corners */
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+}
+
+.resumeGenerate-header {
+  text-align: center; /* Center the header text */
+  margin-bottom: 20px; /* Space below the header */
+}
+
+.resumeGenerate-header h1 {
+  margin: 0; /* Remove default margin */
+}
+
+.profileGenerate-container {
+  display: flex; /* Use flexbox for layout */
+  align-items: center; /* Center items vertically */
+  margin-bottom: 20px; /* Space below the profile section */
+}
+
+.profileGenerate-picture-container {
+  margin-right: 20px; /* Space between the picture and the text */
+}
+
+.profileGenerate-picture {
+  width: 120px; /* Set a fixed width for the profile picture */
+  height: 120px; /* Set a fixed height for the profile picture */
+  border-radius: 50%; /* Make the picture circular */
+  object-fit: cover; /* Ensure the image covers the container */
+}
+
+.personalGenerate-info {
+  text-align: left; /* Align text to the left */
+  padding-left: 100px;
+}
+
+.personalGenerate-info h1 {
+  margin: 0; /* Remove default margin */
+}
+
+.personalGenerate-info p {
+  margin: 5px 0; /* Add some space between paragraphs */
+}
+.skills-container {
+  display: flex; /* Use flexbox for layout */
+  justify-content: space-between; /* Space between sections */
+}
+
+.resume-section {
+  flex: 1; /* Allow sections to grow */
+  margin-right: 5px; /* Space between sections */
+}
+
+.resume-section:last-child {
+  margin-right: 0; /* Remove margin for the last section */
+}
+
+.skills-list {
+  list-style-type: none; /* Remove default list styling */
+  padding: 0; /* Remove padding */
+}
+
+.skills-list li {
+  position: relative; /* Positioning for the checkmark */
+  padding-left: 20px; /* Space for the checkmark */
+  margin: 5px 0; /* Space between list items */
+  font-size: 16px; /* Font size for skills */
+}
+
+.education-container,
+experience-container {
+  display: flex; /* Use flexbox for layout */
+  flex-wrap: wrap; /* Allow items to wrap to the next line */
+  gap: 5px; /* Space between items */
+}
+
+.education-entry,
+.experience-entry {
+  flex: 1 1 calc(50% - 20px); /* Allow two items per row with space */
+  background-color: #f9f9f9; /* Background color for entries */
+  border: 1px solid #ddd; /* Border around entries */
+  border-radius: 5px; /* Rounded corners */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Shadow for depth */
+}
+
+@media (max-width: 600px) {
+  .education-entry,
+  .experience-entry {
+    flex: 1 1 100%; /* Stack items on smaller screens */
+  }
+}

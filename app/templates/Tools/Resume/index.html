@@ -1,0 +1,659 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CS SETS</title>
+    <link rel="stylesheet" href="{% static 'css/navbar.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/header.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/style.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/footer.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/tools/resume.css' %}" />
+    <!-- Add SweetAlert2 CSS and JS -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.32/dist/sweetalert2.min.css"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.32/dist/sweetalert2.all.min.js"></script>
+  </head>
+  <body>
+    <div class="container">
+      {% include 'navbar.html' %} {% include 'header.html' %}
+      <main>
+        <section class="content">
+          <div class="nav-bar">
+            <a
+              href="#personal"
+              class="nav-item active"
+              onclick="showSection('personal-info')"
+            >
+              <i class="fas fa-user"></i> Personal Information
+            </a>
+
+            <a
+              href="#skills"
+              class="nav-item"
+              onclick="showSection('skills-info')"
+            >
+              <i class="fas fa-tools"></i> Technical Skills
+            </a>
+            <a
+              href="#education"
+              class="nav-item"
+              onclick="showSection('education-info')"
+            >
+              <i class="fas fa-graduation-cap"></i> Education
+            </a>
+            <a
+              href="#experience"
+              class="nav-item"
+              onclick="showSection('experience-info')"
+            >
+              <i class="fas fa-briefcase"></i> Experience
+            </a>
+            <a
+              href="#certification"
+              class="nav-item"
+              onclick="showSection('certification-info')"
+            >
+              <i class="fas fa-certificate"></i> Certification
+            </a>
+          </div>
+          <form
+            action="{% url 'resume' %}"
+            method="post"
+            enctype="multipart/form-data"
+          >
+            {% csrf_token %}
+
+            <!-- ===================PERSONAL INFORMATION====================== -->
+
+            <div class="form-container">
+              <div id="personal-info" class="form-section">
+                <h2>Personal Information</h2>
+                <div class="profile-header">
+                  <div
+                    class="profile-picture-container"
+                    onclick="document.getElementById('profilePictureInput').click()"
+                  >
+                  <img
+                  class="profile-picture"
+                  src="{% if resume_data.profile_picture %}
+                         data:image/jpeg;base64,{{ resume_data.profile_picture }}
+                       {% elif user_data.profile_picture %}
+                         data:image/jpeg;base64,{{ user_data.profile_picture }}
+                       {% else %}
+                         {% static 'image/user.png' %}
+                       {% endif %}"
+                  alt="Profile Picture"
+                />
+                    <div class="profile-picture-overlay">
+                      <div class="profile-picture-text">
+                        Click to change<br />profile picture
+                      </div>
+                    </div>
+                    <input
+                      type="file"
+                      id="profilePictureInput"
+                      name="profile_picture"
+                      accept="image/*"
+                      class="profile-picture-input"
+                      onchange="previewImage(this)"
+                    />
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label for="name">Name:</label>
+                  <input type="text" id="name" name="name" value="{{ resume_data.name }}" required />
+                </div>
+
+                <div class="form-group">
+                  <label for="email">Email:</label>
+                  <input type="email" id="email" name="email" value="{{ resume_data.email }}" required />
+                </div>
+
+                <div class="form-group">
+                  <label for="phone">Phone:</label>
+                  <input type="text" id="phone" name="phone" value="{{ resume_data.phone }}" required />
+                </div>
+
+                <div class="form-group">
+                  <label for="about">About:</label>
+                  <textarea id="about" name="about" required>{{ resume_data.about|default:'' }}</textarea>
+                </div>
+
+                <div class="form-group">
+                  <label for="address">Address:</label>
+                  <textarea id="address" name="address" required>{{ resume_data.address|default:'' }}</textarea>
+                </div>
+            
+              <button
+                type="button"
+                class="next-button"
+                onclick="validatePersonalInfo()"
+              >
+                Next
+              </button>
+            </div>
+            <!-- ================Experience======================= -->
+            <div
+              id="experience-info"
+              class="form-section"
+              style="display: none"
+            >
+              <h2>Experience</h2>
+              <div id="company-container">
+                {% if resume_data.companies %}
+                    {% for company in resume_data.companies %}
+                    <div class="company-entry">
+                      <div class="form-group">
+                          <label for="company{{ forloop.counter }}">Company Name:</label>
+                          <input type="text" id="company{{ forloop.counter }}" name="company[]" value="{{ company.name|default:'' }}" />
+                      </div>
+                      <div class="form-group">
+                          <label for="post{{ forloop.counter }}">Post:</label>
+                          <input type="text" id="post{{ forloop.counter }}" name="post[]" value="{{ company.post|default:'' }}" />
+                      </div>
+                      <div class="form-group">
+                          <label for="duration{{ forloop.counter }}">Duration:</label>
+                          <input type="text" id="duration{{ forloop.counter }}" name="duration[]" value="{{ company.duration|default:'' }}" />
+                      </div>
+                      <div class="form-group">
+                          <label for="description{{ forloop.counter }}">Description:</label>
+                          <input type="text" id="description{{ forloop.counter }}" name="description[]" value="{{ company.description|default:'' }}" />
+                      </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                <div class="company-entry">
+                        <div class="form-group">
+                            <label for="company1">Company Name:</label>
+                            <input type="text" id="company1" name="company[]" value="" />
+                        </div>
+                        <div class="form-group">
+                            <label for="post1">Post:</label>
+                            <input type="text" id="post1" name="post[]" value="" />
+                        </div>
+                        <div class="form-group">
+                            <label for="duration1">Duration:</label>
+                            <input type="text" id="duration1" name="duration[]" value="" />
+                        </div>
+                        <div class="form-group">
+                            <label for="description1">Description:</label>
+                            <input type="text" id="description1" name="description[]" value="" />
+                        </div>
+                    </div>
+                {% endif %}
+              </div>
+              <button
+                type="button"
+                class="add-company-button"
+                onclick="addCompany()"
+              >
+                Add Company
+              </button>
+              <button
+                type="button"
+                class="next-button"
+                onclick="showSection('certification-info')"
+              >
+                Next
+              </button>
+            </div>
+
+            <!-- =====================SKILLS SECTION ================== -->
+            <div id="skills-info" class="form-section" style="display: none">
+              <h2>Technical Skills</h2>
+              <div class="skills-entry">
+                <div class="form-group">
+                  <label for="skills">Languages:</label>
+                  <div id="languages-container">
+                    {% if resume_data.languages %}
+                      {% for language in resume_data.languages %}
+                        <div class="language-entry">
+                          <input
+                            type="text"
+                            name="lang[]"
+                            placeholder="Enter language"
+                            value="{{ language }}"
+                          />
+                        </div>
+                      {% endfor %}
+                    {% else %}
+                      <div class="language-entry">
+                        <input
+                          type="text"
+                          name="lang[]"
+                          placeholder="Enter language"
+                          value=""
+                        />
+                      </div>
+                    {% endif %}
+                  </div>
+                  <button type="button" onclick="addLanguage()">
+                    Add Language
+                  </button>
+                </div>
+                <div class="form-group">
+                  <label for="Technical">Technical Skills:</label>
+                  <div id="technical-skills-container">
+                    {% if resume_data.technical_skills %}
+                      {% for skill in resume_data.technical_skills %}
+                        <div class="technical-skill-entry">
+                          <input
+                            type="text"
+                            name="tech[]"
+                            placeholder="Enter technical skill"
+                            value="{{ skill }}"
+                          />
+                        </div>
+                      {% endfor %}
+                    {% else %}
+                      <div class="technical-skill-entry">
+                        <input
+                          type="text"
+                          name="tech[]"
+                          placeholder="Enter technical skill"
+                          value=""
+                        />
+                      </div>
+                    {% endif %}
+                  </div>
+                  <button type="button" onclick="addTechnicalSkill()">
+                    Add Technical Skill
+                  </button>
+                </div>
+                <div class="form-group">
+                  <label for="Technical">Soft Skills:</label>
+                  <div id="soft-skills-container">
+                    {% if resume_data.soft_skills %}
+                      {% for soft in resume_data.soft_skills %}
+                        <div class="soft-skill-entry">
+                          <input
+                            type="text"
+                            name="soft[]"
+                            placeholder="Enter soft skill"
+                            value="{{ soft }}"
+                          />
+                        </div>
+                      {% endfor %}
+                    {% else %}
+                      <div class="soft-skill-entry">
+                        <input
+                          type="text"
+                          name="soft[]"
+                          placeholder="Enter soft skill"
+                          value=""
+                        />
+                      </div>
+                    {% endif %}
+                  </div>
+                  <button type="button" onclick="addSoftSkill()">
+                    Add Soft Skill
+                  </button>
+                </div>
+                <button
+                  type="button"
+                  class="next-button"
+                  onclick="showSection('education-info')"
+                >
+                  Next
+                </button>
+              </div>
+            </div>
+
+            <!-- =====================EDUCATION SECTION ================== -->
+
+            <!-- -----EDUCATION 1----- -->
+            <div id="education-info" class="form-section" style="display: none">
+              <h2>Education</h2>
+              <div id="education-container">
+                {% if resume_data.schools %}
+                    {% for school in resume_data.schools %}
+                    <div class="education-entry">
+                        <div class="form-group">
+                            <label for="school{{ forloop.counter }}">School Name:</label>
+                            <input type="text" id="school{{ forloop.counter }}" name="schools[]" value="{{ school.name|default:'' }}" />
+                        </div>
+                        <div class="form-group">
+                            <label for="program{{ forloop.counter }}">Program:</label>
+                            <input type="text" id="program{{ forloop.counter }}" name="programs[]" value="{{ school.program|default:'' }}" />
+                        </div>
+                        <div class="form-group">
+                            <label for="start_year{{ forloop.counter }}">Start Year:</label>
+                            <input type="text" id="start_year{{ forloop.counter }}" name="start_years[]" value="{{ school.start_year|default:'' }}" />
+                        </div>
+                        <div class="form-group">
+                            <label for="graduation_year{{ forloop.counter }}">Graduation Year:</label>
+                            <input type="text" id="graduation_year{{ forloop.counter }}" name="graduation_years[]" value="{{ school.graduation_year|default:'' }}" />
+                        </div>
+                        <div class="form-group">
+                          <label for="cgpa{{ forloop.counter }}">CGPA/Result:</label>
+                          <input type="text" id="cgpa{{ forloop.counter }}" name="cgpa[]" value="{{ school.cgpa|default:'' }}" />
+                      </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="education-entry">
+                        <div class="form-group">
+                            <label for="school1">School Name:</label>
+                            <input type="text" id="school1" name="schools[]" value="" />
+                        </div>
+                        <div class="form-group">
+                            <label for="program1">Program:</label>
+                            <input type="text" id="program1" name="programs[]" value="" />
+                        </div>
+                        <div class="form-group">
+                            <label for="start_year1">Start Year:</label>
+                            <input type="text" id="start_year1" name="start_years[]" value="" />
+                        </div>
+                        <div class="form-group">
+                            <label for="graduation_year1">Graduation Year:</label>
+                            <input type="text" id="graduation_year1" name="graduation_years[]" value="" />
+                        </div>
+                        <div class="form-group">
+                          <label for="cgpa1">CGPA/Result:</label>
+                          <input type="text" id="cgpa1" name="cgpa[]" value="" />
+                      </div>
+                    </div>
+                {% endif %}
+              </div>
+              <button
+                type="button"
+                class="add-education-button"
+                onclick="addEducation()"
+              >
+                Add Education
+              </button>
+              <button
+                type="button"
+                class="next-button"
+                onclick="showSection('experience-info')"
+              >
+                Next
+              </button>
+            </div>
+
+            <!-- ==========================CERTIFICATION================= -->
+            <div
+              id="certification-info"
+              class="form-section"
+              style="display: none"
+            >
+              <h2>Achievements</h2>
+              <div id="achievements-container">
+                {% if resume_data.achievements %}
+                    {% for achievement in resume_data.achievements %}
+                    <div class="form-group achievement-entry">
+                        <label for="achievement{{ forloop.counter }}">Achievement:</label>
+                  <input
+                    type="text"
+                    id="achievement{{ forloop.counter }}"
+                    name="achievements[]"
+                    placeholder="Enter achievement"
+                    value="{{ achievement }}"
+                  />
+                </div>
+                {% endfor %}
+                {% else %}  
+              <div class="form-group achievement-entry">
+                    <label for="achievement1">Achievements:</label>
+                    <input type="text" id="achievement1" name="achievements[]" value="" />
+                </div>
+               {% endif %}
+               </div>
+              <button
+                type="button"
+                class="add-achievement-button"
+                onclick="addAchievement()"
+              >
+                Add Achievement
+              </button>
+              <button type="submit" class="btn1">Submit</button>
+            </div>
+          </form>
+        </section>
+      </main>
+
+      {% include 'footer.html' %}
+    </div>
+    <script src="{% static 'js/backend.js' %}"></script>
+    <script>
+      function showSection(sectionId) {
+        // Hide all sections
+        const sections = document.querySelectorAll(".form-section");
+        sections.forEach((section) => {
+          section.style.display = "none";
+        });
+
+        // Show the selected section
+        const selectedSection = document.getElementById(sectionId);
+        if (selectedSection) {
+          selectedSection.style.display = "block";
+        }
+
+        // Update active class on nav items
+        const navItems = document.querySelectorAll(".nav-item");
+        navItems.forEach((item) => {
+          item.classList.remove("active");
+        });
+
+        const activeNavItem = document.querySelector(`a[href="#${sectionId}"]`);
+        if (activeNavItem) {
+          activeNavItem.classList.add("active");
+        }
+
+        // Change the URL without reloading the page
+        history.pushState(null, "", `#${sectionId}`);
+      }
+
+      // Initialize by showing the first section
+      document.addEventListener("DOMContentLoaded", () => {
+        showSection("personal-info");
+      });
+
+      document.addEventListener("DOMContentLoaded", function () {
+        const useCurrentRadio = document.getElementById("useCurrent");
+        const uploadNewRadio = document.getElementById("uploadNew");
+        const profilePictureInput = document.getElementById(
+          "profilePictureInput"
+        );
+
+        if (useCurrentRadio) {
+          useCurrentRadio.addEventListener("change", function () {
+            if (this.checked) {
+              profilePictureInput.style.display = "none";
+            }
+          });
+        }
+
+        if (uploadNewRadio) {
+          uploadNewRadio.addEventListener("change", function () {
+            if (this.checked) {
+              profilePictureInput.style.display = "block";
+            }
+          });
+        }
+      });
+
+      // Image preview function
+      function previewImage(input) {
+        if (input.files && input.files[0]) {
+          const reader = new FileReader();
+
+          Swal.fire({
+            title: "Loading...",
+            text: "Preparing image preview",
+            allowOutsideClick: false,
+            showConfirmButton: false,
+            willOpen: () => {
+              Swal.showLoading();
+            },
+          });
+
+          reader.onload = function (e) {
+            const profilePicture = document.querySelector(".profile-picture");
+            if (profilePicture) {
+              profilePicture.src = e.target.result;
+              Swal.close();
+            }
+          };
+
+          reader.readAsDataURL(input.files[0]);
+        }
+      }
+
+      let companyCount = 1;
+let educationCount = 1;
+
+function addCompany() {
+    companyCount++;
+    const companyContainer = document.getElementById('company-container');
+    const newCompanyEntry = `
+        <div class="company-entry">
+            <div class="form-group">
+                <label for="company${companyCount}">Company Name:</label>
+                <input type="text" id="company${companyCount}" name="company[]" required />
+            </div>
+            <div class="form-group">
+                <label for="post${companyCount}">Post:</label>
+                <input type="text" id="post${companyCount}" name="post[]" required />
+            </div>
+            <div class="form-group">
+                <label for="duration${companyCount}">Duration:</label>
+                <input type="text" id="duration${companyCount}" name="duration[]" required />
+            </div>
+            <div class="form-group">
+                <label for="description${companyCount}">Description:</label>
+                <input type="text" id="description${companyCount}" name="description[]" required />
+            </div>
+        </div>
+    `;
+    companyContainer.insertAdjacentHTML('beforeend', newCompanyEntry);
+}
+
+function addEducation() {
+    educationCount++;
+    const educationContainer = document.getElementById('education-container');
+    const newEducationEntry = `
+        <div class="education-entry">
+            <div class="form-group">
+                <label for="school${educationCount}">School Name:</label>
+                <input type="text" id="school${educationCount}" name="schools[]" required />
+            </div>
+            <div class="form-group">
+                <label for="program${educationCount}">Program:</label>
+                <input type="text" id="program${educationCount}" name="programs[]" required />
+            </div>
+            <div class="form-group">
+                <label for="start_year${educationCount}">Start Year:</label>
+                <input type="text" id="start_year${educationCount}" name="start_years[]" required />
+            </div>
+            <div class="form-group">
+                <label for="graduation_year${educationCount}">Graduation Year:</label>
+                <input type="text" id="graduation_year${educationCount}" name="graduation_years[]" required />
+            </div>
+            <div class="form-group">
+                <label for="cgpa${educationCount}">CGPA/Result:</label>
+                <input type="text" id="cgpa${educationCount}" name="cgpa[]" required />
+            </div>
+        </div>
+    `;
+    educationContainer.insertAdjacentHTML('beforeend', newEducationEntry);
+}
+      function addLanguage() {
+        const languagesContainer = document.getElementById(
+          "languages-container"
+        );
+        const newLanguageEntry = document.createElement("div");
+        newLanguageEntry.className = "language-entry";
+        newLanguageEntry.innerHTML = `
+              <input type="text" name="lang[]" placeholder="Enter language"  />
+          `;
+        languagesContainer.appendChild(newLanguageEntry);
+      }
+
+      function addTechnicalSkill() {
+        const technicalSkillsContainer = document.getElementById(
+          "technical-skills-container"
+        );
+        const newTechnicalSkillEntry = document.createElement("div");
+        newTechnicalSkillEntry.className = "technical-skill-entry";
+        newTechnicalSkillEntry.innerHTML = `
+              <input type="text" name="tech[]" placeholder="Enter technical skill"  />
+          `;
+        technicalSkillsContainer.appendChild(newTechnicalSkillEntry);
+      }
+
+      function addSoftSkill() {
+        const softSkillsContainer = document.getElementById(
+          "soft-skills-container"
+        );
+        const newSoftSkillEntry = document.createElement("div");
+        newSoftSkillEntry.className = "soft-skill-entry";
+        newSoftSkillEntry.innerHTML = `
+              <input type="text" name="soft[]" placeholder="Enter soft skill"  />
+          `;
+        softSkillsContainer.appendChild(newSoftSkillEntry);
+      }
+
+      function addAchievement() {
+        const achievementsContainer = document.getElementById(
+          "achievements-container"
+        );
+        const newAchievementEntry = document.createElement("div");
+        newAchievementEntry.className = "form-group achievement-entry";
+        const achievementCount =
+          achievementsContainer.querySelectorAll(".achievement-entry").length +
+          1;
+
+        newAchievementEntry.innerHTML = `
+              <label for="achievement${achievementCount}">Achievement:</label>
+              <input type="text" id="achievement${achievementCount}" name="achievements[]" placeholder="Enter achievement"  />
+          `;
+
+        achievementsContainer.appendChild(newAchievementEntry);
+      }
+
+      function validatePersonalInfo() {
+        const name = document.getElementById("name").value.trim();
+        const email = document.getElementById("email").value.trim();
+        const phone = document.getElementById("phone").value.trim();
+        const about = document.getElementById("about").value.trim();
+        const address = document.getElementById("address").value.trim();
+        const profilePictureInput = document.getElementById(
+          "profilePictureInput"
+        );
+        const currentProfilePicture =
+          document.querySelector(".profile-picture").src;
+
+        // Check if all required fields are filled
+        if (!name || !email || !phone || !about || !address) {
+          Swal.fire({
+            icon: "error",
+            title: "Incomplete Information",
+            text: "Please fill in all required fields in Personal Information.",
+          });
+          return; // Exit the function if validation fails
+        }
+
+        // Check if a new profile picture is selected or if the current one is the default
+        if (
+          profilePictureInput.files.length === 0 &&
+          currentProfilePicture.includes("user.png")
+        ) {
+          Swal.fire({
+            icon: "error",
+            title: "Profile Picture Required",
+            text: "Please select a profile picture or upload a new one.",
+          });
+          return; // Exit the function if validation fails
+        }
+
+        // If all validations pass, proceed to the next section
+        showSection("skills-info");
+      }
+    </script>
+  </body>
+</html>

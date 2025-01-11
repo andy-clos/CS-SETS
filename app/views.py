@@ -32,6 +32,7 @@ import uuid
 import requests
 
 
+
 logger = logging.getLogger(__name__)
 
 config = {
@@ -2162,4 +2163,126 @@ def delete_announcement(request):
         'message': 'Invalid request method'
     })
 
-                
+#resume
+def resume_view(request):
+    user_email = get_current_user(request)
+    encoded_email = user_email.replace('.', '-dot-').replace('@', '-at-')
+    print("resume view")
+    print(request.POST)
+    user_data = database.child("users").child(encoded_email).get().val()
+    resume_data = database.child("resume").child(encoded_email).get().val()
+    if resume_data is None:
+        resume_data = {}  # Initialize as an empty dictionary if no data is found
+    if request.method == 'POST':
+        print("resume view post")
+        resume_data = extract_data(request, user_email, user_data,resume_data)
+        print(resume_data)
+        database.child("resume").child(encoded_email).set(resume_data)
+        return redirect('/resume_generated', resume_data=resume_data)
+        
+    if resume_data.get("current_user") == user_email:
+        print("User email matches.")
+        return render(request, 'Tools/Resume/index.html', {'resume_data': resume_data})
+    else:
+        print("User email does not match.")
+    return render(request, 'Tools/Resume/index.html', {'user_data': user_data})
+
+def extract_data(request, user_email, user_data, resume_data):
+    print("extract data")
+    if request.method == 'POST':
+        data = request.POST
+        print(data)
+
+        # Extracting personal information
+        name = data['name']
+        email = data['email']
+        phone = data['phone']
+        about = data['about']
+        address = data['address']
+        
+          # Extracting company details
+        companies = []
+        company_names = data.getlist('company[]')
+        posts = data.getlist('post[]')
+        durations = data.getlist('duration[]')
+        descriptions = data.getlist('description[]')
+
+        for i in range(len(company_names)):
+            company = {
+                'name': company_names[i],
+                'post': posts[i] if i < len(posts) else '',
+                'duration': durations[i] if i < len(durations) else '',
+                'description': descriptions[i] if i < len(descriptions) else '',
+            }
+            companies.append(company)
+
+        # Extracting languages, technical skills, soft skills, and achievements
+        languages = data.getlist('lang[]')
+        technical_skills = data.getlist('tech[]')
+        soft_skills = data.getlist('soft[]')
+        achievements = data.getlist('achievements[]')
+
+        # Extracting education details
+        schools = []
+        school_names = data.getlist('schools[]')
+        programs = data.getlist('programs[]')
+        start_years = data.getlist('start_years[]')
+        graduation_years = data.getlist('graduation_years[]')
+        cgpas = data.getlist('cgpa[]')
+
+        for j in range(len(school_names)):
+            school = {
+                'name': school_names[j],
+                'program': programs[j] if j < len(programs) else '',
+                'start_year': start_years[j] if j < len(start_years) else '',
+                'graduation_year': graduation_years[j] if j < len(graduation_years) else '',
+                'cgpa': cgpas[j] if j < len(cgpas) else '',
+            }
+            schools.append(school)
+        # Handling profile picture
+        profile_pic_base64 = None
+        if 'profile_picture' in request.FILES:
+            profile_pic = request.FILES['profile_picture']
+            import base64
+            profile_pic_base64 = base64.b64encode(profile_pic.read()).decode('utf-8')
+        elif resume_data.get("profile_picture"):
+            profile_pic_base64 = resume_data.get("profile_picture")
+        else:
+            profile_pic_base64 = user_data.get("profile_picture")
+
+        # Create post data
+        resume_data = {
+            "current_user": user_email,
+            "profile_picture": profile_pic_base64,
+            "name": name,
+            "email": email,
+            "phone": phone,
+            "about": about,
+            "address": address,
+            "companies": companies,
+            "languages": languages,
+            "technical_skills": technical_skills,
+            "soft_skills": soft_skills,
+            "schools": schools,
+            "achievements": achievements,
+        }
+
+        print("Extracted Companies:", companies)
+        print("Extracted Schools:", schools)
+
+        return resume_data
+
+def resume_generated(request):
+    user_email = get_current_user(request)
+    
+    # Encode email for Firebase path (replace @ and . with safe characters)
+    encoded_email = user_email.replace('.', '-dot-').replace('@', '-at-')
+
+    # Check if the user exists in the database
+    #user for take profile picture
+    user_data = database.child("users").child(encoded_email).get().val()
+    resume_data=database.child("resume").child(encoded_email).get().val()
+
+
+    return render(request, 'Tools/Resume/generate.html', {'resume_data': resume_data})
+

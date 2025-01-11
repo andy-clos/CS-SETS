@@ -1,0 +1,175 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CS SETS</title>
+    <link rel="stylesheet" href="{% static 'css/navbar.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/header.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/style.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/footer.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/tools/resume.css' %}" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+    />
+  </head>
+  <body>
+    <div class="container">
+      {% include 'navbar.html' %} {% include 'header.html' %}
+
+      <main>
+        {% if resume_data %}
+        <div class="button-container">
+          <button
+            class="button edit-button"
+            onclick="window.location.href='{% url 'resume' %}'"
+          >
+            <i class="fas fa-edit"></i>
+          </button>
+          <button
+            id="download-button"
+            class="button download-button"
+            onclick="generatePDF('resume-container')"
+          >
+            <i class="fas fa-file-download"></i>
+          </button>
+        </div>
+        <div class="resumeGenerate-container" id="resume-container">
+          <header class="resumeGenerate-header">
+            <div class="profileGenerate-container">
+              <div class="profileGenerate-picture-container">
+                <img
+                  class="profileGenerate-picture"
+                  src="data:image/jpeg;base64,{{ resume_data.profile_picture }}"
+                  alt="Profile Picture"
+                />
+              </div>
+              <div class="personalGenerate-info">
+                <h1>{{ resume_data.name }}</h1>
+                <p>
+                  Email: {{ resume_data.email }} | Phone: {{ resume_data.phone}}
+                </p>
+                <p>Address: {{ resume_data.address }}</p>
+              </div>
+            </div>
+          </header>
+
+          <section class="resume-section">
+            <h3>Biography</h3>
+            <p>{{resume_data.about}}</p>
+          </section>
+          {% if resume_data.schools %}
+          <section class="resume-section">
+            <h3>Education</h3>
+            <div class="education-container">
+              {% for school in resume_data.schools %}
+              <div class="education-entry">
+                <h4 class="job-title">{{ school.name }}</h4>
+                <p class="job-position">{{ school.program }}</p>
+                <p class="job-duration"></p>
+                  {{ school.start_year }} - {{ school.graduation_year }}
+                </p>
+                <p class="job-position">CGPA/Result: {{ school.cgpa }}</p>
+              </div>
+              {% endfor %}
+            </div>
+          </section>
+          {% endif %} {% if resume_data.companies|length > 0 %}
+          <section class="resume-section">
+            <h3>Work Experience</h3>
+            <div class="education-container">
+              {% for job in resume_data.companies %}
+              <div class="education-entry">
+                <h4 class="job-title">{{ job.name }}</h4>
+                <p class="job-position">Position: {{ job.post }}</p>
+                <p class="job-duration">Duration: {{ job.duration }}</p>
+                <h4>Job Description</h4>
+                <p>{{ job.description }}</p>
+              </div>
+              {% endfor %}
+            </div>
+          </section>
+          {% endif %} {% if resume_data.languages%}
+          <div class="skills-container">
+            <section class="resume-section">
+              <h3>Languages</h3>
+              <ul class="skills-list">
+                {% for language in resume_data.languages %}
+                <li>{{language}}</li>
+                {% endfor %}
+              </ul>
+            </section>
+            {% endif %} {% if resume_data.technical_skills|length > 0 %}
+            <section class="resume-section">
+              <h3>Technical Skills</h3>
+              <ul class="skills-list">
+                {% for skill in resume_data.technical_skills %}
+                <li>{{skill}}</li>
+                {% endfor %}
+              </ul>
+            </section>
+            {% endif %} {% if resume_data.soft_skills|length > 0 %}
+            <section class="resume-section">
+              <h3>Soft Skills</h3>
+              <ul class="skills-list">
+                {% for skill in resume_data.soft_skills %}
+                <li>{{skill}}</li>
+                {% endfor %}
+              </ul>
+            </section>
+          </div>
+          {% endif %} {% if resume_data.achievements|length > 0 %}
+          <section class="resume-section">
+            <h3>Achievements</h3>
+            <ul class="achievements-list">
+              {% for achievement in resume_data.achievements %}
+              <li>{{achievement}}</li>
+              {% endfor %}
+            </ul>
+          </section>
+          {% endif %}
+        </div>
+
+        {% else %}
+        <p>No resume data available</p>
+        {% endif %}
+      </main>
+
+      {% include 'footer.html' %}
+    </div>
+    <script src="{% static 'js/backend.js' %}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script>
+      function generatePDF(containerId) {
+        console.log("Generating PDF...");
+        const container = document.getElementById(containerId);
+        const pdfOptions = {
+          margin: 0,
+          filename: "resume.pdf",
+          image: { type: "jpeg", quality: 0.98 },
+          html2canvas: { scale: 2 },
+          jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+          pagebreak: { mode: ["avoid-all"] },
+        };
+
+        if (container) {
+          console.log("Container found, proceeding with PDF generation.");
+          html2pdf()
+            .from(container)
+            .set(pdfOptions)
+            .save()
+            .then(() => {
+              console.log("PDF generated successfully.");
+            })
+            .catch((err) => {
+              console.error("Error generating PDF:", err);
+            });
+        } else {
+          console.error("Container not found:", containerId);
+        }
+      }
+    </script>
+  </body>
+</html>

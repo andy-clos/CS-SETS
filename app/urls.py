@@ -39,4 +39,6 @@ urlpatterns = [
     path('get-mbti-questions/', views.get_mbti_questions, name='get-mbti-questions'),
     path('start-mbti-test/', views.start_mbti_test, name='start-mbti-test'),
     path('check-test-result/', views.check_test_result, name='check-test-result'),
+    path('resume/', views.resume_view, name='resume'),
+    path('resume_generated', views.resume_generated, name='resume_generated'),
 ]
