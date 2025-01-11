@@ -25,6 +25,12 @@ from django.views.decorators.http import require_POST
 import csv
 from io import TextIOWrapper
 import time
+import base64
+from django.core.files.base import ContentFile
+from django.views.decorators.http import require_GET
+import uuid
+import requests
+
 
 logger = logging.getLogger(__name__)
 
@@ -1774,6 +1780,295 @@ def get_latest_semester(courses_data, latest_year):
             if isinstance(courses_data[latest_year][i], dict):
                 latest_semester = i
     return latest_semester
+@require_POST
+def add_achievement(request):
+    try:
+        # Get the current user's email
+        user_email = get_current_user(request)
+        if not user_email:
+            return JsonResponse({'status': 'error', 'message': 'User not authenticated'})
+
+        # Get form data
+        title = request.POST.get('title')
+        description = request.POST.get('description')
+        proof_file = request.FILES.get('proof')
+
+        if not title or not description:
+            return JsonResponse({'status': 'error', 'message': 'Title and description are required'})
+
+        try:
+            # Convert email to database format
+            encoded_email = user_email.replace('.', '-dot-').replace('@', '-at-')
+            
+            # Handle file upload
+            proof_url = None
+            if proof_file:
+                file_content = proof_file.read()
+                file_base64 = base64.b64encode(file_content).decode('utf-8')
+                proof_url = file_base64
+
+            # Get current timestamp for sorting
+            current_time = datetime.datetime.now()
+            timestamp = current_time.strftime('%Y-%m-%d %H:%M:%S')
+            
+            # Create achievement data
+            achievement_data = {
+                'title': title,
+                'description': description,
+                'proof': proof_url,
+                'date_added': timestamp
+            }
+
+            # Generate timestamp-based ID for natural descending order
+            # Using inverse timestamp (max timestamp - current timestamp)
+            max_timestamp = "9999-12-31 23:59:59"
+            inverse_timestamp = datetime.datetime.strptime(max_timestamp, '%Y-%m-%d %H:%M:%S') - current_time
+            
+            # Convert to total seconds and format as hex for compact storage
+            seconds = int(inverse_timestamp.total_seconds())
+            timestamp_hex = f"{seconds:08x}"  # 8 characters of hex
+            
+            # Add random suffix for uniqueness
+            random_suffix = uuid.uuid4().hex[:12]  # 12 characters of random hex
+            
+            # Combine to create the achievement ID
+            achievement_id = f"-{timestamp_hex}{random_suffix}"
+
+            # Update directly under the user's node with the unique ID
+            database.child("users").child(encoded_email).child("achievements").child(achievement_id).set(achievement_data)
+            
+            print(f"Achievement added for user: {encoded_email} with ID: {achievement_id}")  # Debug print
+            return JsonResponse({'status': 'success'})
+
+        except Exception as e:
+            print(f"Database error: {str(e)}")  # Debug print
+            return JsonResponse({'status': 'error', 'message': f'Database error: {str(e)}'})
+
+    except Exception as e:
+        print(f"General error: {str(e)}")  # Debug print
+        return JsonResponse({'status': 'error', 'message': str(e)})
+
+@require_POST
+def delete_achievement(request, achievement_key):
+    try:
+        # Get the current user's email
+        user_email = request.session.get('user_email')
+        if not user_email:
+            return JsonResponse({'status': 'error', 'message': 'User not authenticated'})
+
+        # Convert email to database format
+        encoded_email = user_email.replace('.', '-dot-').replace('@', '-at-')
+
+        # Delete the achievement
+        database.child("users").child(encoded_email).child("achievements").child(achievement_key).remove()
+
+        return JsonResponse({'status': 'success'})
+
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)})
+
+@require_GET
+def view_certificate(request, achievement_key):
+    try:
+        # Get current user's email
+        user_email = request.session.get('user_email')
+        if not user_email:
+            return HttpResponse('User not authenticated', status=401)
+
+        # Convert email to database format
+        encoded_email = user_email.replace('.', '-dot-').replace('@', '-at-')
+
+        # Get the achievement data
+        achievement = database.child("users").child(encoded_email).child("achievements").child(achievement_key).get().val()
+        
+        if not achievement or 'proof' not in achievement:
+            return HttpResponse('Certificate not found', status=404)
+
+        # Decode the base64 data
+        try:
+            file_data = base64.b64decode(achievement['proof'])
+            
+            # Improved file type detection
+            if file_data[0:2] == b'\xff\xd8':  # JPEG signature (more general check)
+                content_type = 'image/jpeg'
+                ext = 'jpg'
+                disposition = 'inline'
+            elif file_data[0:8] == b'\x89PNG\r\n\x1a\n':  # PNG signature
+                content_type = 'image/png'
+                ext = 'png'
+                disposition = 'inline'
+            elif file_data[0:4] == b'%PDF':  # PDF signature
+                content_type = 'application/pdf'
+                ext = 'pdf'
+                disposition = 'inline'
+            else:
+                # Additional check for JPEG files
+                try:
+                    from PIL import Image
+                    import io
+                    img = Image.open(io.BytesIO(file_data))
+                    if img.format == 'JPEG':
+                        content_type = 'image/jpeg'
+                        ext = 'jpg'
+                        disposition = 'inline'
+                    else:
+                        content_type = 'application/octet-stream'
+                        ext = 'file'
+                        disposition = 'attachment'
+                except:
+                    content_type = 'application/octet-stream'
+                    ext = 'file'
+                    disposition = 'attachment'
+            
+            # Create response
+            response = HttpResponse(file_data, content_type=content_type)
+            
+            # Set filename and disposition based on file type
+            filename = f"certificate_{achievement_key}.{ext}"
+            response['Content-Disposition'] = f'{disposition}; filename="{filename}"'
+            
+            # Add cache control headers to help with browser viewing
+            response['Cache-Control'] = 'public, max-age=0'
+            response['Pragma'] = 'public'
+            
+            return response
+
+        except Exception as e:
+            print(f"Error decoding certificate: {str(e)}")  # Debug print
+            return HttpResponse(f'Error decoding certificate: {str(e)}', status=500)
+
+    except Exception as e:
+        print(f"Error: {str(e)}")  # Debug print
+        return HttpResponse(f'Error: {str(e)}', status=500)
+
+DEVIL_AI_API_KEY = '693550-4bddea-2efd1e-e5badd'
+DEVIL_AI_BASE_URL = 'https://api.devil.ai/v1'
+
+@require_POST
+def start_mbti_test(request):
+    try:
+        # Generate new test link from Devil.ai
+        response = requests.get(
+            f'{DEVIL_AI_BASE_URL}/new_test',
+            params={
+                'api_key': DEVIL_AI_API_KEY,
+                'notify_url': request.build_absolute_uri('/test-complete/'),
+                'return_url': request.build_absolute_uri('/profile/'),
+            }
+        )
+
+        if not response.ok:
+            raise Exception('Failed to generate test')
+
+        data = response.json()
+        if data['meta']['success']:
+            return JsonResponse({
+                'status': 'success',
+                'test_url': data['data']['test_url'],
+                'test_id': data['data']['test_id']
+            })
+        else:
+            raise Exception('API returned error')
+
+    except Exception as e:
+        print(f"Error starting test: {str(e)}")
+        return JsonResponse({
+            'status': 'error',
+            'message': str(e)
+        })
+
+@require_POST
+def check_test_result(request):
+    try:
+        data = json.loads(request.body)
+        test_id = data.get('test_id')
+        if not test_id:
+            return JsonResponse({'status': 'error', 'message': 'No test ID provided'})
+
+        # Check test result from Devil.ai
+        response = requests.get(
+            f'{DEVIL_AI_BASE_URL}/check_test',
+            params={
+                'api_key': DEVIL_AI_API_KEY,
+                'test_id': test_id
+            }
+        )
+
+        if not response.ok:
+            raise Exception('Failed to check test result')
+
+        result_data = response.json()
+        if result_data['meta']['success']:
+            # Get current time in the required format
+            current_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+            # Extract and format personality data
+            personality_data = {
+                'type': result_data['data']['prediction'],
+                'predictions': result_data['data']['predictions'],
+                'conscious_traits': result_data['data']['trait_order_conscious'],
+                'shadow_traits': result_data['data']['trait_order_shadow'],
+                'matches': result_data['data']['matches'],
+                'result_date': current_time,  # Use current time instead of API response
+                'results_page': result_data['data']['results_page']
+            }
+
+            # Save to Firebase
+            try:
+                encoded_email = get_current_user(request).replace('.', '-dot-').replace('@', '-at-')
+                database.child("users").child(encoded_email).update({
+                    'personality': personality_data
+                })
+                print(f"Saved personality data for user {encoded_email}: {personality_data}")  # Debug log
+
+                return JsonResponse({
+                    'status': 'success',
+                    'message': 'Personality test results saved successfully'
+                })
+            except Exception as e:
+                print(f"Firebase error: {str(e)}")
+                return JsonResponse({
+                    'status': 'error',
+                    'message': 'Failed to save results to database'
+                })
+        else:
+            return JsonResponse({
+                'status': 'error',
+                'message': 'API returned unsuccessful response'
+            })
+
+    except Exception as e:
+        print(f"Error checking test result: {str(e)}")
+        return JsonResponse({
+            'status': 'error',
+            'message': str(e)
+        })
+
+@require_POST
+def get_mbti_questions(request):
+    try:
+        # Fetch questions from Devil.ai API
+        response = requests.get(
+            f'{DEVIL_AI_BASE_URL}/questions',
+            headers={'Authorization': f'Bearer {DEVIL_AI_API_KEY}'}
+        )
+
+        if not response.ok:
+            raise Exception('Failed to fetch MBTI questions')
+
+        questions = response.json()
+        return JsonResponse({
+            'status': 'success',
+            'questions': questions
+        })
+
+    except Exception as e:
+        print(f"Error fetching questions: {str(e)}")  # Debug print
+        return JsonResponse({
+            'status': 'error',
+            'message': str(e)
+        })
+
 
 @login_required
 def update_announcement(request):
@@ -1866,3 +2161,5 @@ def delete_announcement(request):
         'status': 'error',
         'message': 'Invalid request method'
     })
+
+                

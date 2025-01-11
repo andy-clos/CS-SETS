@@ -33,5 +33,10 @@ urlpatterns = [
     path('academic/<str:semester_year>/<str:course_code>/update-marks/<str:student_email>/', views.update_marks, name='update-marks'),
     path('unenroll-student/', views.unenroll_student, name='unenroll-student'),
     path('upload-marks/<str:semester_year>/<str:course_code>/', views.upload_marks, name='upload-marks'),
-    
+     path('add-achievement/', views.add_achievement, name='add-achievement'),
+    path('delete-achievement/<str:achievement_key>/', views.delete_achievement, name='delete-achievement'),
+    path('view-certificate/<str:achievement_key>/', views.view_certificate, name='view-certificate'),
+    path('get-mbti-questions/', views.get_mbti_questions, name='get-mbti-questions'),
+    path('start-mbti-test/', views.start_mbti_test, name='start-mbti-test'),
+    path('check-test-result/', views.check_test_result, name='check-test-result'),
 ]
