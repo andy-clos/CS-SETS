@@ -24,6 +24,7 @@ from firebase_admin import auth, firestore, credentials, initialize_app
 from django.views.decorators.http import require_POST
 import csv
 from io import TextIOWrapper
+import time
 
 logger = logging.getLogger(__name__)
 
@@ -313,6 +314,7 @@ def dashboard_view(request):
             content = request.POST.get('add-content')
             course_code = request.POST.get('selected_course')
             current_user_email = request.session.get('user_email')
+            files = request.FILES.getlist('attachments[]')
             
             # Get current academic year and semester
             courses_data = database.child("course").get().val()
@@ -321,25 +323,52 @@ def dashboard_view(request):
                 current_year = sorted_years[0]  # Get latest year
                 current_semester = get_latest_semester(courses_data, current_year)
             
+            # Get current timestamp
             malaysia_tz = pytz.timezone('Asia/Kuala_Lumpur')
             current_time = datetime.datetime.now(malaysia_tz)
             formatted_time = current_time.strftime("%I:%M %p, %d %b %Y")
 
+            # Get user's name from users table
+            user_data = database.child("users").get().val()
+            user_name = None
+            for user_id, user_info in user_data.items():
+                if user_info.get('email') == current_user_email:
+                    user_name = user_info.get('name')
+                    break
+
+            # Handle file uploads
+            file_urls = []
+            if files:
+                for file in files:
+                    unique_filename = f"{int(time.time())}_{file.name}"
+                    file_path = f"course/{current_year}/{current_semester}/{course_code}/announcements/{unique_filename}"
+                    
+                    # Upload file to Firebase Storage
+                    storage.child(file_path).put(file)
+                    
+                    # Get the download URL
+                    file_url = storage.child(file_path).get_url(None)
+                    
+                    file_urls.append({
+                        "name": file.name,
+                        "url": file_url
+                    })
+
             # Create announcement data
             announcement_data = {
-                "lecturer_email": current_user_email,
                 "title": title,
                 "content": content,
-                "timestamp": formatted_time
+                "author": user_name,
+                "timestamp": formatted_time,
             }
 
             # Get existing announcements to determine next ID
-            existing_announcements = database.child("announcements").child(current_year).child(str(current_semester)).child(course_code).get().val()
+            course_path = f"course/{current_year}/{current_semester}/{course_code}/announcements"
+            existing_announcements = database.child(course_path).get().val()
             
             # Determine the next announcement number
             next_num = 1
             if existing_announcements:
-                # Get the highest existing number
                 existing_nums = [int(k[1:]) for k in existing_announcements.keys() if k.startswith('a')]
                 if existing_nums:
                     next_num = max(existing_nums) + 1
@@ -347,11 +376,20 @@ def dashboard_view(request):
             # Create the new announcement ID
             announcement_id = f'a{next_num}'
 
-            # Save the announcement with the sequential ID
-            database.child("announcements").child(current_year).child(str(current_semester)).child(course_code).child(announcement_id).set(announcement_data)
+            # Save the announcement directly under the course code
+            database.child("course").child(current_year).child(current_semester).child(course_code).child("announcements").child(announcement_id).set(announcement_data)
+
+            return JsonResponse({
+                'status': 'success',
+                'message': 'Announcement created successfully'
+            })
 
         except Exception as e:
             print(f"Error adding announcement: {e}")
+            return JsonResponse({
+                'status': 'error',
+                'message': str(e)
+            })
 
     try:
         announcements = []

@@ -14,6 +14,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 
 <body>
@@ -195,7 +196,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form method="POST" action="{% url 'dashboard' %}" class="container-fluid">
+                <form method="POST" action="{% url 'dashboard' %}" class="container-fluid" id="createAnnouncementForm" enctype="multipart/form-data">
                     {% csrf_token %}
                     <div class="form-group">
                         <label for="exampleSelect">Select a Course:</label>
@@ -212,11 +213,73 @@
                     </div>
                     <div class="form-group">
                         <label for="add-content">Content:</label>
-                        <textarea id="add-content" name="add-content" class="form-control" rows="10"></textarea>
+                        <textarea id="add-content" name="add-content" class="form-control" rows="10" required></textarea>
                     </div>
+                    {% comment %} <div class="form-group"> attachments function not working because of storage error, not included in operation first
+                        <label for="attachments">Upload Attachments (Max 3 files):</label>
+                        <input type="file" 
+                               id="attachments" 
+                               name="attachments[]" 
+                               class="form-control" 
+                               multiple
+                               accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png"
+                               onchange="validateFiles(this)">
+                        <div id="fileList"></div>
+                        <small class="text-muted">Allowed file types: PDF, DOC, DOCX, TXT, JPG, JPEG, PNG</small>
+                    </div> {% endcomment %}
                     <button type="submit" class="btn-dashboard w-100">Post Announcement</button>
-                    <p style="display: none;"></p>
                 </form>
+
+                <script>
+                    document.getElementById('createAnnouncementForm').addEventListener('submit', async function(e) {
+                        e.preventDefault();
+                        
+                        const formData = new FormData(this);
+                        
+                        try {
+                            console.log('Submitting form...');  // Debug log
+                            const response = await fetch("{% url 'dashboard' %}", {
+                                method: 'POST',
+                                body: formData,
+                                headers: {
+                                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                                }
+                            });
+                            
+                            console.log('Response received:', response);  // Debug log
+                            const result = await response.json();
+                            console.log('Result:', result);  // Debug log
+                            
+                            if (result.status === 'success') {
+                                await Swal.fire({
+                                    icon: 'success',
+                                    title: 'Success!',
+                                    text: result.message,
+                                    timer: 2000,
+                                    showConfirmButton: false
+                                });
+                                // Close the modal after success
+                                const modal = bootstrap.Modal.getInstance(document.getElementById('createAnnouncement'));
+                                modal.hide();
+                                window.location.reload();
+                            } else {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Error',
+                                    text: result.message || 'An error occurred'
+                                });
+                            }
+                            
+                        } catch (error) {
+                            console.error('Error:', error);  // Debug log
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: 'An error occurred while processing your request'
+                            });
+                        }
+                    });
+                </script>
             </div>
         </div>
     </div>
