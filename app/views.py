@@ -1784,7 +1784,7 @@ def update_announcement(request):
             course_code = data.get('course_code')
             title = data.get('title')
             content = data.get('content')
-            year = data.get('year').replace('/', '-')
+            year = data.get('year').replace('/', '-')  # Convert 2025/2026 to 2025-2026
             semester = data.get('semester')
             current_user = request.session.get('user_name')
             
@@ -1830,12 +1830,16 @@ def update_announcement(request):
 def delete_announcement(request):
     if request.method == 'POST':
         try:
+            # First parse the JSON data
             data = json.loads(request.body)
+            
+            # Then get the values from the parsed data
             announcement_id = data.get('announcement_id')
             course_code = data.get('course_code')
             year = data.get('year')
             semester = data.get('semester')
             
+            # Delete the announcement
             database.child("course")\
                    .child(year)\
                    .child(semester)\
