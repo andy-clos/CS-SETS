@@ -1,0 +1,108 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CS SETS</title>
+    <link rel="stylesheet" href="{% static 'css/navbar.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/header.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/style.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/footer.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/tools/quizz.css' %}" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+      integrity="sha384-k6RqeWeci5ZR/Lv4MR0sA0FfDOM6g0g5z5e5e5e5e5e5e5e5e5e5e5e5e5e5e5"
+      crossorigin="anonymous"
+    />
+    <style>
+      .section-title {
+        font-size: 40px;
+        font-weight: bold;
+        margin-bottom: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      {% include 'navbar.html' %} {% include 'header.html' %}
+      <main>
+        <section class="content">
+          <h2 class="section-title">Flashcard</h2>
+        </section>
+        <div class="flashcard-container">
+          <div class="navigation">
+            <span id="back-button" title="Back" class="arrow">&#8592;</span>
+          </div>
+          <div class="flashcard" id="flashcard">
+            <div class="front">
+              <h2 id="question">What is the capital of France?</h2>
+            </div>
+            <div class="back">
+              <h2 id="answer">Answer goes here</h2>
+            </div>
+          </div>
+          <div class="navigation">
+            <span id="next-button" title="Next" class="arrow">&#8594;</span>
+          </div>
+          <p>{{ final_data }}</p>
+        </div>
+      </main>
+      {% include 'footer.html' %}
+    </div>
+    <script src="{% static 'js/backend.js' %}"></script>
+    <script>
+
+      const flashcards = [
+        { question: "What is the capital of France?", answer: "Paris" },
+        { question: "What is 2 + 2?", answer: "4" },
+        { question: "What is the capital of Japan?", answer: "Tokyo" },
+      ];
+
+      let currentCardIndex = 0;
+
+      const flashcardElement = document.getElementById("flashcard");
+      const questionElement = document.getElementById("question");
+      const answerElement = document.getElementById("answer");
+      const nextButton = document.getElementById("next-button");
+      const backButton = document.getElementById("back-button");
+
+      function showCard(index) {
+        const card = flashcards[index];
+        questionElement.textContent = card.question;
+        answerElement.textContent = card.answer;
+        flashcardElement.classList.remove("flipped"); // Ensure it's not flipped initially
+      }
+
+      flashcardElement.addEventListener("click", () => {
+        flashcardElement.classList.toggle("flipped");
+      });
+
+      nextButton.addEventListener("click", () => {
+        if (flashcardElement.classList.contains("flipped")) {
+          flashcardElement.classList.remove("flipped");
+        }
+        currentCardIndex = (currentCardIndex + 1) % flashcards.length;
+        setTimeout(() => {
+          showCard(currentCardIndex);
+        }, 300); // Wait for the flip animation to finish
+      });
+
+      // Back button functionality
+      backButton.addEventListener("click", () => {
+        if (flashcardElement.classList.contains("flipped")) {
+          flashcardElement.classList.remove("flipped");
+        }
+        currentCardIndex =
+          (currentCardIndex - 1 + flashcards.length) % flashcards.length;
+        setTimeout(() => {
+          showCard(currentCardIndex);
+        }, 300); // Wait for the flip animation to finish
+      });
+
+      // Show the first card on load
+      showCard(currentCardIndex);
+    </script>
+  </body>
+</html>

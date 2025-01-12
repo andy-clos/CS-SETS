@@ -2416,3 +2416,72 @@ def get_coursework_breakdown(student_email, course_data):
         print(f"Error getting coursework breakdown for {student_email}: {e}")
         return {}
 
+def flashcard_view(request):
+    return render(request, 'Tools/Quizz/flashcard.html')
+
+def quizz_menu(request):
+    quizzes = database.child("quizzes").child('flashcard').get()
+    if quizzes.val():
+        quizzes = [quiz.val() for quiz in quizzes.each()]
+        # quiz = next ((q for q in quizzes if q.get('id') == quiz_id), None)
+        # print(quiz)
+    else:
+        quizzes = []
+    return render(request, 'Tools/Quizz/index.html', {'quizzes': quizzes})
+
+
+def create_quizz(request):
+    if request.method == 'POST':
+        data = request.POST
+        print(data)  # Debug print to see incoming data
+
+        # Extract title and description
+        title = data.get('title')
+        description = data.get('description')
+        tags = json.loads(data.get('tags', '[]'))  # Assuming tags are sent as a JSON string
+
+        # Validate title and description
+        if not title or not description:
+            print("Title and description are required.")
+            return render(request, 'Tools/Quizz/create.html',   { 'error_message': 'Title and description are required.'})
+
+        # Prepare flashcard data
+        flashcards = []
+        question_counter = 1
+
+        while True:
+            question = data.get(f'question-content-{question_counter}')
+            answer = data.get(f'answer-content-{question_counter}')
+            if question is None or answer is None:
+                break  # Stop if no more questions are found
+            flashcards.append({
+                f'question{question_counter}': question,
+                f'ans{question_counter}': answer
+            })
+            question_counter += 1
+
+        # Validate that at least one flashcard is present
+        if not flashcards:
+            return render(request, 'Tools/Quizz/create.html',   {'error_message': 'At least one question is required.'})
+
+        # Prepare the final data structure
+        final_data = {
+            'title': title,
+            'description': description,
+            'tags': tags,
+            'QueAns': flashcards,
+            'timestamp': datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+            'author': get_current_user(request)
+        }
+
+        # Save to the database (assuming you have a function to handle this)
+        try:
+            # Replace this with your actual database saving logic
+            database.child("quizzes").child('flashcard').push(final_data)
+            return redirect('/flashcard', final_data=final_data)
+        except Exception as e:
+            print(f"Error saving quiz: {str(e)}")
+            return render(request, 'Tools/Quizz/create.html',   { 'error_message': 'Failed to save quiz.'})
+
+    return render(request, 'Tools/Quizz/create.html')
+

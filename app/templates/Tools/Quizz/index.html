@@ -1,0 +1,73 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CS SETS</title>
+    <link rel="stylesheet" href="{% static 'css/navbar.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/header.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/style.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/footer.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/tools/quizz.css' %}" />
+
+    <style>
+      .section-title {
+        font-size: 40px;
+        font-weight: bold;
+        margin-bottom: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      {% include 'navbar.html' %} {% include 'header.html' %}
+
+      <main>
+        <section class="content">
+          <h2 class="section-title">Study Tool</h2>
+          <div class="options-container">
+            <button
+              class="create-new"
+              onclick="window.location.href='{% url 'create_quizz' %}'"
+            >
+              + Create new
+            </button>
+            <select class="sort-options">
+              <option>Last Updated</option>
+              <option>Alphabetical</option>
+            </select>
+          </div>
+          {%if quizzes%} {%for quiz in quizzes%}
+          <div class="files-section">
+            <div class="file-card">
+              <div class="file-info">
+                <h3>{{quiz.title}}</h3>
+
+                <span class="file-type">{{quiz.QueAns|length}} questions</span>
+                <span class="studied"></span>
+                <span class="timestamp">{{quiz.timestamp}}</span>
+              </div>
+              <div class="file-actions">
+                <button
+                  class="preview-btn"
+                  onclick="window.location.href='{% url 'flashcard' %}'"
+                >
+                  Preview
+                </button>
+              </div>
+            </div>
+          </div>
+          {%endfor%} {%else%}
+          <p>
+            No quizzes found. Go to <a href="/create_quizz">create</a> a quiz
+          </p>
+          {%endif%}
+        </section>
+      </main>
+
+      {% include 'footer.html' %}
+    </div>
+    <script src="{% static 'js/backend.js' %}"></script>
+  </body>
+</html>

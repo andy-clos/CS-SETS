@@ -1,0 +1,396 @@
+button {
+  background-color: #ff9900;
+  color: white;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  margin-top: 20px;
+}
+
+.section-title {
+  font-size: 40px;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.flashcard-container {
+  display: flex;
+  align-items: center; /* Align items vertically */
+  justify-content: center; /* Center the content */
+  margin-top: 50px;
+  background-color: #f0f0f0; /* Light background for contrast */
+  border-radius: 10px; /* Rounded corners */
+  padding: 20px; /* Padding around the container */
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+}
+
+.navigation {
+  display: flex;
+  align-items: center; /* Center the arrows vertically */
+  margin: 0 20px; /* Add some space between the arrows and the flashcard */
+}
+
+.arrow {
+  padding: 10px;
+  font-size: 48px; /* Size of the arrows */
+  cursor: pointer;
+  color: #007bff; /* Arrow color */
+  transition: color 0.3s;
+}
+
+.arrow:hover {
+  color: #0056b3; /* Darker shade on hover */
+}
+
+.flashcard {
+  width: 600px;
+  height: 200px;
+  border: 2px solid #007bff; /* Blue border for the flashcard */
+  border-radius: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  perspective: 1000px;
+  background-color: white; /* White background for the card */
+}
+.front,
+.back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 24px;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.back {
+  transform: rotateY(180deg);
+}
+
+.flashcard.flipped .front {
+  transform: rotateY(180deg);
+}
+
+.flashcard.flipped .back {
+  transform: rotateY(0);
+}
+
+/* flashcard  create*/
+.files-section {
+  display: flex;
+  flex-direction: column;
+}
+
+.file-card {
+  background: #f0f0f0;
+  border-radius: 8px;
+  padding: 15px;
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.file-info {
+  flex-grow: 1;
+}
+
+.file-type {
+  display: block;
+  color: #555;
+}
+
+.studied,
+.timestamp {
+  display: block;
+  color: #888;
+}
+
+.file-actions {
+  display: flex;
+  align-items: center;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.create-new {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.sort-options {
+  padding: 10px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+}
+
+.options-container {
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.create-new {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 5px;
+  cursor: pointer;
+  height: 40px; /* Set a fixed height for alignment */
+}
+
+.sort-options {
+  padding: 10px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  height: 40px; /* Match the height of the button */
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  font-weight: bold;
+  display: block;
+  margin-bottom: 5px;
+}
+
+.form-input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  box-sizing: border-box;
+}
+
+.form-textarea {
+  width: 100%;
+  height: 100px;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  box-sizing: border-box;
+  resize: none; /* Prevent resizing */
+}
+
+/*tag */
+.label-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 10px;
+  padding: 10px;
+}
+
+.tag-label {
+  display: flex;
+  align-items: center;
+  background-color: white;
+  color: #333;
+  border-radius: 20px;
+  padding: 5px 10px;
+  font-size: 14px;
+  font-weight: 500;
+  margin: 2px;
+}
+
+.tag-label .remove-btn {
+  margin-left: 10px;
+  color: white;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.tag-label .remove-btn:hover {
+  color: white;
+}
+.section-title {
+  font-size: 40px;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.tag-label {
+  display: inline-flex;
+  align-items: center;
+  background-color: #c82333;
+  padding: 5px 10px;
+  border-radius: 15px;
+  margin: 2px;
+  color: white;
+}
+
+.tag-text {
+  color: white;
+  margin-right: 5px;
+}
+
+.remove-btn {
+  cursor: pointer;
+  color: white;
+  font-size: 14px;
+}
+
+.remove-btn:hover {
+  color: #c82333;
+}
+.form-group {
+  margin-bottom: 25px;
+}
+
+.form-group label {
+  display: block;
+  font-size: 16px;
+  font-weight: bold;
+  color: #4e598c;
+  margin-bottom: 10px;
+}
+
+.form-group select,
+.form-group input[type="text"],
+.form-group textarea {
+  width: 100%;
+  padding: 12px;
+  border: 2px solid #e0e0e0;
+  border-radius: 6px;
+  font-size: 15px;
+  transition: border-color 0.3s;
+}
+
+.form-group select:focus,
+.form-group input[type="text"]:focus,
+.form-group textarea:focus {
+  border-color: #4e598c;
+  outline: none;
+}
+
+.flashcard-input {
+  margin-top: 20px;
+}
+
+.input-group {
+  margin-bottom: 20px;
+}
+
+.input-group label {
+  font-weight: bold;
+  display: block;
+  margin-bottom: 5px;
+}
+
+.form-input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  box-sizing: border-box;
+}
+
+.form-textarea {
+  width: 100%;
+  height: 100px;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  box-sizing: border-box;
+  resize: none; /* Prevent resizing */
+}
+
+.submit-btn {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-top: 20px;
+}
+
+.title-container,
+.flashcard-input {
+  background-color: white; /* Set background to white */
+  padding: 20px; /* Optional: Add some padding */
+  border-radius: 8px; /* Optional: Add rounded corners */
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Optional: Add a subtle shadow */
+}
+
+.form-input,
+.form-textarea {
+  background-color: #f0f0f0; /* Light gray background */
+  border: 1px solid #ccc; /* Border color */
+  border-radius: 5px; /* Rounded corners */
+  padding: 10px; /* Padding inside the input */
+  width: 100%; /* Full width */
+  box-sizing: border-box; /* Include padding in width */
+  transition: border-color 0.3s; /* Smooth transition for border color */
+}
+
+.form-input:focus,
+.form-textarea:focus {
+  border-color: #4e598c; /* Change border color on focus */
+  outline: none; /* Remove default outline */
+}
+
+.tag-container input[type="text"] {
+  background-color: #f0f0f0; /* Light gray background for the tag input */
+  border: 1px solid #ccc; /* Border color */
+  border-radius: 5px; /* Rounded corners */
+  padding: 10px; /* Padding inside the input */
+  width: 100%; /* Full width */
+  box-sizing: border-box; /* Include padding in width */
+  transition: border-color 0.3s; /* Smooth transition for border color */
+}
+
+.tag-container input[type="text"]:focus {
+  border-color: #4e598c; /* Change border color on focus */
+  outline: none; /* Remove default outline */
+}
+.flashcard-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 20px; /* Use gap for consistent spacing */
+}
+
+.question-container,
+.answer-container {
+  flex: 1;
+  min-width: 0; /* Prevent flex items from overflowing */
+}
+
+/* Ensure Quill editor toolbar appears only once */
+.flashcard-input {
+  margin-bottom: 20px;
+  background: #f8f9fa;
+  padding: 20px;
+  border-radius: 8px;
+  position: relative; /* For remove button positioning */
+}
+
+/* Hide duplicate toolbars */
+.ql-toolbar:not(:first-of-type) {
+  display: none;
+}
+
+/* Add space between editors */
+.ql-container {
+  margin-bottom: 20px;
+}

@@ -41,4 +41,7 @@ urlpatterns = [
     path('resume_generated', views.resume_generated, name='resume_generated'),
     path('predict-risks/<str:course_code>/<str:semester_year>/', views.predict_risks, name='predict-risks'),
     path('send-student-alert/', views.send_student_alert, name='send-student-alert'),
+    path('flashcard/', views.flashcard_view, name='flashcard'),
+    path('quizzMenu/', views.quizz_menu, name='quizz'),
+    path('create_quizz/', views.create_quizz, name='create_quizz'),
 ]
