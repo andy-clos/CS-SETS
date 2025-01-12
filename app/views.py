@@ -1603,7 +1603,7 @@ def update_marks(request, semester_year, course_code, student_email):
             
             # Update the marks in database
             if marks:
-                database.child("users").child(encoded_email).child("courses").child(target_course_key).child("marks").update(marks)
+                database.child("users").child(encoded_email).child("courses").child(target_course_key).child("coursework").update(marks)
                 messages.success(request, 'Marks updated successfully')
             else:
                 messages.warning(request, 'No marks to update')
