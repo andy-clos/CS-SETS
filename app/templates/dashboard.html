@@ -28,129 +28,148 @@
         <main style="padding-top: 0%;">
             <div class="main-content">
                 <div class="announcement-card">
-                    <div class="announcement-content">
-                        <div class="announcement-header">
-                            <div class="profile-container">
-                                <img src="/static/image/user.png" alt="Profile Picture" class="profile-img">
-                                <p>Mr. Bean</p>
-                            </div>
-                            <div class="announcement-details">
-                                <h3>Changes venue for event application</h3>
-                                <p class="announcement-body">
-                                    Dear student, today due to emergency reason, hall B are closed until 14/11/2025, thus student need to register your application at hall A...
-                                    <span class="expand-text">[expand]</span>
-                                </p>
-                                <p class="posted-info">posted 11.00PM 11 Aug 2024</p>
-                            </div>
+                    <div id="announcementCarousel" class="carousel slide announcement-content" data-bs-ride="carousel">
+                        <div class="carousel-inner">
+                            {% for announcement in latest_announcements %}
+                                <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                                    <div class="announcement-header">
+                                        <div class="profile-container">
+                                            <img src="/static/image/user.png" alt="Profile Picture" class="profile-img">
+                                            <p style="color: #4E598C;">{{ announcement.author }}</p>
+                                        </div>
+                                        <div class="announcement-details">
+                                            <h3>{{ announcement.title }}</h3>
+                                            <p class="announcement-body">
+                                                {{ announcement.content }}...
+                                                <span class="expand-text">
+                                                    <a href="{% url 'course-detail' semester_year=sem_year course_code=announcement.course_code %}" class="expand-text">
+                                                        [view more]
+                                                    </a>
+                                                </span>
+                                            </p>
+                                            <div class="timestamp-container">
+                                                <p class="posted-info" style="color: #4E598C;">posted {{ announcement.timestamp }}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
                         </div>
+                        <div class="carousel-indicators">
+                            {% for announcement in latest_announcements %}
+                                <button type="button" data-bs-target="#announcementCarousel" data-bs-slide-to="{{ forloop.counter0 }}" class="{% if forloop.first %}active{% endif %}" aria-current="{% if forloop.first %}true{% endif %}" aria-label="Slide {{ forloop.counter }}"></button>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
 
-                    </div>
-                </div>
-                
-                <div class="leaderboard-card">
-                    <h2>Leaderboard</h2>
-                    <div class="leaderboard-content">
-                        <div class="leaderboard-header">
-                            <ul>
-                                <li class="list-item">
-                                    <div class="list-item-content">
-                                        <p>1.</p>
-                                        <img src="/static/image/user.png" alt="Profile Picture" class="profile-img">
-                                        <p>AndyClos A/L Boon Mee</p>
-                                        <button class="leaderboard-details"><i class="fa fa-file-text"></i></button>
-                                    </div>
-                                    
-                                </li>
-                                <li class="list-item">
-                                    <div class="list-item-content">
-                                        <p>2.</p>
-                                        <img src="/static/image/user.png" alt="Profile Picture" class="profile-img">
-                                        <p>Muhammad Ezzat Haziq Bin Elhan</p>
-                                        <button class="leaderboard-details"><i class="fa fa-file-text"></i></button>
-                                    </div>
-                                    
-                                </li>
-                                <li class="list-item">
-                                    <div class="list-item-content">
-                                        <p>3.</p>
-                                        <img src="/static/image/user.png" alt="Profile Picture" class="profile-img">
-                                        <p>Kam Weng Xuan</p>
-                                        <button class="leaderboard-details"><i class="fa fa-file-text"></i></button>
-                                    </div>
-                                    
-                                </li>
-                                <li class="list-item">
-                                    <div class="list-item-content">
-                                        <p>4.</p>
-                                        <img src="/static/image/user.png" alt="Profile Picture" class="profile-img">
-                                        <p>Loh Wei Ting</p>
-                                        <button class="leaderboard-details"><i class="fa fa-file-text"></i></button>
-                                    </div>
-                                    
-                                </li>
-                                <li class="list-item">
-                                    <div class="list-item-content">
-                                        <p>5.</p>
-                                        <img src="/static/image/user.png" alt="Profile Picture" class="profile-img">
-                                        <p>John</p>
-                                        <button class="leaderboard-details"><i class="fa fa-file-text"></i></button>
-                                    </div>
-                                    
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-                <div class="academic-card">
-                    <h2>Academic Result</h2>
-                    <div class="academic-outsider">
-                        <div class="academic-content">
-                            <!-- CGPA Section -->
-                            <div class="academic-cgpa-section">
-                                <p class="progress-text">Progress to target: 92.89%</p>
-                                <div class="progress-bar-container">
-                                    <div class="progress-bar"></div>
-                                </div>
-                                <div class="cgpa-container">
-                                    <div class="cgpa-box">
-                                        <h3 class="cgpa-title">Current CGPA</h3>
-                                        <p class="cgpa-value">3.53</p>
-                                        <button class="btn-dashboard">Check current result</button>
-                                    </div>
-                                    <div class="cgpa-box">
-                                        <h3 class="cgpa-title">Targeted CGPA</h3>
-                                        <p class="cgpa-value">3.80</p>
-                                        <button class="btn-dashboard">Check targeted result</button>
-                                    </div>
-                                </div>
-                            </div>
-                
-                            <!-- Feedback Section -->
-                            <div class="academic-feedback-section">
-                                <ul class="feedback-list">
-                                    <li class="feedback-item">
-                                        <p class="feedback-text subject">Subject that has risk to fail: 0</p>
+                <div class="cards-container">
+                    <div class="leaderboard-card">
+                        <h2>Leaderboard</h2>
+                        <div class="leaderboard-content">
+                            <div class="leaderboard-header">
+                                <ul>
+                                    <li class="list-item">
+                                        <div class="list-item-content">
+                                            <p>1.</p>
+                                            <img src="/static/image/user.png" alt="Profile Picture" class="profile-img">
+                                            <p>AndyClos A/L Boon Mee</p>
+                                            <button class="leaderboard-details"><i class="fa fa-file-text"></i></button>
+                                        </div>
+                                        
                                     </li>
-                                    <li class="feedback-item">
-                                        <button class="btn-dashboard" style="margin-left: auto;margin-right: auto;">View details</button>
+                                    <li class="list-item">
+                                        <div class="list-item-content">
+                                            <p>2.</p>
+                                            <img src="/static/image/user.png" alt="Profile Picture" class="profile-img">
+                                            <p>Muhammad Ezzat Haziq Bin Elhan</p>
+                                            <button class="leaderboard-details"><i class="fa fa-file-text"></i></button>
+                                        </div>
+                                        
                                     </li>
-                                    <li class="feedback-item feedback">
-                                        <span class="feedback-icon positive-icon">&#128077;</span>
-                                        <p class="feedback-text">Maintain your academic result</p>
+                                    <li class="list-item">
+                                        <div class="list-item-content">
+                                            <p>3.</p>
+                                            <img src="/static/image/user.png" alt="Profile Picture" class="profile-img">
+                                            <p>Kam Weng Xuan</p>
+                                            <button class="leaderboard-details"><i class="fa fa-file-text"></i></button>
+                                        </div>
+                                        
                                     </li>
-                                    <li class="feedback-item feedback">
-                                        <span class="feedback-icon neutral-icon">&#128200;</span>
-                                        <p class="feedback-text">You still have the chance to improve</p>
+                                    <li class="list-item">
+                                        <div class="list-item-content">
+                                            <p>4.</p>
+                                            <img src="/static/image/user.png" alt="Profile Picture" class="profile-img">
+                                            <p>Loh Wei Ting</p>
+                                            <button class="leaderboard-details"><i class="fa fa-file-text"></i></button>
+                                        </div>
+                                        
                                     </li>
-                                    <li class="feedback-item feedback">
-                                        <span class="feedback-icon warning-icon">&#10060;</span>
-                                        <p class="feedback-text">You might fail if next CPT123 test is below 50 marks</p>
-                                    </li>
-                                    <li class="feedback-item feedback">
-                                        <span class="feedback-icon encouragement-icon">&#127800;</span>
-                                        <p class="feedback-text">Work harder to achieve more</p>
+                                    <li class="list-item">
+                                        <div class="list-item-content">
+                                            <p>5.</p>
+                                            <img src="/static/image/user.png" alt="Profile Picture" class="profile-img">
+                                            <p>John</p>
+                                            <button class="leaderboard-details"><i class="fa fa-file-text"></i></button>
+                                        </div>
+                                        
                                     </li>
                                 </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="academic-card">
+                        <h2>Academic Result</h2>
+                        <div class="academic-outsider">
+                            <div class="academic-content">
+                                <!-- CGPA Section -->
+                                <div class="academic-cgpa-section">
+                                    <p class="progress-text">Progress to target: 92.89%</p>
+                                    <div class="progress-bar-container">
+                                        <div class="progress-bar"></div>
+                                    </div>
+                                    <div class="cgpa-container">
+                                        <div class="cgpa-box">
+                                            <h3 class="cgpa-title">Current CGPA</h3>
+                                            <p class="cgpa-value">3.53</p>
+                                            <button class="btn-dashboard">Check current result</button>
+                                        </div>
+                                        <div class="cgpa-box">
+                                            <h3 class="cgpa-title">Targeted CGPA</h3>
+                                            <p class="cgpa-value">3.80</p>
+                                            <button class="btn-dashboard">Check targeted result</button>
+                                        </div>
+                                    </div>
+                                </div>
+                
+                                <!-- Feedback Section -->
+                                <div class="academic-feedback-section">
+                                    <ul class="feedback-list">
+                                        <li class="feedback-item">
+                                            <p class="feedback-text subject">Subject that has risk to fail: 0</p>
+                                        </li>
+                                        <li class="feedback-item">
+                                            <button class="btn-dashboard" style="margin-left: auto;margin-right: auto;">View details</button>
+                                        </li>
+                                        <li class="feedback-item feedback">
+                                            <span class="feedback-icon positive-icon">&#128077;</span>
+                                            <p class="feedback-text">Maintain your academic result</p>
+                                        </li>
+                                        <li class="feedback-item feedback">
+                                            <span class="feedback-icon neutral-icon">&#128200;</span>
+                                            <p class="feedback-text">You still have the chance to improve</p>
+                                        </li>
+                                        <li class="feedback-item feedback">
+                                            <span class="feedback-icon warning-icon">&#10060;</span>
+                                            <p class="feedback-text">You might fail if next CPT123 test is below 50 marks</p>
+                                        </li>
+                                        <li class="feedback-item feedback">
+                                            <span class="feedback-icon encouragement-icon">&#127800;</span>
+                                            <p class="feedback-text">Work harder to achieve more</p>
+                                        </li>
+                                    </ul>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -180,7 +199,6 @@
                                             <div class="display-ann-details-header">
                                                 <div style="margin-bottom: 20px;">
                                                     {% if request.session.user_name == announcement.author %}
-                                                        <p></p>
                                                         <button class="btn btn-primary" 
                                                                 onclick="openUpdateModal('{{ announcement.id }}', '{{ announcement.course_code }}', '{{ announcement.title|escapejs }}', '{{ announcement.content|escapejs }}')">
                                                             Update
@@ -666,6 +684,12 @@ document.addEventListener('DOMContentLoaded', function() {
 <!-- Add these hidden inputs with modified values -->
 <input type="hidden" id="current_year" value="{{ current_year|cut:'Academic Session ' }}">
 <input type="hidden" id="current_semester" value="{{ current_semester|cut:'Semester ' }}">
+
+
+<!-- Include Bootstrap JS (make sure this is included) -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+
 </body>
 </html>
 

@@ -26,9 +26,14 @@
     color: #4E598C;
     border-radius: 10px;
     padding: 20px 10px 10px 10px;
+    position: relative;
+    overflow: hidden;
     display: flex;
     flex-direction: column;
     gap: 15px;
+    font-size: 14px;
+    color: #333;
+    padding-left: 15px;
 }
 
 .announcement-header {
@@ -58,6 +63,7 @@
 }
 
 .announcement-details h3 {
+    color: #4E598C;
     font-size: 18px;
     margin: 0;
     font-weight: bold;
@@ -73,6 +79,7 @@
 .announcement-body {
     font-size: 16px;
     line-height: 1.5;
+    color: #4E598C;
 }
 
 .expand-text {
@@ -639,12 +646,6 @@
     margin-bottom: 10px;
 }
 
-.announcement-content {
-    font-size: 14px;
-    color: #333;
-    margin-bottom: 10px;
-    padding-left: 15px;
-}
 
 .announcement-meta {
     font-size: 12px;
@@ -786,4 +787,21 @@
 
 .display-ann-content {
     white-space: pre-wrap;
+}
+
+.announcement-card, .leaderboard-card, .academic-card {
+    width: 100%;
+    margin: 0 auto;
+    padding: 15px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+}
+
+.timestamp-container {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    margin: 10px;
+    text-align: right;
+    color: black;
 }

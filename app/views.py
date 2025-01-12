@@ -294,12 +294,6 @@ def dashboard_view(request):
                     'timestamp': datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                 }
                 
-                print(f"Creating announcement:")
-                print(f"Course: {selected_course}")
-                print(f"Year: {current_year}")
-                print(f"Semester: {current_semester}")
-                print(f"Data: {announcement_data}")
-                
                 # Push the announcement to Firebase
                 database.child("course")\
                        .child(current_year)\
@@ -314,16 +308,15 @@ def dashboard_view(request):
                 })
                 
             except Exception as e:
-                print(f"Error posting announcement: {e}")
                 return JsonResponse({
                     'status': 'error',
                     'message': str(e)
                 })
 
-        # Handle GET request - Your existing code
+        # Handle GET request
         courses_data = database.child("course").get().val()
         latest_courses = []
-        lecturer_latest_courses =[]
+        lecturer_latest_courses = []
         announcements = []
         
         if courses_data:
@@ -336,9 +329,6 @@ def dashboard_view(request):
             
             # Process each course
             for course_code, course_info in semester_courses.items():
-                print(f"\nProcessing course: {course_code}")
-                print(f"Course info: {course_info}")
-                
                 # Create course_data for admin view
                 course_data = {
                     'course_code': course_code,
@@ -346,29 +336,31 @@ def dashboard_view(request):
                 }
                 latest_courses.append(course_data)
                 
+                # Get user's enrolled courses if they're a student
+                user_email = request.session.get('user_email')
+                encoded_email = user_email.replace('.', '-dot-').replace('@', '-at-')
+                user_courses = []
+                
+                # Get student's enrolled courses
+                enrolled_courses = database.child("users").child(encoded_email).child("courses").get().val()
+                if enrolled_courses:
+                    for enrollment in enrolled_courses.values():
+                        user_courses.append(enrollment.get('course_code'))
+                
                 # Check all lecturers entries
                 lecturers = course_info.get('lecturers', [])
-                print(f"Lecturers data: {lecturers}")
-                print(f"Current user email: {request.session.get('user_email')}")
                 is_course_lecturer = False
                 
                 # Loop through the lecturers list
                 if isinstance(lecturers, list):
-                    print("Processing lecturers list...")
                     for lecturer_entry in lecturers:
-                        print(f"Checking lecturer entry: {lecturer_entry}")
                         if lecturer_entry and isinstance(lecturer_entry, dict):
                             lecturer_email = lecturer_entry.get('lecturer_email')
-                            print(f"Found lecturer email: {lecturer_email}")
-                            print(f"Comparing with current user: {lecturer_email == request.session.get('user_email')}")
-                            if lecturer_email == request.session.get('user_email'):
+                            lecturer_name = lecturer_entry.get('lecturer_name')
+                            
+                            if lecturer_email == user_email or lecturer_name == user_email:
                                 is_course_lecturer = True
-                                print("Match found!")
                                 break
-                    else:
-                        print(f"Lecturers is not a list, it's a {type(lecturers)}")
-                
-                print(f"Is course lecturer: {is_course_lecturer}")
                 
                 # Only add to lecturer_latest_courses if current user is a lecturer for this course
                 if is_course_lecturer:
@@ -377,42 +369,49 @@ def dashboard_view(request):
                         'course_name': course_info.get('course_name', '')
                     }
                     lecturer_latest_courses.append(lecturer_course_data)
-                    print(f"Added course {course_code} to lecturer courses")
                 
-                # Get announcements for this course
-                course_announcements = course_info.get('announcements', {})
-                if course_announcements:
-                    for ann_id, ann_data in course_announcements.items():
-                        announcement = {
-                            'id': ann_id,
-                            'course_code': course_code,
-                            'title': ann_data.get('title', ''),
-                            'content': ann_data.get('content', ''),
-                            'author': ann_data.get('author', ''),
-                            'timestamp': ann_data.get('timestamp', '')
-                        }
-                        announcements.append(announcement)
-        
-        # Sort announcements by timestamp (newest first)
-        announcements.sort(key=lambda x: x['timestamp'], reverse=True)
-        
-        context = {
-            'lecturer_latest_courses': lecturer_latest_courses,
-            'latest_courses': latest_courses,
-            'announcements': announcements,
-            'current_year': current_year,
-            'current_semester': current_semester
-        }
-        
-        print("\nFinal Results:")
-        print(f"Total courses: {len(latest_courses)}")
-        print(f"Lecturer courses: {len(lecturer_latest_courses)}")
-        print(f"Lecturer courses list: {lecturer_latest_courses}")
-        
-        return render(request, 'dashboard.html', context)
-        
+                # Get announcements for this course if user is a lecturer, enrolled student, or admin
+                if is_course_lecturer or course_code in user_courses or request.session.get('user_role') == 'admin':
+                    course_announcements = course_info.get('announcements', {})
+                    
+                    if course_announcements:
+                        for ann_id, ann_data in course_announcements.items():
+                            # Check if the user is a student
+                            if request.session.get('user_role') == 'student':
+                                # Truncate content for students
+                                content = ' '.join(ann_data.get('content', '').split()[:10]) + '...'
+                            else:
+                                # Use full content for other roles
+                                content = ann_data.get('content', '')
+
+                            announcement = {
+                                'id': ann_id,
+                                'course_code': course_code,
+                                'title': ann_data.get('title', ''),
+                                'content': content,  # Use truncated or full content
+                                'author': ann_data.get('author', ''),
+                                'timestamp': ann_data.get('timestamp', '')
+                            }
+                            announcements.append(announcement)
+                            print(f"Added announcement: {announcement}")  # Debugging line
+
+            # Sort announcements by timestamp (newest first) and get latest 5
+            announcements.sort(key=lambda x: x['timestamp'], reverse=True)
+            latest_announcements = announcements[:5]  # Get the latest 5 announcements
+            
+            context = {
+                'lecturer_latest_courses': lecturer_latest_courses,
+                'latest_courses': latest_courses,
+                'announcements': announcements,
+                'latest_announcements': latest_announcements,  # Add this for carousel
+                'current_year': current_year,
+                'current_semester': current_semester,
+                'sem_year': f"sem{current_semester}year{current_year}",
+            }
+            
+            return render(request, 'dashboard.html', context)
+            
     except Exception as e:
-        print(f"Error in dashboard view: {e}")
         return render(request, 'dashboard.html', {'error': str(e)})
 
 def academic_view(request):
@@ -715,6 +714,7 @@ def course_detail_view(request, semester_year, course_code):
                                                     })
 
                                         # Process course details
+                                        announcements = course_info.get('announcements', [])  # Fetch announcements
                                         courses.append({
                                             'semester_year': semester_year,
                                             'academic_year': year.replace('-', '/'),
@@ -723,8 +723,12 @@ def course_detail_view(request, semester_year, course_code):
                                             'course_name': course_info.get('course_name', ''),
                                             'lecturers': [l for l in course_info.get('lecturers', []) if l],
                                             'venue_time': [vt for vt in course_info.get('venue and time', []) if vt],
-                                            'courseworks': processed_courseworks
+                                            'courseworks': processed_courseworks,
+                                            'announcements': announcements  # Add announcements to the course data
                                         })
+
+                                        print(announcements)
+                                        print('this is the announcements')
 
         # Process enrolled students
         users = database.child("users").get().val()
@@ -770,7 +774,6 @@ def course_detail_view(request, semester_year, course_code):
         return render(request, 'course-detail.html', context)
 
     except Exception as e:
-        print(f"Error in course detail view: {e}")
         return render(request, 'course-detail.html', {
             'error': f'An error occurred: {str(e)}'
         })
@@ -831,6 +834,7 @@ def analytics_detail_view(request, semester_year, course_code):
                                                     })
 
                                         # Process course details
+                                        announcements = course_info.get('announcements', [])  # Fetch announcements
                                         courses.append({
                                             'semester_year': semester_year,
                                             'academic_year': year.replace('-', '/'),
@@ -839,7 +843,8 @@ def analytics_detail_view(request, semester_year, course_code):
                                             'course_name': course_info.get('course_name', ''),
                                             'lecturers': [l for l in course_info.get('lecturers', []) if l],
                                             'venue_time': [vt for vt in course_info.get('venue and time', []) if vt],
-                                            'courseworks': processed_courseworks
+                                            'courseworks': processed_courseworks,
+                                            'announcements': announcements  # Add announcements to the course data
                                         })
 
         # Process enrolled students

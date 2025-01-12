@@ -196,20 +196,22 @@ function removeVenueTimeField(id) {
   }
 }
 
-var acc = document.getElementsByClassName("accordion");
-var i;
+document.addEventListener("DOMContentLoaded", function () {
+    var acc = document.getElementsByClassName("accordion");
+    var i;
 
-for (i = 0; i < acc.length; i++) {
-  acc[i].addEventListener("click", function () {
-    this.classList.toggle("active");
-    var panel = this.nextElementSibling;
-    if (panel.style.maxHeight) {
-      panel.style.maxHeight = null;
-    } else {
-      panel.style.maxHeight = panel.scrollHeight + "px";
+    for (i = 0; i < acc.length; i++) {
+        acc[i].addEventListener("click", function () {
+            this.classList.toggle("active");
+            var panel = this.nextElementSibling;
+            if (panel.style.maxHeight) {
+                panel.style.maxHeight = null;
+            } else {
+                panel.style.maxHeight = panel.scrollHeight + "px";
+            }
+        });
     }
-  });
-}
+});
 
 let courseworkCount = 1;
 
@@ -276,4 +278,16 @@ function removeCourseworkField(id) {
             }
         }
     }
+}
+
+function openAnnouncement(title, content, author, timestamp, authorProfilePhoto) {
+    // Populate the form with the announcement details
+    document.getElementById("form-title").innerText = title;
+    document.getElementById("form-content").innerText = content;
+    document.getElementById("form-author").innerText = "Author: " + author;
+    document.getElementById("form-timestamp").innerText = "Timestamp: " + timestamp;
+    document.getElementById("form-author-photo").src = authorProfilePhoto;
+
+    // Show the form
+    document.getElementById("announcement-form").style.display = "block";
 }
