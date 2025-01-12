@@ -108,6 +108,107 @@
     #predictionTable td {
         vertical-align: middle;
     }
+
+    
+    .accordion {
+        background-color: #eee;
+        color: #444;
+        cursor: pointer;
+        padding: 18px;
+        width: 100%;
+        border: none;
+        text-align: left;
+        outline: none;
+        font-size: 15px;
+        transition: 0.4s;
+      }
+
+      .active, .accordion:hover {
+        background-color: #ccc;
+      }
+
+      .accordion:after {
+        content: '\002B';
+        color: #777;
+        font-weight: bold;
+        float: right;
+        margin-left: 5px;
+      }
+
+      .active:after {
+        content: "\2212";
+      }
+
+      .panel {
+        padding: 0 18px;
+        background-color: white;
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.2s ease-out;
+      }
+
+      .form-group {
+        margin-bottom: 20px;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: bold;
+    }
+    
+    .form-group input,
+    .form-group textarea {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+    }
+    
+    .form-group #editor {
+        height: 300px;
+        margin-bottom: 20px;
+    }
+
+    .form-control {
+        border: 2px solid black !important;
+        border-radius: 4px;
+        padding: 10px;
+        transition: border-color 0.3s;
+    }
+    
+    .form-title {
+        font-size: 20px;
+        font-weight: bold;
+        color: #4E598C;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .announcement-title {
+        background-color: #F9C784;
+        color: #4E598C;
+        cursor: pointer;
+        padding: 18px;
+        width: 100%;
+        border: none;
+        text-align: left;
+        outline: none;
+        font-size: 15px; 
+        transition: 0.4s;
+    }
+    
+    .announcement-title:hover {
+        background-color: #e39023;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .btn-show-announcement {
+        background-color: #4E598C;
+        color: white;
+        margin-top: 10px;
+    }
     </style>
 </head>
 <body>
@@ -1225,6 +1326,19 @@
             }
         }
     }
+
+    // Function to open the announcement modal and display details
+    function openAnnouncement(title, content, author, timestamp) {
+        // Set the modal content
+        document.getElementById('ann-title').value = title; // Assuming you have an input for the title
+        document.getElementById('ann-content').value = content; // Assuming you have a textarea for the content
+        document.getElementById('form-author').innerText = author; // Assuming you have a span or div for the author
+        document.getElementById('form-timestamp').innerText = timestamp; // Assuming you have a span or div for the timestamp
+
+        // Show the modal using Bootstrap's modal method
+        const modal = new bootstrap.Modal(document.getElementById('viewAnnouncement'));
+        modal.show();
+    }
     </script>
 
     <div class="modal fade" id="viewAnnouncement" tabindex="-1" aria-labelledby="updateAnnouncementModalLabel" aria-hidden="true">
@@ -1238,27 +1352,20 @@
                     <form id="onlyViewAnnouncement" class="container-fluid">
                         {% csrf_token %}
                         <div class="form-group">
-                            <div style="display: flex; align-items: center;">
-                                <b><span style="margin: 0;">Author:</span></b>
-                                <b><p id="form-author" style="margin-left: 5px; margin: 0;"></p></b>
-                            </div>
+                            <label for="form-author" style="display: inline; margin-right: 5px;">Author:</label>
+                            <p id="form-author" style="display: inline; margin: 0;"></p>
                         </div>
                         <div class="form-group">
                             <label for="ann-title">Title:</label>
-                            <input type="text" 
-                                   class="select-width form-select form-control" 
-                                   id="ann-title" 
-                                   disabled>
+                            <input type="text" class="select-width form-select form-control" id="ann-title" disabled>
                         </div>
                         <div class="form-group">
                             <label for="ann-content">Content:</label>
-                            <textarea class="form-control" 
-                                      id="ann-content" 
-                                      rows="10" 
-                                      disabled></textarea>
+                            <textarea class="form-control" id="ann-content" rows="10" disabled></textarea>
                         </div>
-                        <div style="margin-left: 80%;">
-                        <p>posted on: </P><p id="form-timestamp"></p>
+                        <div class="form-group">
+                            <label for="form-timestamp">Timestamp:</label>
+                            <p id="form-timestamp"></p>
                         </div>
                     </form>
                 </div>
