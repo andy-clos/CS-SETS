@@ -91,104 +91,22 @@
         user-select: none;
     }
 
-    .accordion {
-        background-color: #eee;
-        color: #444;
-        cursor: pointer;
-        padding: 18px;
-        width: 100%;
-        border: none;
-        text-align: left;
-        outline: none;
-        font-size: 15px;
-        transition: 0.4s;
-      }
-
-      .active, .accordion:hover {
-        background-color: #ccc;
-      }
-
-      .accordion:after {
-        content: '\002B';
-        color: #777;
-        font-weight: bold;
-        float: right;
-        margin-left: 5px;
-      }
-
-      .active:after {
-        content: "\2212";
-      }
-
-      .panel {
-        padding: 0 18px;
-        background-color: white;
-        max-height: 0;
-        overflow: hidden;
-        transition: max-height 0.2s ease-out;
-      }
-
-      .form-group {
-        margin-bottom: 20px;
-    }
-    
-    .form-group label {
-        display: block;
-        margin-bottom: 8px;
-        font-weight: bold;
-    }
-    
-    .form-group input,
-    .form-group textarea {
-        width: 100%;
-        padding: 8px;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-    }
-    
-    .form-group #editor {
-        height: 300px;
-        margin-bottom: 20px;
+    .progress {
+        margin-bottom: 0;
     }
 
-    .form-control {
-        border: 2px solid black !important;
-        border-radius: 4px;
-        padding: 10px;
-        transition: border-color 0.3s;
-    }
-    
-    .form-title {
-        font-size: 20px;
-        font-weight: bold;
-        color: #4E598C;
-        margin-left: auto;
-        margin-right: auto;
+    .badge {
+        padding: 8px 12px;
     }
 
-    .announcement-title {
-        background-color: #F9C784;
-        color: #4E598C;
-        cursor: pointer;
-        padding: 18px;
-        width: 100%;
-        border: none;
-        text-align: left;
-        outline: none;
-        font-size: 15px; 
-        transition: 0.4s;
-    }
-    
-    .announcement-title:hover {
-        background-color: #e39023;
-        transform: translateY(-2px);
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    .coursework-breakdown .progress {
+        height: 8px;
+        margin-bottom: 4px;
     }
 
-    .btn-show-announcement {
-        background-color: #4E598C;
-        color: white;
-        margin-top: 10px;
+    #predictionTable th, 
+    #predictionTable td {
+        vertical-align: middle;
     }
     </style>
 </head>
@@ -318,7 +236,6 @@
                                     <i class="fas fa-file-pdf"></i> Export PDF
                                 </button>
                             </div>
-                            {% if request.session.user_role == 'admin' or request.session.user_role == 'lecturer' %}
                             <div class="upload-button ms-2">
                                 <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#uploadMarksModal">
                                     <i class="fas fa-upload"></i> Upload Marks CSV
@@ -345,6 +262,80 @@
                                                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                                                     <button type="submit" class="btn btn-primary">Upload</button>
                                                 </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% if request.session.user_role == 'lecturer' %}
+                            <div class="prediction-button ms-2">
+                                <button type="button" class="btn btn-warning" onclick="predictStudentRisks()">
+                                    <i class="fas fa-chart-line"></i> Predict Student Risks
+                                </button>
+                            </div>
+
+                            <div class="modal fade" id="predictionResultsModal" tabindex="-1">
+                                <div class="modal-dialog modal-xl">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title">Student Risk Predictions</h5>
+                                            <button type="button" class="btn-close" onclick="closePredictionModal()" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <div class="alert alert-info mb-3">
+                                                <h6>Risk Summary:</h6>
+                                                <p class="mb-1">High Risk Students: <span id="highRiskCount">0</span></p>
+                                                <p class="mb-0">Total Students: <span id="totalStudents">0</span></p>
+                                            </div>
+                                            <div class="table-responsive">
+                                                <table class="table table-striped" id="predictionTable">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Student Name</th>
+                                                            <th>Matrix Number</th>
+                                                            <th>Current Progress</th>
+                                                            <th>Risk Analysis</th>
+                                                            <th>Coursework Breakdown</th>
+                                                            <th>Actions</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody id="predictionTableBody">
+                                                        <!-- Predictions will be inserted here -->
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" onclick="closePredictionModal()">Close</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        
+                            <!-- Add Alert Modal -->
+                            <div class="modal fade" id="alertModal" tabindex="-1">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title">Send Alert & Feedback</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <form id="alertForm" onsubmit="return sendAlert(event)">
+                                                <input type="hidden" id="alertStudentEmail">
+                                                <div class="mb-3">
+                                                    <label class="form-label">Student Performance Summary:</label>
+                                                    <div id="performanceSummary" class="alert alert-info"></div>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label for="feedbackMessage" class="form-label">Feedback Message:</label>
+                                                    <textarea class="form-control" id="feedbackMessage" rows="4" required></textarea>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label for="recommendedActions" class="form-label">Recommended Actions:</label>
+                                                    <textarea class="form-control" id="recommendedActions" rows="3" required></textarea>
+                                                </div>
+                                                <button type="submit" class="btn btn-primary">Send Alert</button>
                                             </form>
                                         </div>
                                     </div>
@@ -505,10 +496,19 @@
 
         {% include 'footer.html' %} 
     </div>
+
     <script src="{% static 'js/backend.js' %}"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
     <script>
+    // Initialize variables from Django template context
+    const semester_year = "{{ semester_year|escapejs }}";
+    const course_code = "{{ course_code|escapejs }}";
+    const csrfToken = "{{ csrf_token }}";
+
+    // Debug log to verify variables are set
+    console.log('Template variables:', { semester_year, course_code });
+
     function confirmDelete() {
         Swal.fire({
             title: 'Are you sure?',
@@ -878,24 +878,352 @@
         }
     });
 
-    // Modal for displaying announcement details
-    function openAnnouncement(title, content, author, timestamp) {
-        console.log("Opening announcement:", title, content, author, timestamp); // Debug log
+    async function predictStudentRisks() {
+        try {
+            // Show loading alert
+            Swal.fire({
+                title: 'Analyzing Student Data',
+                html: 'Generating risk predictions...',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
 
-        // Set the modal content
-        const titleInput = document.getElementById('ann-title');
-        const contentTextarea = document.getElementById('ann-content');
-        const authorElement = document.getElementById('form-author');
-        const timestampElement = document.getElementById('form-timestamp');
+            // Make the prediction request
+            const response = await fetch(`/predict-risks/${course_code}/${semester_year}/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken
+                }
+            });
 
-        titleInput.value = title;
-        contentTextarea.value = content;
-        authorElement.innerText = author;
-        timestampElement.innerText = timestamp;
+            const data = await response.json();
 
-        // Show the modal using Bootstrap's modal method
-        const modal = new bootstrap.Modal(document.getElementById('viewAnnouncement'));
-        modal.show();
+            // Close loading alert
+            Swal.close();
+
+            if (data.status === 'success') {
+                displayPredictions(data.predictions);
+                const modal = new bootstrap.Modal(document.getElementById('predictionResultsModal'));
+                modal.show();
+            } else {
+                throw new Error(data.message || 'Failed to predict risks');
+            }
+        } catch (error) {
+            // Close loading alert if there's an error
+            Swal.close();
+            
+            console.error('Error predicting risks:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: error.message || 'Failed to predict student risks'
+            });
+        }
+    }
+
+    function displayPredictions(predictions) {
+        if (!predictions || predictions.length === 0) {
+            Swal.fire({
+                icon: 'info',
+                title: 'No Data',
+                text: 'No student data available for predictions'
+            });
+            return;
+        }
+
+        const tbody = document.getElementById('predictionTableBody');
+        if (!tbody) {
+            console.error('Prediction table body element not found');
+            return;
+        }
+
+        tbody.innerHTML = '';
+        let highRiskCount = 0;
+
+        predictions.forEach(pred => {
+            if (!pred) return;
+            
+            try {
+                if (pred.risk_level === 'High Risk') highRiskCount++;
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${pred.student_name || 'N/A'}</td>
+                    <td>${pred.matrix_number || 'N/A'}</td>
+                    <td>
+                        <div class="progress">
+                            <div class="progress-bar ${getProgressBarClass(pred.current_progress || 0)}" 
+                                 role="progressbar" 
+                                 style="width: ${pred.current_progress || 0}%">
+                                ${(pred.current_progress || 0).toFixed(1)}%
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <span class="badge ${getRiskBadgeClass(pred.risk_level || 'Unknown')}">
+                            ${pred.risk_level || 'Unknown'}
+                        </span>
+                        <br>
+                        <small>Confidence: ${(pred.prediction_confidence || 0).toFixed(1)}%</small>
+                    </td>
+                    <td class="coursework-breakdown">
+                        ${generateCourseworkBreakdown(pred.coursework_breakdown)}
+                    </td>
+                    <td>
+                        <button class="btn btn-warning btn-sm" 
+                                onclick='showAlert(${JSON.stringify(pred).replace(/'/g, "&#39;")})'>
+                            <i class="fas fa-bell"></i> Alert & Feedback
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            } catch (error) {
+                console.error('Error processing prediction:', error, pred);
+            }
+        });
+
+        // Update counters
+        const highRiskElement = document.getElementById('highRiskCount');
+        const totalElement = document.getElementById('totalStudents');
+        
+        if (highRiskElement) highRiskElement.textContent = highRiskCount;
+        if (totalElement) totalElement.textContent = predictions.length;
+
+        // Show modal with proper backdrop handling
+        const modal = document.getElementById('predictionResultsModal');
+        if (modal) {
+            const bsModal = new bootstrap.Modal(modal, {
+                backdrop: 'static',  // Prevents closing when clicking outside
+                keyboard: true       // Allows closing with Esc key
+            });
+            
+            // Clean up when modal is hidden
+            modal.addEventListener('hidden.bs.modal', function () {
+                document.body.classList.remove('modal-open');
+                const backdrop = document.querySelector('.modal-backdrop');
+                if (backdrop) {
+                    backdrop.remove();
+                }
+            });
+
+            bsModal.show();
+        }
+    }
+
+    function generateCourseworkBreakdown(breakdown) {
+        console.log('Received breakdown:', breakdown); // Debug log
+
+        if (!breakdown || Object.keys(breakdown).length === 0) {
+            return '<small>No coursework data available</small>';
+        }
+
+        return Object.entries(breakdown).map(([type, data]) => {
+            const achieved = data.achieved || 0;
+            const total = data.total || 0;
+            const percentage = data.percentage || 0;
+
+            return `
+                <div class="coursework-item mb-2">
+                    <div class="d-flex justify-content-between">
+                        <small>${type}</small>
+                        <small>${achieved}/${total} (${percentage.toFixed(1)}%)</small>
+                    </div>
+                    <div class="progress" style="height: 8px;">
+                        <div class="progress-bar ${getProgressBarClass(percentage)}" 
+                             role="progressbar" 
+                             style="width: ${percentage}%">
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    function getProgressBarClass(percentage) {
+        if (percentage >= 70) return 'bg-success';
+        if (percentage >= 40) return 'bg-warning';
+        return 'bg-danger';
+    }
+
+    function getRiskBadgeClass(risk) {
+        switch(risk) {
+            case 'Low Risk': return 'bg-success';
+            case 'Medium Risk': return 'bg-warning';
+            case 'High Risk': return 'bg-danger';
+            default: return 'bg-secondary';
+        }
+    }
+
+    let currentPredictionData = null;
+
+    function showAlert(predictionData) {
+        try {
+            console.log('Showing alert for:', predictionData);
+            
+            // Store the prediction data globally
+            currentPredictionData = predictionData;
+            
+            if (!predictionData || !predictionData.student_email) {
+                throw new Error('Invalid student data');
+            }
+
+            // Set student email in hidden input
+            document.getElementById('alertStudentEmail').value = predictionData.student_email;
+            
+            // Set performance summary
+            const summaryHTML = `
+                <strong>Student: ${predictionData.student_name || 'N/A'}</strong><br>
+                Matrix Number: ${predictionData.matrix_number || 'N/A'}<br>
+                Current Progress: ${(predictionData.current_progress || 0).toFixed(1)}%<br>
+                Risk Level: <span class="badge ${getRiskBadgeClass(predictionData.risk_level)}">${predictionData.risk_level || 'Unknown'}</span>
+                <hr>
+                <strong>Coursework Breakdown:</strong><br>
+                ${Object.entries(predictionData.coursework_breakdown || {})
+                    .map(([type, data]) => 
+                        `${type}: ${data.achieved || 0}/${data.total || 0} (${(data.percentage || 0).toFixed(1)}%)`
+                    ).join('<br>')}
+            `;
+            
+            const summaryElement = document.getElementById('performanceSummary');
+            if (summaryElement) {
+                summaryElement.innerHTML = summaryHTML;
+            }
+            
+            // Set default feedback and actions
+            const feedbackElement = document.getElementById('feedbackMessage');
+            const actionsElement = document.getElementById('recommendedActions');
+            
+            if (feedbackElement) {
+                feedbackElement.value = getDefaultFeedback(predictionData);
+            }
+            if (actionsElement) {
+                actionsElement.value = getDefaultActions(predictionData);
+            }
+            
+            // Show modal
+            const modal = document.getElementById('alertModal');
+            if (modal) {
+                new bootstrap.Modal(modal).show();
+            } else {
+                throw new Error('Alert modal not found');
+            }
+        } catch (error) {
+            console.error('Error showing alert:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Failed to show alert dialog: ' + error.message
+            });
+        }
+    }
+
+    async function sendAlert(event) {
+        event.preventDefault();
+        
+        try {
+            if (!currentPredictionData) {
+                throw new Error('No prediction data available');
+            }
+
+            const studentEmail = document.getElementById('alertStudentEmail').value;
+            const feedbackMessage = document.getElementById('feedbackMessage').value;
+            const recommendedActions = document.getElementById('recommendedActions').value;
+
+            console.log('Sending alert with:', { 
+                studentEmail, 
+                course_code, 
+                semester_year,
+                currentPredictionData 
+            });
+
+            const response = await fetch('/send-student-alert/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken
+                },
+                body: JSON.stringify({
+                    student_email: studentEmail,
+                    feedback: feedbackMessage,
+                    actions: recommendedActions,
+                    course_code: course_code,
+                    semester_year: semester_year,
+                    risk_level: currentPredictionData.risk_level,
+                    current_progress: currentPredictionData.current_progress
+                })
+            });
+
+            const data = await response.json();
+            
+            if (data.status === 'success') {
+                // Close the modal
+                const modal = document.getElementById('alertModal');
+                const modalInstance = bootstrap.Modal.getInstance(modal);
+                modalInstance.hide();
+
+                // Reset the current prediction data
+                currentPredictionData = null;
+
+                // Show success message
+                await Swal.fire({
+                    icon: 'success',
+                    title: 'Success',
+                    text: 'Alert and feedback sent successfully',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+            } else {
+                throw new Error(data.message || 'Failed to send alert');
+            }
+        } catch (error) {
+            console.error('Error sending alert:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: error.message || 'Failed to send alert and feedback'
+            });
+        }
+        return false;
+    }
+
+    function getDefaultFeedback(predictionData) {
+        const progress = (predictionData.current_progress || 0).toFixed(1);
+        
+        if (predictionData.risk_level === 'High Risk') {
+            return `I am concerned about your current academic progress in this course. Your overall coursework achievement is at ${progress}%, which puts you at risk of not meeting the course requirements. Let's discuss how we can improve your performance.`;
+        } else if (predictionData.risk_level === 'Medium Risk') {
+            return `While you are making progress in the course with ${progress}% achievement, there's room for improvement. I'd like to help ensure you reach your full potential in this course.`;
+        }
+        return `You are performing well in this course with ${progress}% achievement. Keep up the good work! Let me know if you need any additional support.`;
+    }
+
+    function getDefaultActions(predictionData) {
+        if (predictionData.risk_level === 'High Risk') {
+            return "1. Schedule an urgent consultation session\n2. Complete all pending coursework\n3. Attend all remaining classes\n4. Consider forming a study group\n5. Review difficult topics with lecturer";
+        } else if (predictionData.risk_level === 'Medium Risk') {
+            return "1. Review challenging topics\n2. Submit all coursework on time\n3. Participate actively in class\n4. Consider additional practice exercises";
+        }
+        return "1. Continue your current study approach\n2. Consider helping peers who need assistance\n3. Prepare early for upcoming assessments\n4. Maintain regular attendance";
+    }
+
+    // Add this function to properly close the modal
+    function closePredictionModal() {
+        const modal = document.getElementById('predictionResultsModal');
+        if (modal) {
+            const bsModal = bootstrap.Modal.getInstance(modal);
+            if (bsModal) {
+                bsModal.hide();
+            }
+            // Clean up manually just in case
+            document.body.classList.remove('modal-open');
+            const backdrop = document.querySelector('.modal-backdrop');
+            if (backdrop) {
+                backdrop.remove();
+            }
+        }
     }
     </script>
 

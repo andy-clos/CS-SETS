@@ -30,6 +30,10 @@ from django.core.files.base import ContentFile
 from django.views.decorators.http import require_GET
 import uuid
 import requests
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.preprocessing import StandardScaler
+import numpy as np
+import pandas as pd
 
 
 
@@ -777,125 +781,6 @@ def course_detail_view(request, semester_year, course_code):
         return render(request, 'course-detail.html', {
             'error': f'An error occurred: {str(e)}'
         })
-    
-
-def analytics_detail_view(request, semester_year, course_code):
-    model_path = os.path.join(os.path.dirname(__file__), 'ml_models', 'model.pkl')
-
-    model = joblib.load(model_path)
-
-    predictions = []
-
-    try:
-        if request.method == 'POST':
-            data1 = float(request.POST.get('data1'))
-            data2 = float(request.POST.get('data2'))
-            data3 = float(request.POST.get('data3'))
-            data4 = float(request.POST.get('data4'))
-            data5 = float(request.POST.get('data5'))
-            data6 = float(request.POST.get('data6'))
-            data7 = float(request.POST.get('data7'))
-            data8 = float(request.POST.get('data8'))
-            data9 = float(request.POST.get('data9'))
-            data10 = float(request.POST.get('data10'))
-            data11 = float(request.POST.get('data11'))
-            input_data = [[data1, data2, data3, data4, data5, data6, data7, data8, data9, data10, data11]]
-
-            predictions = model.predict(input_data)
-
-        academic_year, semester = semester_year.split('sem')
-        semester = semester[0] 
-        academic_year = semester_year[semester_year.index("year") + 4:]
-
-        courses_data = database.child("course").get().val()
-        courses = []
-        enrolled_students = []
-        courseworks_data = {}
-        processed_courseworks = []
-
-        # Process course data
-        if courses_data:
-            for year, semesters in courses_data.items():
-                if year == academic_year:
-                    for semester_index, courses_in_semester in enumerate(semesters):
-                        if str(semester_index) == semester:
-                            if isinstance(courses_in_semester, dict):
-                                for code, course_info in courses_in_semester.items():
-                                    if code == course_code:
-                                        # Process courseworks
-                                        courseworks_data = course_info.get('courseworks', {})
-                                        if isinstance(courseworks_data, dict):
-                                            for coursework_id, cw in courseworks_data.items():
-                                                if cw and isinstance(cw, dict):
-                                                    processed_courseworks.append({
-                                                        'type': cw['type'],
-                                                        'total_mark': cw['total_mark'],
-                                                        'field_name': cw['type'].replace(' ', '_')
-                                                    })
-
-                                        # Process course details
-                                        announcements = course_info.get('announcements', [])  # Fetch announcements
-                                        courses.append({
-                                            'semester_year': semester_year,
-                                            'academic_year': year.replace('-', '/'),
-                                            'semester': str(semester_index),
-                                            'course_code': code,
-                                            'course_name': course_info.get('course_name', ''),
-                                            'lecturers': [l for l in course_info.get('lecturers', []) if l],
-                                            'venue_time': [vt for vt in course_info.get('venue and time', []) if vt],
-                                            'courseworks': processed_courseworks,
-                                            'announcements': announcements  # Add announcements to the course data
-                                        })
-
-        # Process enrolled students
-        users = database.child("users").get().val()
-        if users:
-            for email_key, user_data in users.items():
-                if user_data.get('role') == 'student' and 'courses' in user_data:
-                    for course_key, course_info in user_data['courses'].items():
-                        if (course_info.get('course_code') == course_code and 
-                            course_info.get('academic_year') == academic_year and 
-                            course_info.get('semester') == semester):
-                            
-                            student_data = {
-                                'name': user_data.get('name', ''),
-                                'matrix': user_data.get('matrix', ''),
-                                'email': user_data.get('email', ''),
-                                'marks': {},
-                                'total_mark': 0
-                            }
-                            
-                            coursework_data = course_info.get('coursework', {})
-                            
-                            if isinstance(coursework_data, dict):
-                                for coursework_type, mark in coursework_data.items():
-                                    student_data['marks'][coursework_type] = mark
-                            
-                            student_data['total_mark'] = sum(student_data['marks'].values())
-
-                            enrolled_students.append(student_data)
-
-        total_marks = sum(cw['total_mark'] for cw in courses[0]['courseworks'])
-
-        # Always return a response
-        context = {
-            'courses': courses,
-            'course_code': course_code,
-            'academic_year': academic_year,
-            'semester': semester,
-            'semester_year': semester_year,
-            'enrolled_students': enrolled_students,
-            'error': None if courses else 'Course not found',
-            'predictions': predictions,
-            'total_marks': total_marks
-        }
-        return render(request, 'analytics-detail.html', context)
-
-    except Exception as e:
-        print(f"Error in course detail view: {e}")
-        return render(request, 'analytics-detail.html', {
-            'error': f'An error occurred: {str(e)}'
-        })
 
 def delete_course_view(request, semester_year, course_code):
     if request.method == 'POST':
@@ -963,111 +848,6 @@ def forum_view(request):
 
 def getSubject():
     subject = database.child("forum").child("posts").get()
-
-def analytics_view(request):
-    # Get latest courses for student selection
-    latest_courses = []
-    student_courses = []
-    courses = {}
-    latest_year = None
-    latest_semester = None
-
-    try:
-        courses_data = database.child("course").get().val()
-        if courses_data:
-            # Get all users to count students per course
-            users_data = database.child("users").get().val()
-            course_student_counts = {}
-            
-            # Count students for each course, considering semester
-            if users_data:
-                for user_key, user_info in users_data.items():
-                    if user_info.get('role') == 'student' and 'courses' in user_info:
-                        for course_key, course_info in user_info['courses'].items():
-                            course_code = course_info.get('course_code')
-                            course_semester = course_info.get('semester')
-                            course_year = course_info.get('academic_year')
-                            if course_code and course_semester and course_year:
-                                # Create a unique key combining course code, year, and semester
-                                unique_course_key = f"{course_code}_{course_year}_{course_semester}"
-                                course_student_counts[unique_course_key] = course_student_counts.get(unique_course_key, 0) + 1
-
-            # Get latest academic year
-            sorted_years = sorted(courses_data.keys(), reverse=True)
-            latest_year = sorted_years[0]
-            
-            # Get latest semester
-            latest_semester = get_latest_semester(courses_data, latest_year)
-
-            # Process all courses for display
-            for academic_year in sorted_years:
-                year_display = academic_year.replace('-', '/')
-                courses[academic_year] = {'display': year_display, 'semesters': {}}
-                
-                for semester_index, semester_data in enumerate(courses_data[academic_year]):
-                    if isinstance(semester_data, dict):
-                        semester_courses = []
-                        for code, course_info in semester_data.items():
-                            unique_course_key = f"{code}_{academic_year}_{semester_index}"
-                            lecturers = course_info.get('lecturers', {})
-                            lecturers = [lecturer for lecturer in lecturers if lecturer is not None]
-                            venue_time = course_info.get('venue and time', {})
-                            venue_time = [vt for vt in venue_time if vt is not None]
-                            lecturer_count = len(lecturers)
-                            semester_courses.append({
-                                'course_code': code,
-                                'course_name': course_info.get('course_name', ''),
-                                'lecturers': lecturers,
-                                'lecturer_count': lecturer_count,
-                                'venue_time': venue_time,
-                                'student_count': course_student_counts.get(unique_course_key, 0)  # Use the semester-specific count
-                            })
-                            
-                        if semester_courses:
-                            courses[academic_year]['semesters'][str(semester_index)] = semester_courses
-
-            # Get latest courses for dropdown
-            if latest_semester is not None:
-                latest_semester_courses = courses_data[latest_year][latest_semester]
-                if isinstance(latest_semester_courses, dict):
-                    for code, course_info in latest_semester_courses.items():
-                        latest_courses.append({
-                            'course_code': code,
-                            'course_name': course_info.get('course_name', '')
-                        })
-            
-            # Get student's courses if user is a student
-            if request.session.get('user_role') == 'student':
-                user_email = get_current_user(request)
-                encoded_email = user_email.replace('.', '-dot-').replace('@', '-at-')
-                user_courses = database.child("users").child(encoded_email).child("courses").get().val()
-                student_courses = []
-                if user_courses and isinstance(user_courses, dict):
-                    for course in user_courses.values():
-                        student_courses.append({
-                            'course_code': course.get('course_code', ''),
-                            'academic_year': course.get('academic_year', ''),
-                            'semester': course.get('semester', '')  # Add semester to the data structure
-                        })
-                    # Sort by academic year to get the earliest year first
-                    student_courses.sort(key=lambda x: x['academic_year'])
-
-    except Exception as e:
-        print(f"Error fetching courses: {e}")
-        print(f"Latest year: {latest_year}")
-        print(f"Latest semester: {latest_semester}")
-   
-    context = {
-        'courses': courses,
-        'latest_courses': latest_courses,
-        'student_courses': student_courses,
-        'latest_year': latest_year,
-        'latest_semester': latest_semester
-    }
-
-    print("this is student courses", student_courses)
-
-    return render(request, 'analytics.html', context)
 
 def users_management_view(request):
     return render(request, 'users-management.html')
@@ -2351,4 +2131,288 @@ def resume_generated(request):
 
 
     return render(request, 'Tools/Resume/generate.html', {'resume_data': resume_data})
+
+@require_POST
+def predict_risks(request, course_code, semester_year):
+    try:
+        # Parse semester_year
+        semester = semester_year[3:4]
+        academic_year = semester_year[8:]
+
+        # Get course data
+        course = database.child("course").child(academic_year).child(semester).child(course_code).get().val()
+        if not course:
+            return JsonResponse({'status': 'error', 'message': 'Course not found'})
+
+        # Get coursework types and total marks
+        coursework_types = {}
+        total_coursework_marks = 0
+        if 'courseworks' in course:
+            for cw_key, cw_data in course['courseworks'].items():
+                if isinstance(cw_data, dict) and 'type' in cw_data and 'total_mark' in cw_data:
+                    coursework_types[cw_data['type']] = float(cw_data['total_mark'])
+                    total_coursework_marks += float(cw_data['total_mark'])
+
+        if not coursework_types:
+            return JsonResponse({'status': 'error', 'message': 'No coursework found in course'})
+
+        # Generate training data based on coursework structure
+        X_train, y_train = generate_training_data(coursework_types)
+
+        # Train the model
+        model, scaler = train_model(X_train, y_train)
+
+        # Get enrolled students
+        enrolled_students = get_enrolled_students(course_code, academic_year, semester)
+        predictions = []
+
+        for student in enrolled_students:
+            try:
+                # Get student's marks
+                student_marks = student.get('marks', {})
+                
+                # Prepare feature vector for prediction
+                features = []
+                coursework_breakdown = {}
+                total_achieved = 0
+
+                # Calculate percentage for each coursework type
+                for cw_type, total_mark in coursework_types.items():
+                    achieved_mark = float(student_marks.get(cw_type, 0))
+                    percentage = (achieved_mark / total_mark * 100) if total_mark > 0 else 0
+                    features.append(percentage)
+                    total_achieved += achieved_mark
+                    
+                    coursework_breakdown[cw_type] = {
+                        'achieved': achieved_mark,
+                        'total': total_mark,
+                        'percentage': percentage
+                    }
+                print("total coursework marks",coursework_breakdown)
+                # Calculate overall progress
+                overall_progress = (total_achieved / total_coursework_marks * 100) if total_coursework_marks > 0 else 0
+
+                # Make prediction
+                features = np.array(features).reshape(1, -1)
+                features_scaled = scaler.transform(features)
+                
+                # Get prediction probability
+                prob_pass = model.predict_proba(features_scaled)[0][1]
+                prediction_confidence = max(model.predict_proba(features_scaled)[0]) * 100
+
+                # Determine risk level
+                risk_level = determine_risk_level(overall_progress, prob_pass)
+
+                predictions.append({
+                    'student_name': student.get('name', 'N/A'),
+                    'student_email': student.get('email', 'N/A'),
+                    'matrix_number': student.get('matrix', 'N/A'),
+                    'current_progress': overall_progress,
+                    'prediction_confidence': prediction_confidence,
+                    'risk_level': risk_level,
+                    'coursework_breakdown': coursework_breakdown
+                })
+
+            except Exception as e:
+                print(f"Error processing student {student.get('name')}: {str(e)}")
+                continue
+
+        return JsonResponse({
+            'status': 'success',
+            'predictions': predictions
+        })
+
+    except Exception as e:
+        print(f"Error in predict_risks: {str(e)}")
+        return JsonResponse({'status': 'error', 'message': str(e)})
+
+def generate_training_data(coursework_types):
+    """Generate synthetic training data based on coursework structure"""
+    X = []
+    y = []
+    n_samples = 1000  # Generate 1000 synthetic students
+
+    # Generate data for different scenarios
+    for _ in range(n_samples):
+        features = []
+        total_percentage = 0
+        weights = np.array(list(coursework_types.values())) / sum(coursework_types.values())
+
+        # Determine if this will be a "good" or "poor" student
+        is_good_student = np.random.random() < 0.7  # 70% good students
+
+        for total_mark in coursework_types.values():
+            if is_good_student:
+                # Good students: mostly 60-100%
+                percentage = np.random.normal(80, 10)
+            else:
+                # Poor students: mostly 0-60%
+                percentage = np.random.normal(40, 15)
+            
+            # Clip to valid range
+            percentage = np.clip(percentage, 0, 100)
+            features.append(percentage)
+            total_percentage += percentage * (total_mark / sum(coursework_types.values()))
+
+        X.append(features)
+        # Student passes if weighted average is >= 50%
+        y.append(1 if total_percentage >= 50 else 0)
+
+    return np.array(X), np.array(y)
+
+def train_model(X, y):
+    """Train the Random Forest model"""
+    # Scale the features
+    scaler = StandardScaler()
+    X_scaled = scaler.fit_transform(X)
+
+    # Train Random Forest
+    model = RandomForestClassifier(
+        n_estimators=100,
+        max_depth=5,
+        random_state=42
+    )
+    model.fit(X_scaled, y)
+
+    return model, scaler
+
+def determine_risk_level(progress, pass_probability):
+    """Determine risk level based on progress and model prediction"""
+    if progress < 40 or pass_probability < 0.4:
+        return 'High Risk'
+    elif progress < 60 or pass_probability < 0.7:
+        return 'Medium Risk'
+    return 'Low Risk'
+
+@require_POST
+def send_student_alert(request):
+    try:
+        data = json.loads(request.body)
+        
+        # Debug print
+        print("Received data:", data)
+        
+        # Create alert data structure
+        alert_data = {
+            'timestamp': datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+            'feedback': data['feedback'],
+            'recommended_actions': data['actions'],
+            'sender_email': request.session.get('user_email'),
+            'sender_role': request.session.get('user_role'),
+            'risk_level': data.get('risk_level', 'Unknown'),
+            'current_progress': data.get('current_progress', 0)
+        }
+
+        # Get student reference with encoded email
+        student_ref = data['student_email'].replace('.', '-dot-').replace('@', '-at-')
+        
+        # Parse semester_year (e.g., "S2/2025-2026" format)
+        semester = data['semester_year'][3:4] if len(data['semester_year']) > 3 else None
+        academic_year = data['semester_year'][8:] if len(data['semester_year']) > 8 else None
+        
+        if not semester or not academic_year:
+            raise Exception(f'Invalid semester_year format: {data["semester_year"]}')
+            
+        print(f"Parsed semester: {semester}, academic_year: {academic_year}")  # Debug print
+        
+        # Get all courses for this student
+        courses = database.child("users").child(student_ref).child("courses").get().val()
+        
+        if not courses:
+            raise Exception('No courses found for student')
+            
+        # Find the specific course and store alert
+        for course_id, course_data in courses.items():
+            print(f"Checking course: {course_data}")  # Debug print
+            
+            if (course_data.get('course_code') == data['course_code'] and 
+                course_data.get('academic_year') == academic_year and 
+                str(course_data.get('semester')) == str(semester)):
+                
+                # Store alert under the specific course
+                database.child("users").child(student_ref).child("courses").child(course_id).child("alerts").push(alert_data)
+                
+                return JsonResponse({
+                    'status': 'success',
+                    'message': 'Alert sent successfully'
+                })
+        
+        raise Exception(f'Course {data["course_code"]} not found for student in semester {semester} {academic_year}')
+
+    except Exception as e:
+        print(f"Error sending alert: {str(e)}")
+        return JsonResponse({
+            'status': 'error',
+            'message': str(e)
+        })
+
+def get_enrolled_students(course_code, academic_year, semester):
+    """
+    Get list of students enrolled in a specific course
+    """
+    try:
+        # Get all users
+        users = database.child("users").get().val()
+        enrolled_students = []
+
+        if users:
+            for user_email, user_data in users.items():
+                # Skip if no courses or not a student
+                if not user_data.get('courses') or user_data.get('role') != 'student':
+                    continue
+
+                # Check each course the student is enrolled in
+                for course in user_data['courses'].values():
+                    if (course.get('course_code') == course_code and 
+                        course.get('academic_year') == academic_year and 
+                        str(course.get('semester')) == str(semester)):
+                        
+                        # Get student's marks for this course
+                        marks = {}
+                        if 'coursework' in course:
+                            marks = course['coursework']
+
+                        # Create student info dictionary
+                        student_info = {
+                            'name': user_data.get('name', 'N/A'),
+                            'email': user_email.replace('-dot-', '.').replace('-at-', '@'),
+                            'matrix': user_data.get('matrix', 'N/A'),
+                            'marks': marks
+                        }
+                        enrolled_students.append(student_info)
+                        break  # Found the course, no need to check others
+
+        return enrolled_students
+
+    except Exception as e:
+        print(f"Error getting enrolled students: {str(e)}")
+        return []
+
+def get_coursework_breakdown(student_email, course_data):
+    try:
+        coursework_data = {}
+        
+        # Get the coursework data from the course
+        if 'courseworks' in course_data:
+            for cw_id, cw_info in course_data['courseworks'].items():
+                cw_type = cw_info.get('type', '')  # e.g., 'Project 1', 'Test'
+                total = float(cw_info.get('total_mark', 0))
+                
+                # Get student's achieved mark for this coursework
+                achieved = 0
+                if 'coursework' in course_data and cw_id in course_data['coursework']:
+                    achieved = float(course_data['coursework'][cw_id])
+                
+                coursework_data[cw_type] = {
+                    'achieved': achieved,
+                    'total': total,
+                    'percentage': (achieved / total * 100) if total > 0 else 0
+                }
+        
+        print(f"Coursework breakdown for {student_email}:", coursework_data)  # Debug print
+        return coursework_data
+        
+    except Exception as e:
+        print(f"Error getting coursework breakdown for {student_email}: {e}")
+        return {}
 
