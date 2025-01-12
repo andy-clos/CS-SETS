@@ -90,6 +90,106 @@
     th {
         user-select: none;
     }
+
+    .accordion {
+        background-color: #eee;
+        color: #444;
+        cursor: pointer;
+        padding: 18px;
+        width: 100%;
+        border: none;
+        text-align: left;
+        outline: none;
+        font-size: 15px;
+        transition: 0.4s;
+      }
+
+      .active, .accordion:hover {
+        background-color: #ccc;
+      }
+
+      .accordion:after {
+        content: '\002B';
+        color: #777;
+        font-weight: bold;
+        float: right;
+        margin-left: 5px;
+      }
+
+      .active:after {
+        content: "\2212";
+      }
+
+      .panel {
+        padding: 0 18px;
+        background-color: white;
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.2s ease-out;
+      }
+
+      .form-group {
+        margin-bottom: 20px;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: bold;
+    }
+    
+    .form-group input,
+    .form-group textarea {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+    }
+    
+    .form-group #editor {
+        height: 300px;
+        margin-bottom: 20px;
+    }
+
+    .form-control {
+        border: 2px solid black !important;
+        border-radius: 4px;
+        padding: 10px;
+        transition: border-color 0.3s;
+    }
+    
+    .form-title {
+        font-size: 20px;
+        font-weight: bold;
+        color: #4E598C;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .announcement-title {
+        background-color: #F9C784;
+        color: #4E598C;
+        cursor: pointer;
+        padding: 18px;
+        width: 100%;
+        border: none;
+        text-align: left;
+        outline: none;
+        font-size: 15px; 
+        transition: 0.4s;
+    }
+    
+    .announcement-title:hover {
+        background-color: #e39023;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .btn-show-announcement {
+        background-color: #4E598C;
+        color: white;
+        margin-top: 10px;
+    }
     </style>
 </head>
 <body>
@@ -106,7 +206,24 @@
             {% else %}
                 {% for course in courses %}
                 <h2 class="section-title">{{ course_code }} : {{course.course_name}}</h2>
-                <form id="updateCourseForm" method="POST" action="{% url 'course-detail' semester_year=course.semester_year course_code=course_code %}" onsubmit="return handleUpdateSubmit(event)">
+                <div class="view-announcement">
+                    <button class="accordion btn-show-announcement">Announcements</button>
+                    <div class="panel">
+                        {% if course.announcements %}
+                            {% for announcement_id, announcement in course.announcements.items %}
+                                <button class="announcement-title dashboard-accordion" 
+                                        onclick="openAnnouncement('{{ announcement.title|escapejs }}', '{{ announcement.content|escapejs }}', '{{ announcement.author|escapejs }}', '{{ announcement.timestamp|escapejs }}')" 
+                                        style="display: block; width: 100%; margin: 5px 0;">
+                                    {{ announcement.title }}
+                                </button>
+                            {% endfor %}
+                        {% else %}
+                            <p>No announcements available.</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <form id="updateCourseForm" style="margin-top: 20px;" method="POST" action="{% url 'course-detail' semester_year=course.semester_year course_code=course_code %}" onsubmit="return handleUpdateSubmit(event)">
                     {% csrf_token %}
                     <label>Academic Year: </label>
                     <input id="academic_year" type="text" name="academic_year" placeholder="Enter academic year" maxlength="9" required value="{{ course.academic_year }}" readonly>
@@ -760,6 +877,65 @@
             });
         }
     });
+
+    // Modal for displaying announcement details
+    function openAnnouncement(title, content, author, timestamp) {
+        console.log("Opening announcement:", title, content, author, timestamp); // Debug log
+
+        // Set the modal content
+        const titleInput = document.getElementById('ann-title');
+        const contentTextarea = document.getElementById('ann-content');
+        const authorElement = document.getElementById('form-author');
+        const timestampElement = document.getElementById('form-timestamp');
+
+        titleInput.value = title;
+        contentTextarea.value = content;
+        authorElement.innerText = author;
+        timestampElement.innerText = timestamp;
+
+        // Show the modal using Bootstrap's modal method
+        const modal = new bootstrap.Modal(document.getElementById('viewAnnouncement'));
+        modal.show();
+    }
     </script>
+
+    <div class="modal fade" id="viewAnnouncement" tabindex="-1" aria-labelledby="updateAnnouncementModalLabel" aria-hidden="true">
+        <div class="modal-xl modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="modal-title">Announcement Details</h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="onlyViewAnnouncement" class="container-fluid">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <div style="display: flex; align-items: center;">
+                                <b><span style="margin: 0;">Author:</span></b>
+                                <b><p id="form-author" style="margin-left: 5px; margin: 0;"></p></b>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="ann-title">Title:</label>
+                            <input type="text" 
+                                   class="select-width form-select form-control" 
+                                   id="ann-title" 
+                                   disabled>
+                        </div>
+                        <div class="form-group">
+                            <label for="ann-content">Content:</label>
+                            <textarea class="form-control" 
+                                      id="ann-content" 
+                                      rows="10" 
+                                      disabled></textarea>
+                        </div>
+                        <div style="margin-left: 80%;">
+                        <p>posted on: </P><p id="form-timestamp"></p>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
