@@ -169,11 +169,11 @@
                 </div>
 
                 <div class="announcement-view">
-                    {% for latest_courses in latest_courses %}
-                        <button class="dashboard-accordion">{{ latest_courses.course_code }} - {{ latest_courses.course_name }}</button>
+                    {% for lecturer_latest_courses in lecturer_latest_courses %}
+                        <button class="dashboard-accordion">{{ lecturer_latest_courses.course_code }} - {{ lecturer_latest_courses.course_name }}</button>
                         <div class="dashboard-panel">
                             {% for announcement in announcements %}
-                                {% if announcement.course_code == latest_courses.course_code %}
+                                {% if announcement.course_code == lecturer_latest_courses.course_code %}
                                     <button class="sub-dashboard-accordion">{{ announcement.title }}</button>
                                     <div class="sub-dashboard-panel">
                                         <div class="display-ann-details">
@@ -205,14 +205,49 @@
                 </div>
             </main>
         {% elif request.session.user_role == 'admin' %}
-            <div id="admin-dashboard">
-                <main style="padding-top: 0%;">
-                    <div class="main-content">
-                        <!-- Admin-specific content -->
-                        {{ admin_content }}
-                    </div>
-                </main>
+        <main style="padding-top: 0%;">
+            {% comment %} <button class="btn-dashboard btn-add-announce" data-toggle="modal" data-target="#createAnnouncement">
+                Create Announcement
+            </button> {% endcomment %}
+            
+            <div class="modal-title">
+                <h2>Academic Session {{current_year}}</h2><br>
+                <h2>Semester {{current_semester}}</h2>
             </div>
+
+            <div class="announcement-view">
+                {% for latest_courses in latest_courses %}
+                    <button class="dashboard-accordion">{{ latest_courses.course_code }} - {{ latest_courses.course_name }}</button>
+                    <div class="dashboard-panel">
+                        {% for announcement in announcements %}
+                            {% if announcement.course_code == latest_courses.course_code %}
+                                <button class="sub-dashboard-accordion">{{ announcement.title }}</button>
+                                <div class="sub-dashboard-panel">
+                                    <div class="display-ann-details">
+                                        <div class="display-ann-details-header">
+                                            <div style="margin-bottom: 20px;">
+                                                <button class="btn btn-primary" 
+                                                        onclick="openUpdateModal('{{ announcement.id }}', '{{ announcement.course_code }}', '{{ announcement.title|escapejs }}', '{{ announcement.content|escapejs }}')">
+                                                    Update
+                                                </button>
+                                                <button class="btn btn-danger" 
+                                                        onclick="deleteAnnouncement('{{ announcement.id }}', '{{ announcement.course_code }}')">
+                                                    Delete
+                                                </button>
+                                            </div>
+                                            <p class="announcement-author">Posted by: {{ announcement.author }}</p>
+                                            <p class="announcement-time">{{ announcement.timestamp }}</p>
+                                        
+                                        <div class="display-ann-content">{% spaceless %}{{ announcement.content }}{% endspaceless %}</div>
+                                    </div>
+                                    </div>
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                {% endfor %}
+            </div>
+        </main>
         {% endif %}
 
         {% include 'footer.html' %} 
@@ -241,7 +276,7 @@
                         <label for="exampleSelect">Select a Course:</label>
                         <select class="select-width form-select form-control" id="exampleSelect" name="selected_course" required>
                             <option selected disabled>Select Course</option>
-                            {% for course in latest_courses %}
+                            {% for course in lecturer_latest_courses %}
                                 <option value="{{ course.course_code }}">{{ course.course_code }} - {{ course.course_name }}</option>
                             {% endfor %}
                         </select>
