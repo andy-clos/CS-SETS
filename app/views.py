@@ -1682,17 +1682,34 @@ def upload_marks(request, semester_year, course_code):
         if 'courseworks' in course:
             for cw_key, cw_data in course['courseworks'].items():
                 if isinstance(cw_data, dict) and 'type' in cw_data and 'total_mark' in cw_data:
-                    courseworks[cw_data['type']] = float(cw_data['total_mark'])
+                    # Store the coursework type and its total mark
+                    coursework_type = cw_data['type'].strip()
+                    courseworks[coursework_type] = float(cw_data['total_mark'])
 
-        # Clean CSV headers by removing percentages
+        if not courseworks:
+            return JsonResponse({'status': 'error', 'message': 'No coursework types found in course configuration'})
+
+        # Clean CSV headers by removing percentages and match with course courseworks
         cleaned_headers = {}
         for header in reader.fieldnames:
-            if '(' in header:
-                clean_header = header.split('(')[0].strip()
-                if clean_header in ['Assignment 1', 'Assignment 2', 'Test 1', 'Test 2']:
-                    cleaned_headers[header] = clean_header
-            elif header == 'Matrix Number':
+            if header == 'Matrix Number':
                 cleaned_headers[header] = header
+                continue
+
+            # Remove percentage and clean the header
+            clean_header = header.split('(')[0].strip() if '(' in header else header.strip()
+            
+            # Check if this header matches any coursework type (case-insensitive)
+            for coursework_type in courseworks.keys():
+                if clean_header.lower() == coursework_type.lower():
+                    cleaned_headers[header] = coursework_type
+                    break
+
+        if len(cleaned_headers) <= 1:  # Only Matrix Number found
+            return JsonResponse({
+                'status': 'error',
+                'message': 'No valid coursework columns found in CSV. Headers should match coursework types in course configuration.'
+            })
 
         success_count = 0
         errors = []
@@ -1715,19 +1732,18 @@ def upload_marks(request, semester_year, course_code):
 
                 # Update marks
                 marks = {}
-                for original_header, clean_header in cleaned_headers.items():
-                    if clean_header != 'Matrix Number' and original_header in row:
+                for original_header, coursework_type in cleaned_headers.items():
+                    if coursework_type != 'Matrix Number' and original_header in row:
                         try:
                             mark = float(row[original_header])
-                            if clean_header in courseworks:
-                                max_mark = courseworks[clean_header]
-                                if 0 <= mark <= max_mark:
-                                    marks[clean_header] = mark
-                                else:
-                                    errors.append(f"Invalid mark for {matrix}: {clean_header} mark must be between 0 and {max_mark}")
-                                    continue
+                            max_mark = courseworks[coursework_type]
+                            if 0 <= mark <= max_mark:
+                                marks[coursework_type] = mark
+                            else:
+                                errors.append(f"Invalid mark for {matrix}: {coursework_type} mark must be between 0 and {max_mark}")
+                                continue
                         except ValueError:
-                            errors.append(f"Invalid mark format for {matrix}: {clean_header}")
+                            errors.append(f"Invalid mark format for {matrix}: {coursework_type}")
                             continue
 
                 # Find the course key in student's courses
