@@ -336,6 +336,8 @@ def dashboard_view(request):
             
             # Process each course
             for course_code, course_info in semester_courses.items():
+                print(f"\nProcessing course: {course_code}")
+                print(f"Course info: {course_info}")
                 
                 # Create course_data for admin view
                 course_data = {
@@ -346,22 +348,36 @@ def dashboard_view(request):
                 
                 # Check all lecturers entries
                 lecturers = course_info.get('lecturers', [])
+                print(f"Lecturers data: {lecturers}")
+                print(f"Current user email: {request.session.get('user_email')}")
                 is_course_lecturer = False
                 
                 # Loop through the lecturers list
                 if isinstance(lecturers, list):
+                    print("Processing lecturers list...")
                     for lecturer_entry in lecturers:
-                        if lecturer_entry and isinstance(lecturer_entry, dict):  # Skip None and ensure it's a dictionary
+                        print(f"Checking lecturer entry: {lecturer_entry}")
+                        if lecturer_entry and isinstance(lecturer_entry, dict):
                             lecturer_email = lecturer_entry.get('lecturer_email')
+                            print(f"Found lecturer email: {lecturer_email}")
+                            print(f"Comparing with current user: {lecturer_email == request.session.get('user_email')}")
                             if lecturer_email == request.session.get('user_email'):
                                 is_course_lecturer = True
+                                print("Match found!")
                                 break
+                    else:
+                        print(f"Lecturers is not a list, it's a {type(lecturers)}")
                 
-                lecturer_course_data = {
-                    'course_code': course_code,
-                    'course_name': course_info.get('course_name', '')
-                }
-                lecturer_latest_courses.append(lecturer_course_data)
+                print(f"Is course lecturer: {is_course_lecturer}")
+                
+                # Only add to lecturer_latest_courses if current user is a lecturer for this course
+                if is_course_lecturer:
+                    lecturer_course_data = {
+                        'course_code': course_code,
+                        'course_name': course_info.get('course_name', '')
+                    }
+                    lecturer_latest_courses.append(lecturer_course_data)
+                    print(f"Added course {course_code} to lecturer courses")
                 
                 # Get announcements for this course
                 course_announcements = course_info.get('announcements', {})
@@ -387,6 +403,11 @@ def dashboard_view(request):
             'current_year': current_year,
             'current_semester': current_semester
         }
+        
+        print("\nFinal Results:")
+        print(f"Total courses: {len(latest_courses)}")
+        print(f"Lecturer courses: {len(lecturer_latest_courses)}")
+        print(f"Lecturer courses list: {lecturer_latest_courses}")
         
         return render(request, 'dashboard.html', context)
         

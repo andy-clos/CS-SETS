@@ -206,10 +206,6 @@
             </main>
         {% elif request.session.user_role == 'admin' %}
         <main style="padding-top: 0%;">
-            {% comment %} <button class="btn-dashboard btn-add-announce" data-toggle="modal" data-target="#createAnnouncement">
-                Create Announcement
-            </button> {% endcomment %}
-            
             <div class="modal-title">
                 <h2>Academic Session {{current_year}}</h2><br>
                 <h2>Semester {{current_semester}}</h2>
