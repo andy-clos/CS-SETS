@@ -30,30 +30,41 @@
                 <div class="announcement-card">
                     <div id="announcementCarousel" class="carousel slide announcement-content" data-bs-ride="carousel">
                         <div class="carousel-inner">
-                            {% for announcement in latest_announcements %}
-                                <div class="carousel-item {% if forloop.first %}active{% endif %}">
-                                    <div class="announcement-header">
-                                        <div class="profile-container">
-                                            <img src="/static/image/user.png" alt="Profile Picture" class="profile-img">
-                                            <p style="color: #4E598C;">{{ announcement.author }}</p>
-                                        </div>
-                                        <div class="announcement-details">
-                                            <h3>{{ announcement.title }}</h3>
-                                            <p class="announcement-body">
-                                                {{ announcement.content }}...
-                                                <span class="expand-text">
-                                                    <a href="{% url 'course-detail' semester_year=sem_year course_code=announcement.course_code %}" class="expand-text">
-                                                        [view more]
-                                                    </a>
-                                                </span>
-                                            </p>
-                                            <div class="timestamp-container">
-                                                <p class="posted-info" style="color: #4E598C;">posted {{ announcement.timestamp }}</p>
+                            {% if latest_announcements %}
+                                {% for announcement in latest_announcements %}
+                                    <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                                        <div class="announcement-header">
+                                            <div class="profile-container">
+                                                <img src="/static/image/user.png" alt="Profile Picture" class="profile-img">
+                                                <p style="color: #4E598C;">{{ announcement.author }}</p>
+                                            </div>
+                                            <div class="announcement-details">
+                                                <h3>{{ announcement.title }}</h3>
+                                                <p class="announcement-body">
+                                                    {{ announcement.content }}...
+                                                    <span class="expand-text">
+                                                        <a href="{% url 'course-detail' semester_year=sem_year course_code=announcement.course_code %}" class="expand-text">
+                                                            [view more]
+                                                        </a>
+                                                    </span>
+                                                </p>
+                                                <div class="timestamp-container">
+                                                    <p class="posted-info" style="color: #4E598C;">posted {{ announcement.timestamp }}</p>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
+                                {% endfor %}
+                            {% else %}
+                                <div class="carousel-item active">
+                                    <div class="announcement-header">
+                                        <div class="announcement-details" style="margin-left: auto;margin-right: auto;margin-top: 2%;">
+                                            <h3 style="color: #4E598C;text-align: center;">No Announcements Available</h3>
+                                            <p style="color: #4E598C;">There are currently no announcements to display.</p>
+                                        </div>
+                                    </div>
                                 </div>
-                            {% endfor %}
+                            {% endif %}
                         </div>
                         <div class="carousel-indicators">
                             {% for announcement in latest_announcements %}
@@ -69,51 +80,19 @@
                         <div class="leaderboard-content">
                             <div class="leaderboard-header">
                                 <ul>
-                                    <li class="list-item">
-                                        <div class="list-item-content">
-                                            <p>1.</p>
-                                            <img src="/static/image/user.png" alt="Profile Picture" class="profile-img">
-                                            <p>AndyClos A/L Boon Mee</p>
-                                            <button class="leaderboard-details"><i class="fa fa-file-text"></i></button>
-                                        </div>
-                                        
-                                    </li>
-                                    <li class="list-item">
-                                        <div class="list-item-content">
-                                            <p>2.</p>
-                                            <img src="/static/image/user.png" alt="Profile Picture" class="profile-img">
-                                            <p>Muhammad Ezzat Haziq Bin Elhan</p>
-                                            <button class="leaderboard-details"><i class="fa fa-file-text"></i></button>
-                                        </div>
-                                        
-                                    </li>
-                                    <li class="list-item">
-                                        <div class="list-item-content">
-                                            <p>3.</p>
-                                            <img src="/static/image/user.png" alt="Profile Picture" class="profile-img">
-                                            <p>Kam Weng Xuan</p>
-                                            <button class="leaderboard-details"><i class="fa fa-file-text"></i></button>
-                                        </div>
-                                        
-                                    </li>
-                                    <li class="list-item">
-                                        <div class="list-item-content">
-                                            <p>4.</p>
-                                            <img src="/static/image/user.png" alt="Profile Picture" class="profile-img">
-                                            <p>Loh Wei Ting</p>
-                                            <button class="leaderboard-details"><i class="fa fa-file-text"></i></button>
-                                        </div>
-                                        
-                                    </li>
-                                    <li class="list-item">
-                                        <div class="list-item-content">
-                                            <p>5.</p>
-                                            <img src="/static/image/user.png" alt="Profile Picture" class="profile-img">
-                                            <p>John</p>
-                                            <button class="leaderboard-details"><i class="fa fa-file-text"></i></button>
-                                        </div>
-                                        
-                                    </li>
+                                    {% for user in top_users %}
+                                        <li class="list-item">
+                                            <div class="list-item-content">
+                                                <img src="{% if user.profile_picture and user.achievement_count > 0 %}data:image/jpeg;base64,{{ user.profile_picture }}{% else %}{% static 'image/user.png' %}{% endif %}" alt="Profile Picture" class="profile-img">
+                                                <p>{% if user.achievement_count > 0 %}{{ user.name }}{% else %}-{% endif %}</p>
+                                                <button class="leaderboard-details" 
+                                                        {% if user.achievement_count == 0 %}disabled{% endif %} 
+                                                        onclick="openLeaderboardDetails('{{ user.name }}', {{ user}},{{user_achievements}})">
+                                                    <i class="fa fa-file-text"></i>
+                                                </button>
+                                            </div>
+                                        </li>
+                                    {% endfor %}
                                 </ul>
                             </div>
                         </div>
@@ -415,6 +394,24 @@
     </div>
 </div>
 
+<!-- Leaderboard Details Modal -->
+<div class="modal fade" id="leaderboardDetailsModal" tabindex="-1" aria-labelledby="leaderboardDetailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="leaderboardDetailsModalLabel">Leaderboard Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="leaderboardDetailsModalBody">
+                <!-- Content will be populated here -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 {% if request.session.user_role == 'student' %}
 <script>
     const progressBarContainer = document.querySelector('.progress-bar-container');
@@ -674,6 +671,55 @@ window.deleteAnnouncement = function(announcementId, courseCode) {
         }
     });
 };
+
+
+function openLeaderboardDetails(userName, user, user_achievements) {
+    const modalBody = document.getElementById('leaderboardDetailsModalBody');
+    modalBody.innerHTML = ''; // Clear previous content
+
+    // Convert achievements object to an array
+    const achievementsArray = user_achievements; // Get an array of achievement values
+
+    // Check if there are achievements
+    if (achievementsArray.length === 0) {
+        modalBody.innerHTML = `<p>No achievements available for ${userName}.</p>`;
+    } else {
+        console.log("Achievements data:", achievementsArray); // Debugging line
+        achievementsArray.forEach((achievement, index) => {
+            const userEmail = user.email.replace(/\./g, '-dot-').replace(/@/g, '-at-'); // Encode email for URL
+            const achievementKey = achievement.achievement_key; // Escape for JavaScript
+
+            // Construct the base URL using Django's url tag with placeholders
+            const baseUrl = "{% url 'view-proof' achievement_key='PLACEHOLDER_KEY' encoded_email='PLACEHOLDER_EMAIL' %}";
+
+            // Replace placeholders with actual values
+            const url = baseUrl
+                .replace('PLACEHOLDER_KEY', achievementKey) // Replace with actual achievement key
+                .replace('PLACEHOLDER_EMAIL', userEmail); // Replace with encoded user email
+            
+            // Check if the achievement belongs to the user being viewed
+            if (achievement.email === userEmail) { // Assuming `owner_id` is the field that identifies the user who holds the achievement
+                modalBody.innerHTML += `
+                    <div class="achievement-item">
+                        <h5>${achievement.title}</h5>
+                        <p>Description: ${achievement.description}</p>
+                        <button class="btn-dashboard" style="margin-top: 10px;margin-bottom: 10px;">
+                            <a href="${url}" target="_blank" style="color: white;">
+                                View Certificate
+                            </a>
+                        </button>
+                        <p>Date Posted: ${achievement.date_added}</p>
+                    </div>
+                    <hr>
+                `;
+            }
+        });
+    }
+
+    // Show the modal
+    const modal = new bootstrap.Modal(document.getElementById('leaderboardDetailsModal'));
+    modal.show();
+}
 
 // Make sure the document is loaded before attaching event listeners
 document.addEventListener('DOMContentLoaded', function() {

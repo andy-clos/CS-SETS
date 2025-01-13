@@ -2,14 +2,9 @@ function updateActiveMenu() {
   const menuItems = document.querySelectorAll(".menu-item");
   const currentPath = window.location.pathname; // Get the current path
 
-  // Debug: Log the current path
-  console.log("Current Path:", currentPath);
-
   // Remove active class from all items and set the active class for the current path
   menuItems.forEach((item) => {
     const itemPath = item.getAttribute("href");
-    // Debug: Log each item path
-    console.log("Checking item path:", itemPath);
     
     // Remove active class from all items
     item.classList.remove("active");
@@ -17,8 +12,6 @@ function updateActiveMenu() {
     // Set active class for the current path
     if (currentPath.startsWith(itemPath)) {
       item.classList.add("active"); // Add active class to the current menu item
-      // Debug: Log which item is set as active
-      console.log("Setting active class for:", itemPath);
     }
   });
 }

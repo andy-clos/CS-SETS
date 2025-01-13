@@ -34,6 +34,7 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.preprocessing import StandardScaler
 import numpy as np
 import pandas as pd
+from django.contrib.auth.decorators import login_required
 
 
 
@@ -397,13 +398,57 @@ def dashboard_view(request):
                                 'timestamp': ann_data.get('timestamp', '')
                             }
                             announcements.append(announcement)
-                            print(f"Added announcement: {announcement}")  # Debugging line
 
             # Sort announcements by timestamp (newest first) and get latest 5
             announcements.sort(key=lambda x: x['timestamp'], reverse=True)
             latest_announcements = announcements[:5]  # Get the latest 5 announcements
-            
+
+            # Fetch users from Firebase and count achievements
+            users_data = database.child("users").get().val()
+            user_achievements = []
+            top_users = []
+
+            # Create a list to store user achievement counts
+            user_achievement_counts = []
+
+            for user_key, user_info in users_data.items():
+                profile_picture = user_info.get('profile_picture')
+                achievements = user_info.get('achievements', {})
+                achievement_count = len(achievements)  # Count the number of achievements
+
+                # Append user data to the list
+                user_achievement_counts.append({
+                    'email': user_info.get('email'),
+                    'name': user_info.get('name'),
+                    'profile_picture': profile_picture,
+                    'achievement_count': achievement_count,
+                    'achievements': achievements  # Store achievements for later use
+                })
+            # Sort users by achievement count in descending order
+            user_achievement_counts.sort(key=lambda x: x['achievement_count'], reverse=True)
+
+            # Get the top 5 users
+            top_users = user_achievement_counts[:5]
+
+            # Prepare user achievements for display
+            for user in top_users:
+                achievements = user['achievements']
+                for achievement_key, achievement in achievements.items():
+                    user_achievements.append({
+                        'email': user['email'].replace('.', '-dot-').replace('@', '-at-'),
+                        'achievement_key': achievement_key,
+                        'user_name': user['name'],
+                        'profile_picture': user['profile_picture'],
+                        'title': achievement.get('title'),
+                        'description': achievement.get('description'),
+                        'proof': achievement.get('proof'),
+                        'date_added': achievement.get('date_added'),  # Adjust based on your structure
+                    })
+                    
+
             context = {
+                'top_users': top_users,
+                'user_achievements': user_achievements,
                 'lecturer_latest_courses': lecturer_latest_courses,
                 'latest_courses': latest_courses,
                 'announcements': announcements,
@@ -1778,6 +1823,7 @@ def view_certificate(request, achievement_key):
             response['Cache-Control'] = 'public, max-age=0'
             response['Pragma'] = 'public'
             
+            print(response)
             return response
 
         except Exception as e:
@@ -2514,4 +2560,79 @@ def create_quizz(request):
             return render(request, 'Tools/Quizz/create.html',   { 'error_message': 'Failed to save quiz.'})
 
     return render(request, 'Tools/Quizz/create.html')
+
+
+@require_GET
+def view_proof(request, achievement_key, encoded_email):
+    try:
+        # Get the achievement data
+        achievement = database.child("users").child(encoded_email).child("achievements").child(achievement_key).get().val()
+        
+        
+        if not achievement or 'proof' not in achievement:
+            return HttpResponse('Certificate not found', status=404)
+
+        # Decode the base64 data
+        try:
+            file_data = base64.b64decode(achievement['proof'])
+            
+            # Improved file type detection
+            if file_data[0:2] == b'\xff\xd8':  # JPEG signature (more general check)
+                content_type = 'image/jpeg'
+                ext = 'jpg'
+                disposition = 'inline'
+            elif file_data[0:8] == b'\x89PNG\r\n\x1a\n':  # PNG signature
+                content_type = 'image/png'
+                ext = 'png'
+                disposition = 'inline'
+            elif file_data[0:4] == b'%PDF':  # PDF signature
+                content_type = 'application/pdf'
+                ext = 'pdf'
+                disposition = 'inline'
+            else:
+                # Additional check for JPEG files
+                try:
+                    from PIL import Image
+                    import io
+                    img = Image.open(io.BytesIO(file_data))
+                    if img.format == 'JPEG':
+                        content_type = 'image/jpeg'
+                        ext = 'jpg'
+                        disposition = 'inline'
+                    else:
+                        content_type = 'application/octet-stream'
+                        ext = 'file'
+                        disposition = 'attachment'
+                except:
+                    content_type = 'application/octet-stream'
+                    ext = 'file'
+                    disposition = 'attachment'
+            
+            # Create response
+            response = HttpResponse(file_data, content_type=content_type)
+            
+            # Set filename and disposition based on file type
+            filename = f"certificate_{achievement_key}.{ext}"
+            response['Content-Disposition'] = f'{disposition}; filename="{filename}"'
+            
+            # Add cache control headers to help with browser viewing
+            response['Cache-Control'] = 'public, max-age=0'
+            response['Pragma'] = 'public'
+            
+            print("here is response ")
+            print(response)
+            return response
+            
+
+        except Exception as e:
+            print(f"Error decoding certificate: {str(e)}")  # Debug print
+            return HttpResponse(f'Error decoding certificate: {str(e)}', status=500)
+
+    except Exception as e:
+        print(f"Error: {str(e)}")  # Debug print
+        return HttpResponse(f'Error: {str(e)}', status=500)
+
+DEVIL_AI_API_KEY = '693550-4bddea-2efd1e-e5badd'
+DEVIL_AI_BASE_URL = 'https://api.devil.ai/v1'
+
 
