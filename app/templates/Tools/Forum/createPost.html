@@ -51,13 +51,17 @@
           <form method="POST" action="{% url 'createpost' %}">
             {% csrf_token %}
             <div class="form-group">
+              {% if course_enrolled %}
               <label for="subject">Subject:</label>
               <select id="subject" name="subject">
-                <option value="CAT301">CAT301</option>
-                <option value="CPC353">CPC353</option>
-                <option value="CPT316">CPT316</option>
+                {% for course in course_enrolled %}
+                <option value="{{course.course_code}}">
+                  {{course.course_code}}
+                </option>
+                {% endfor %}
               </select>
             </div>
+            {% endif %}
             <div class="form-group">
               <label for="title">Title:</label>
               <input
@@ -86,6 +90,22 @@
             </div>
             <button type="submit" class="btn-post">Post</button>
           </form>
+          {%if not course_enrolled %}
+          <script src="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/7.29.2/sweetalert2.all.js"></script>
+          <script>
+            // Show SweetAlert success message\
+            Swal.fire({
+              title:
+                "<a href='/academic'>Click here to enroll or wait 5 seconds to redirect</a> ",
+              text: "No courses enrolled. User only allow to create post in the course they are enrolled in.",
+              type: "error",
+              timer: 4000,
+              showConfirmButton: false,
+            }).then(() => {
+              window.location.href = "/academic"; // Redirect to the forum after the alert
+            });
+          </script>
+          {% endif %}
         </section>
       </main>
 

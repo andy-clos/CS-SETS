@@ -37,10 +37,12 @@
         {% endfor %} {% endif %}
         <header>
           <div class="user-profile">
-            <i class="fas fa-user-circle profile-icon"></i>
+            <img class="user-profile-picture" 
+            src="{% if user_data.profile_picture %}data:image/jpeg;base64,{{ user_data.profile_picture }}{% else %}{% static 'image/user.png' %}{% endif %}" 
+            alt="User Profile Picture">
             <div class="user-info">
               {% csrf_token %}
-              <span class="username">{{user_email}}</span>
+              <span class="username">{{user_data.email}}</span>
             </div>
           </div>
             <div class="search-container">
