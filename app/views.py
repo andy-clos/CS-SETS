@@ -2416,15 +2416,30 @@ def get_coursework_breakdown(student_email, course_data):
         print(f"Error getting coursework breakdown for {student_email}: {e}")
         return {}
 
-def flashcard_view(request):
-    return render(request, 'Tools/Quizz/flashcard.html')
+def flashcard_view(request,quiz_id):
+    print(quiz_id)
+    try:
+        # Fetch the quiz details from the database using the quiz_id
+        quiz_details = database.child("quizzes").child('flashcard').get()
+        if quiz_details.val():
+            quiz_list = [quiz.val() for quiz in quiz_details.each()]
+            # Find the post with the matching PostID
+            quiz = next((p for p in quiz_list if p.get("QuizID") == quiz_id), None)
+            if quiz:
+                return render(request, 'Tools/Quizz/flashcard.html', {'quiz': quiz})
+        return render(request, 'Tools/Quizz/flashcard.html', {'error': 'Quiz not found'})
+
+    except Exception as e:
+        print(f"Error fetching quiz details: {str(e)}")
+        return render(request, 'Tools/Quizz/flashcard.html', {'error_message': 'An error occurred while fetching quiz details.'})
+
 
 def quizz_menu(request):
     quizzes = database.child("quizzes").child('flashcard').get()
     if quizzes.val():
-        quizzes = [quiz.val() for quiz in quizzes.each()]
-        # quiz = next ((q for q in quizzes if q.get('id') == quiz_id), None)
-        # print(quiz)
+     quizzes = [quiz.val() for quiz in quizzes.each()]
+
+     print(quizzes)
     else:
         quizzes = []
     return render(request, 'Tools/Quizz/index.html', {'quizzes': quizzes})
@@ -2464,8 +2479,23 @@ def create_quizz(request):
         if not flashcards:
             return render(request, 'Tools/Quizz/create.html',   {'error_message': 'At least one question is required.'})
 
+       # Retrieve all posts
+        all_quizzes = database.child("quizzes").get()
+            
+        # Find the maximum PostID
+        max_quiz_id = 0
+        if all_quizzes.val() and 'flashcard' in all_quizzes.val():
+                quizzes = all_quizzes.val()['flashcard']
+                max_quiz_id = max(
+                    quiz.get('QuizID', 0) for quiz in quizzes.values()
+                )
+            
+        # Increment to get next PostID
+        next_quiz_id = max_quiz_id + 1
+     
         # Prepare the final data structure
         final_data = {
+            'QuizID': next_quiz_id,
             'title': title,
             'description': description,
             'tags': tags,
@@ -2474,11 +2504,11 @@ def create_quizz(request):
             'author': get_current_user(request)
         }
 
-        # Save to the database (assuming you have a function to handle this)
+
         try:
             # Replace this with your actual database saving logic
             database.child("quizzes").child('flashcard').push(final_data)
-            return redirect('/flashcard', final_data=final_data)
+            return redirect('/flashcard/' + str(next_quiz_id))
         except Exception as e:
             print(f"Error saving quiz: {str(e)}")
             return render(request, 'Tools/Quizz/create.html',   { 'error_message': 'Failed to save quiz.'})

@@ -47,8 +47,7 @@ button {
 .flashcard {
   width: 600px;
   height: 200px;
-  border: 2px solid #007bff; /* Blue border for the flashcard */
-  border-radius: 10px;
+  
   display: flex;
   justify-content: center;
   align-items: center;
@@ -56,6 +55,7 @@ button {
   perspective: 1000px;
   background-color: white; /* White background for the card */
 }
+
 .front,
 .back {
   position: absolute;
@@ -69,9 +69,13 @@ button {
   padding: 20px;
   box-sizing: border-box;
 }
-
+.front {
+    border: 5px solid #0056b3; /
+}
 .back {
+  background-color: white; /* Different color for the answer */
   transform: rotateY(180deg);
+  border: 5px solid darkcyan;
 }
 
 .flashcard.flipped .front {
@@ -80,6 +84,21 @@ button {
 
 .flashcard.flipped .back {
   transform: rotateY(0);
+}
+
+.flashcard:hover {
+  transform: rotateY(360deg);
+}
+
+#question-number,
+#ans-number {
+  position: absolute; /* Position it absolutely within the flashcard */
+  top: 10px; /* Distance from the top */
+  left: 10px; /* Distance from the left */
+  font-size: 18px; /* Adjust font size as needed */
+  font-weight: bold; /* Make it bold */
+  color: #333; /* Change color if needed */
+  z-index: 1; /* Ensure it appears above other elements */
 }
 
 /* flashcard  create*/
@@ -100,6 +119,7 @@ button {
 
 .file-info {
   flex-grow: 1;
+  padding: auto;
 }
 
 .file-type {
@@ -393,4 +413,30 @@ button {
 /* Add space between editors */
 .ql-container {
   margin-bottom: 20px;
+}
+
+.quiz-details-container {
+  background-color: #f8f9fa; /* Light background for contrast */
+  padding: 20px; /* Padding around the container */
+  border-radius: 8px; /* Rounded corners */
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+  margin-bottom: 20px; /* Space below the container */
+}
+
+.titleQuizz-container {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+#copy-link-icon {
+  background-color: #f0f0f0;
+  padding: 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+#copy-link-icon:hover {
+  background-color: #e0e0e0;
 }

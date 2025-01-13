@@ -13,14 +13,13 @@
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
-      integrity="sha384-k6RqeWeci5ZR/Lv4MR0sA0FfDOM6g0g5z5e5e5e5e5e5e5e5e5e5e5e5e5e5e5"
-      crossorigin="anonymous"
     />
     <style>
       .section-title {
         font-size: 40px;
         font-weight: bold;
         margin-bottom: 10px;
+        display: inline-block;
       }
     </style>
   </head>
@@ -28,25 +27,40 @@
     <div class="container">
       {% include 'navbar.html' %} {% include 'header.html' %}
       <main>
-        <section class="content">
-          <h2 class="section-title">Flashcard</h2>
-        </section>
-        <div class="flashcard-container">
-          <div class="navigation">
-            <span id="back-button" title="Back" class="arrow">&#8592;</span>
+        <section class="content"></section>
+        <div class="quiz-details-container">
+          <div class="titleQuizz-container">
+            <h2 class="section-title">Flashcard {{quiz.QuizID}}</h2>
+            <a id="copy-link-icon" title="Copy Link">
+              <i class="fas fa-link"></i>
+            </a>
           </div>
-          <div class="flashcard" id="flashcard">
-            <div class="front">
-              <h2 id="question">What is the capital of France?</h2>
+          <div class="quiz-details">
+            <h2>{{ quiz.title }}</h2>
+            <p>{{ quiz.description }}</p>
+            <div id="copy-notification" style="display: none">
+              Link copied to clipboard!
             </div>
-            <div class="back">
-              <h2 id="answer">Answer goes here</h2>
+          </div>
+          <div class="flashcard-container">
+            <div class="navigation">
+              <span id="back-button" title="Back" class="arrow">&#8592;</span>
+            </div>
+
+            <div class="flashcard" id="flashcard">
+              <div class="front">
+                <p id="question-number">Question</p>
+                <h2 id="question">{{ quiz.QueAns.0.question1|safe }}</h2>
+              </div>
+              <div class="back">
+                <p id="ans-number">Answer</p>
+                <h2 id="answer">{{ quiz.QueAns.0.ans1|safe }}</h2>
+              </div>
+            </div>
+            <div class="navigation">
+              <span id="next-button" title="Next" class="arrow">&#8594;</span>
             </div>
           </div>
-          <div class="navigation">
-            <span id="next-button" title="Next" class="arrow">&#8594;</span>
-          </div>
-          <p>{{ final_data }}</p>
         </div>
       </main>
       {% include 'footer.html' %}
@@ -54,55 +68,77 @@
     <script src="{% static 'js/backend.js' %}"></script>
     <script>
 
-      const flashcards = [
-        { question: "What is the capital of France?", answer: "Paris" },
-        { question: "What is 2 + 2?", answer: "4" },
-        { question: "What is the capital of Japan?", answer: "Tokyo" },
-      ];
+      const flashcards = {{ quiz.QueAns|safe }}; // Pass the quiz questions and answers to JavaScript
+        console.log(flashcards);
+        let currentCardIndex = 0;
 
-      let currentCardIndex = 0;
+        const flashcardElement = document.getElementById("flashcard");
+        const questionElement = document.getElementById("question");
+        const answerElement = document.getElementById("answer");
+        const nextButton = document.getElementById("next-button");
+        const backButton = document.getElementById("back-button");
 
-      const flashcardElement = document.getElementById("flashcard");
-      const questionElement = document.getElementById("question");
-      const answerElement = document.getElementById("answer");
-      const nextButton = document.getElementById("next-button");
-      const backButton = document.getElementById("back-button");
+        function showCard(index) {
+            const card = flashcards[index];
+            questionElement.innerHTML = card[`question${index + 1}`]; // Access question dynamically
+            answerElement.innerHTML = card[`ans${index + 1}`]; // Access answer dynamically
+            flashcardElement.classList.remove("flipped"); // Ensure it's not flipped initially
+        }
 
-      function showCard(index) {
-        const card = flashcards[index];
-        questionElement.textContent = card.question;
-        answerElement.textContent = card.answer;
-        flashcardElement.classList.remove("flipped"); // Ensure it's not flipped initially
+        flashcardElement.addEventListener("click", () => {
+            flashcardElement.classList.toggle("flipped");
+        });
+
+        nextButton.addEventListener("click", () => {
+            if (flashcardElement.classList.contains("flipped")) {
+                flashcardElement.classList.remove("flipped");
+            }
+            currentCardIndex = (currentCardIndex + 1) % flashcards.length; // Loop back to the first card
+            setTimeout(() => {
+                showCard(currentCardIndex);
+            }, 300); // Wait for the flip animation to finish
+        });
+
+        backButton.addEventListener("click", () => {
+            if (flashcardElement.classList.contains("flipped")) {
+                flashcardElement.classList.remove("flipped");
+            }
+            currentCardIndex = (currentCardIndex - 1 + flashcards.length) % flashcards.length; // Loop back to the last card
+            setTimeout(() => {
+                showCard(currentCardIndex);
+            }, 300); // Wait for the flip animation to finish
+        });
+
+        // Show the first card on load
+        showCard(currentCardIndex);
+
+        function showCard(index) {
+          const card = flashcards[index];
+          questionElement.innerHTML = card[`question${index + 1}`]; // Access question dynamically
+          answerElement.innerHTML = card[`ans${index + 1}`]; // Access answer dynamically
+          document.getElementById("question-number").innerText = `Question ${index + 1}`; // Update question number
+          document.getElementById("ans-number").innerText = `Answer ${index + 1}`;
+          flashcardElement.classList.remove("flipped"); // Ensure it's not flipped initially
       }
 
-      flashcardElement.addEventListener("click", () => {
-        flashcardElement.classList.toggle("flipped");
-      });
+      const copyLinkIcon = document.getElementById("copy-link-icon");
+      const copyNotification = document.getElementById("copy-notification");
 
-      nextButton.addEventListener("click", () => {
-        if (flashcardElement.classList.contains("flipped")) {
-          flashcardElement.classList.remove("flipped");
-        }
-        currentCardIndex = (currentCardIndex + 1) % flashcards.length;
-        setTimeout(() => {
-          showCard(currentCardIndex);
-        }, 300); // Wait for the flip animation to finish
+      // Function to copy the link
+      copyLinkIcon.addEventListener("click", () => {
+          const quizLink = window.location.href; // Get the current URL
+          navigator.clipboard.writeText(quizLink) // Copy the URL to clipboard
+              .then(() => {
+                  // Show notification
+                  copyNotification.style.display = "block";
+                  setTimeout(() => {
+                      copyNotification.style.display = "none"; // Hide after 2 seconds
+                  }, 2000);
+              })
+              .catch(err => {
+                  console.error("Failed to copy: ", err);
+              });
       });
-
-      // Back button functionality
-      backButton.addEventListener("click", () => {
-        if (flashcardElement.classList.contains("flipped")) {
-          flashcardElement.classList.remove("flipped");
-        }
-        currentCardIndex =
-          (currentCardIndex - 1 + flashcards.length) % flashcards.length;
-        setTimeout(() => {
-          showCard(currentCardIndex);
-        }, 300); // Wait for the flip animation to finish
-      });
-
-      // Show the first card on load
-      showCard(currentCardIndex);
     </script>
   </body>
 </html>

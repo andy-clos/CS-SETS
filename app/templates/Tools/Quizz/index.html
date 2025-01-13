@@ -33,9 +33,10 @@
             >
               + Create new
             </button>
-            <select class="sort-options">
-              <option>Last Updated</option>
-              <option>Alphabetical</option>
+
+            <select class="sort-options" onchange="sortQuizzes(this.value)">
+              <option value="last_updated">Last Updated</option>
+              <option value="alphabetical">Alphabetical</option>
             </select>
           </div>
           {%if quizzes%} {%for quiz in quizzes%}
@@ -47,11 +48,16 @@
                 <span class="file-type">{{quiz.QueAns|length}} questions</span>
                 <span class="studied"></span>
                 <span class="timestamp">{{quiz.timestamp}}</span>
+                <div class="tag">
+                  {% for tag in quiz.tags %}
+                  <span class="tag-label"># {{ tag }}</span>
+                  {% endfor %}
+                </div>
               </div>
               <div class="file-actions">
                 <button
                   class="preview-btn"
-                  onclick="window.location.href='{% url 'flashcard' %}'"
+                  onclick="window.location.href='{% url 'flashcard' quiz.QuizID %}'"
                 >
                   Preview
                 </button>
@@ -69,5 +75,33 @@
       {% include 'footer.html' %}
     </div>
     <script src="{% static 'js/backend.js' %}"></script>
+    <script>
+      function sortQuizzes(criteria) {
+        const quizCards = document.querySelectorAll(".file-card");
+        const quizArray = Array.from(quizCards);
+
+        if (criteria === "last_updated") {
+          quizArray.sort((a, b) => {
+            const aTimestamp = new Date(
+              a.querySelector(".timestamp").textContent
+            );
+            const bTimestamp = new Date(
+              b.querySelector(".timestamp").textContent
+            );
+            return bTimestamp - aTimestamp; // Sort descending
+          });
+        } else if (criteria === "alphabetical") {
+          quizArray.sort((a, b) => {
+            const aTitle = a.querySelector("h3").textContent.toLowerCase();
+            const bTitle = b.querySelector("h3").textContent.toLowerCase();
+            return aTitle.localeCompare(bTitle); // Sort alphabetically
+          });
+        }
+
+        const container = document.querySelector(".files-section");
+        container.innerHTML = ""; // Clear existing quizzes
+        quizArray.forEach((quiz) => container.appendChild(quiz)); // Append sorted quizzes
+      }
+    </script>
   </body>
 </html>
