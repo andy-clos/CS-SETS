@@ -35,6 +35,7 @@ from sklearn.preprocessing import StandardScaler
 import numpy as np
 import pandas as pd
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth import logout
 
 
 
@@ -152,13 +153,30 @@ def handle_firebase_error(e):  # not complete yet, error undetected!!!!
 def logout_view(request):
     """Handle user logout"""
     try:
+        # Clear authentication
+        logout(request)
         # Clear all session data
         request.session.flush()
+        
+        # Create response with cache control headers
+        response = redirect('login')
+        
+        # Clear cookies with proper settings
+        response.delete_cookie('sessionid', path='/')
+        response.delete_cookie('csrftoken', path='/')
+        
+        # Add cache control headers
+        response['Cache-Control'] = 'no-cache, no-store, must-revalidate, private'
+        response['Pragma'] = 'no-cache'
+        response['Expires'] = '0'
+        
         messages.success(request, "You have been successfully logged out.")
+        return response
+        
     except Exception as e:
+        print(f"Logout error: {str(e)}")  # Add debug print
         messages.error(request, "Error during logout. Please try again.")
-    
-    return redirect('login')
+        return redirect('login')
 
 def is_logged_in(request):
     """Check if user is logged in"""
@@ -492,6 +510,7 @@ def dashboard_view(request):
     except Exception as e:
         return render(request, 'dashboard.html', {'error': str(e)})
 
+@login_required
 def academic_view(request):
     if request.method == 'POST':
         if 'action' not in request.POST:  # This is for admin adding a course
@@ -706,6 +725,7 @@ def academic_view(request):
 
     return render(request, 'academic.html', context)
 
+@login_required
 def course_detail_view(request, semester_year, course_code):
     try:
         academic_year, semester = semester_year.split('sem')
@@ -906,9 +926,11 @@ def delete_course_view(request, semester_year, course_code):
 def tools_view(request):
     return render(request, 'Tools/tools.html')
 
+@login_required
 def appointments_view(request):
     return render(request, 'appointments.html')
 
+@login_required
 def forum_view(request):
     user_email = get_current_user(request)
     search_query = request.GET.get('search', '')  # Get the search query from the URL
@@ -923,6 +945,7 @@ def forum_view(request):
 def getSubject():
     subject = database.child("forum").child("posts").get()
 
+@login_required
 def users_management_view(request):
     return render(request, 'users-management.html')
 
@@ -1510,6 +1533,11 @@ def update_marks(request, semester_year, course_code, student_email):
                 messages.success(request, 'Marks updated successfully')
             else:
                 messages.warning(request, 'No marks to update')
+
+            return JsonResponse({
+                'status': 'success',
+                'message': 'Marks updated successfully'
+            })
             
         except Exception as e:
             print(f"Error updating marks: {str(e)}")

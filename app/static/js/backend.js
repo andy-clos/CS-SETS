@@ -70,11 +70,39 @@ document.querySelectorAll('.menu-item, .logo-brand').forEach(item => {
   item.addEventListener('click', activateMenu);
 });
 
-function logout() {
-  localStorage.removeItem("activeLink");
-  setDefaultActiveMenu();
-  sessionStorage.removeItem("userEmail");
-  window.location.href = "/login/";
+async function logout() {
+    try {
+        // Make a GET request to the logout endpoint
+        const response = await fetch('/logout', {  // Remove trailing slash
+            method: 'GET',
+            headers: {
+                'Cache-Control': 'no-cache',
+                'Pragma': 'no-cache'
+            },
+            credentials: 'same-origin'  // Include credentials
+        });
+
+        if (response.ok) {
+            // Clear all client-side storage
+            localStorage.clear();
+            sessionStorage.clear();
+            
+            // Clear cookies
+            document.cookie.split(";").forEach(function(c) {
+                document.cookie = c.replace(/^ +/, "")
+                    .replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+            });
+            
+            // Force reload to clear any cached pages
+            window.location.href = "/login";
+        } else {
+            console.error('Logout failed');
+            window.location.href = "/login";
+        }
+    } catch (error) {
+        console.error('Error during logout:', error);
+        window.location.href = "/login";
+    }
 }
 
 function searchCourse() {
