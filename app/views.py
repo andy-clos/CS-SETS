@@ -444,9 +444,39 @@ def dashboard_view(request):
                         'proof': achievement.get('proof'),
                         'date_added': achievement.get('date_added'),  # Adjust based on your structure
                     })
-                    
+
+            #personality
+                        # Fetch the personality type from the database
+            current_user_email = request.session.get('user_email').replace('.', '-dot-').replace('@', '-at-')
+            mbti = database.child("users").child(current_user_email).child("personality").child("type").get().val()
+
+            # Define the MBTI characteristics and descriptions
+            mbti_info = {
+                'INTJ': ('Architect', 'Imaginative and strategic thinkers, with a plan for everything.'),
+                'INTP': ('Logician', 'Innovative inventors with an unquenchable thirst for knowledge.'),
+                'ENTJ': ('Commander', 'Bold, imaginative and strong-willed leaders, always finding a way – or making one.'),
+                'ENTP': ('Debater', 'Smart and curious thinkers who cannot resist an intellectual challenge.'),
+                'INFJ': ('Advocate', 'Quiet and mystical, yet very inspiring and tireless idealists.'),
+                'INFP': ('Mediator', 'Poetic, kind and altruistic people, always eager to help a good cause.'),
+                'ENFJ': ('Protagonist', 'Charismatic and inspiring leaders, able to mesmerize their listeners.'),
+                'ENFP': ('Campaigner', 'Enthusiastic, creative and sociable free spirits, who can always find a reason to smile.'),
+                'ISTJ': ('Logistician', 'Practical and fact-minded individuals, whose reliability cannot be doubted.'),
+                'ISFJ': ('Defender', 'Very dedicated and warm protectors, always ready to defend their loved ones.'),
+                'ESTJ': ('Executive', 'Excellent administrators, unsurpassed at managing things – or people.'),
+                'ESFJ': ('Consul', 'Extraordinarily caring, social and popular people, always eager to help.'),
+                'ISTP': ('Virtuoso', 'Bold and practical experimenters, masters of all kinds of tools.'),
+                'ISFP': ('Adventurer', 'Flexible and charming artists, always ready to explore and experience something new.'),
+                'ESTP': ('Entrepreneur', 'Smart, energetic and very perceptive people, who truly enjoy living on the edge.'),
+                'ESFP': ('Entertainer', 'Spontaneous, energetic and enthusiastic people – life is never boring around them.'),
+            }
+
+            # Get the corresponding character and description
+            character, description = mbti_info.get(mbti, ('Unknown', 'No description available.'))
 
             context = {
+                'mbti': mbti,
+                'character': character,
+                'description': description,
                 'top_users': top_users,
                 'user_achievements': user_achievements,
                 'lecturer_latest_courses': lecturer_latest_courses,
@@ -457,7 +487,6 @@ def dashboard_view(request):
                 'current_semester': current_semester,
                 'sem_year': f"sem{current_semester}year{current_year}",
             }
-            
             return render(request, 'dashboard.html', context)
             
     except Exception as e:
@@ -2564,6 +2593,7 @@ def create_quizz(request):
 
 @require_GET
 def view_proof(request, achievement_key, encoded_email):
+
     try:
         # Get the achievement data
         achievement = database.child("users").child(encoded_email).child("achievements").child(achievement_key).get().val()

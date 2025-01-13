@@ -122,6 +122,7 @@
 }
 
 .leaderboard-details {
+    margin-left: auto;
     color: #4E598C;
     border: none;
     border-radius: 20px;
@@ -130,7 +131,6 @@
     font-size: 14px;
     outline: none;
     background-color: transparent;
-    margin-left: auto;
     transition: background-color 0.3s, transform 0.2s ease;
 }
 
@@ -194,7 +194,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 15px;
+    margin-bottom: 35px;
 }
 
 .list-item-content {
@@ -226,6 +226,26 @@
     border-radius: 20px;
     height: 100%;
     flex: 1;
+}
+
+.personality-title {
+    font-size: 20px;
+    font-weight: bold;
+    color: #4E598C;
+    text-align: center;
+    margin-top: 3%;
+}
+
+.image-container{
+    margin-left: auto;
+    margin-right: auto;
+    width: 80%;
+}
+
+.mbti-info{
+    text-align: center;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .progress-bar-header {

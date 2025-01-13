@@ -79,46 +79,38 @@
                         <h2>Leaderboard</h2>
                         <div class="leaderboard-content">
                             <div class="leaderboard-header">
-                                <ul>
+                                <ol class="leaderboard-list">
                                     {% for user in top_users %}
                                         <li class="list-item">
                                             <div class="list-item-content">
                                                 <img src="{% if user.profile_picture and user.achievement_count > 0 %}data:image/jpeg;base64,{{ user.profile_picture }}{% else %}{% static 'image/user.png' %}{% endif %}" alt="Profile Picture" class="profile-img">
-                                                <p>{% if user.achievement_count > 0 %}{{ user.name }}{% else %}-{% endif %}</p>
+                                                <p>{{ forloop.counter }}. {% if user.achievement_count > 0 %}{{ user.name }}{% else %}-{% endif %}</p>
                                                 <button class="leaderboard-details" 
                                                         {% if user.achievement_count == 0 %}disabled{% endif %} 
-                                                        onclick="openLeaderboardDetails('{{ user.name }}', {{ user}},{{user_achievements}})">
+                                                        onclick="openLeaderboardDetails('{{ user.name }}', {{ user }}, {{ user_achievements }})">
                                                     <i class="fa fa-file-text"></i>
                                                 </button>
                                             </div>
                                         </li>
                                     {% endfor %}
-                                </ul>
+                                </ol>
                             </div>
                         </div>
                     </div>
 
                     <div class="academic-card">
-                        <h2>Academic Result</h2>
+                        <h2>Personal Management</h2>
                         <div class="academic-outsider">
                             <div class="academic-content">
                                 <!-- CGPA Section -->
                                 <div class="academic-cgpa-section">
-                                    <p class="progress-text">Progress to target: 92.89%</p>
-                                    <div class="progress-bar-container">
-                                        <div class="progress-bar"></div>
+                                    <p class="personality-title">Your Personality is {{ mbti }}</p>
+                                    <div class="image-container">
+                                        <img src="/static/image/{{ mbti|lower }}.png" alt="Personal Management" class="academic-image" style="max-width: 80%; height: auto;">
                                     </div>
-                                    <div class="cgpa-container">
-                                        <div class="cgpa-box">
-                                            <h3 class="cgpa-title">Current CGPA</h3>
-                                            <p class="cgpa-value">3.53</p>
-                                            <button class="btn-dashboard">Check current result</button>
-                                        </div>
-                                        <div class="cgpa-box">
-                                            <h3 class="cgpa-title">Targeted CGPA</h3>
-                                            <p class="cgpa-value">3.80</p>
-                                            <button class="btn-dashboard">Check targeted result</button>
-                                        </div>
+                                    <div class="mbti-info">
+                                        <b><p>{{ character }}</p></b>
+                                        <p>{{ description }}</p>
                                     </div>
                                 </div>
                 
@@ -412,7 +404,7 @@
     </div>
 </div>
 
-{% if request.session.user_role == 'student' %}
+{% comment %} {% if request.session.user_role == 'student' %}
 <script>
     const progressBarContainer = document.querySelector('.progress-bar-container');
 
@@ -436,7 +428,7 @@
 
     setInterval(createGlitterEffect, 100);
 </script>
-{% endif %}
+{% endif %} {% endcomment %}
 
 <script>
     document.querySelector('.btn-add-announce').addEventListener('click', function() {
