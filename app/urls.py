@@ -1,6 +1,6 @@
 from django.urls import path
 from . import views
-from .views import getPosts, viewPost,submit_comment
+from .views import getPosts, viewPost, submit_comment
 
 urlpatterns = [
     path('', views.login_view, name='login'),
@@ -32,7 +32,7 @@ urlpatterns = [
     path('academic/<str:semester_year>/<str:course_code>/update-marks/<str:student_email>/', views.update_marks, name='update-marks'),
     path('unenroll-student/', views.unenroll_student, name='unenroll-student'),
     path('upload-marks/<str:semester_year>/<str:course_code>/', views.upload_marks, name='upload-marks'),
-     path('add-achievement/', views.add_achievement, name='add-achievement'),
+    path('add-achievement/', views.add_achievement, name='add-achievement'),
     path('delete-achievement/<str:achievement_key>/', views.delete_achievement, name='delete-achievement'),
     path('view-certificate/<str:achievement_key>/', views.view_certificate, name='view-certificate'),
     path('get-mbti-questions/', views.get_mbti_questions, name='get-mbti-questions'),
@@ -45,4 +45,5 @@ urlpatterns = [
     path('quizzMenu/', views.quizz_menu, name='quizz'),
     path('create_quizz/', views.create_quizz, name='create_quizz'),
     path('flashcard/<int:quiz_id>/', views.flashcard_view, name='flashcard'),
+    path('logout', views.logout_view, name='logout'),
 ]

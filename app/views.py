@@ -35,6 +35,7 @@ from sklearn.preprocessing import StandardScaler
 import numpy as np
 import pandas as pd
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth import logout
 
 
 
@@ -152,13 +153,30 @@ def handle_firebase_error(e):  # not complete yet, error undetected!!!!
 def logout_view(request):
     """Handle user logout"""
     try:
+        # Clear authentication
+        logout(request)
         # Clear all session data
         request.session.flush()
+        
+        # Create response with cache control headers
+        response = redirect('login')
+        
+        # Clear cookies with proper settings
+        response.delete_cookie('sessionid', path='/')
+        response.delete_cookie('csrftoken', path='/')
+        
+        # Add cache control headers
+        response['Cache-Control'] = 'no-cache, no-store, must-revalidate, private'
+        response['Pragma'] = 'no-cache'
+        response['Expires'] = '0'
+        
         messages.success(request, "You have been successfully logged out.")
+        return response
+        
     except Exception as e:
+        print(f"Logout error: {str(e)}")  # Add debug print
         messages.error(request, "Error during logout. Please try again.")
-    
-    return redirect('login')
+        return redirect('login')
 
 def is_logged_in(request):
     """Check if user is logged in"""
