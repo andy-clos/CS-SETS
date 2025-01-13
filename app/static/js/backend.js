@@ -1,19 +1,51 @@
+function updateActiveMenu() {
+  const menuItems = document.querySelectorAll(".menu-item");
+  const currentPath = window.location.pathname; // Get the current path
+
+  // Debug: Log the current path
+  console.log("Current Path:", currentPath);
+
+  // Remove active class from all items and set the active class for the current path
+  menuItems.forEach((item) => {
+    const itemPath = item.getAttribute("href");
+    // Debug: Log each item path
+    console.log("Checking item path:", itemPath);
+    
+    // Remove active class from all items
+    item.classList.remove("active");
+
+    // Set active class for the current path
+    if (currentPath.startsWith(itemPath)) {
+      item.classList.add("active"); // Add active class to the current menu item
+      // Debug: Log which item is set as active
+      console.log("Setting active class for:", itemPath);
+    }
+  });
+}
+
+// Function to handle menu item clicks
 function activateMenu(event) {
   const menuItems = document.querySelectorAll(".menu-item");
-  menuItems.forEach((item) => item.classList.remove("active"));
+  
+  // Remove active class from all items
+  menuItems.forEach((item) => {
+    item.classList.remove("active");
+  });
 
+  // Check if the logo is clicked
   if (event.currentTarget.classList.contains("logo-brand")) {
-    const dashboardMenuItem = document.querySelector(
-      '.menu-item[href="/dashboard"]'
-    );
+    const dashboardMenuItem = document.querySelector('.menu-item[href="/dashboard"]');
     if (dashboardMenuItem) {
-      dashboardMenuItem.classList.add("active");
+      dashboardMenuItem.classList.add("active"); // Set active class for Dashboard
     }
     localStorage.setItem("activeLink", "/dashboard");
   } else if (event.currentTarget.classList.contains("menu-item")) {
-    event.currentTarget.classList.add("active");
     const activeLink = event.currentTarget.getAttribute("href");
+    event.currentTarget.classList.add("active"); // Set active class for clicked menu item
     localStorage.setItem("activeLink", activeLink);
+
+    // Redirect to the clicked link
+    window.location.href = activeLink; // Redirect to the clicked link
   }
 }
 
@@ -41,9 +73,8 @@ if (logoBrand) {
   logoBrand.addEventListener("click", activateMenu);
 }
 
-const menuItems = document.querySelectorAll(".menu-item");
-menuItems.forEach((item) => {
-  item.addEventListener("click", activateMenu);
+document.querySelectorAll('.menu-item, .logo-brand').forEach(item => {
+  item.addEventListener('click', activateMenu);
 });
 
 function logout() {
@@ -291,3 +322,13 @@ function openAnnouncement(title, content, author, timestamp, authorProfilePhoto)
     // Show the form
     document.getElementById("announcement-form").style.display = "block";
 }
+
+// Add event listeners to menu items
+document.addEventListener("DOMContentLoaded", () => {
+  // Set the active menu item on page load
+  updateActiveMenu();
+
+  document.querySelectorAll('.menu-item, .logo-brand').forEach(item => {
+    item.addEventListener('click', activateMenu);
+  });
+});
