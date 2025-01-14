@@ -22,12 +22,14 @@
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.1.3/sweetalert.min.css"
     />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
   </head>
   <body>
     <div class="container">
       {% include 'navbar.html' %} {% include 'header.html' %}
       <main>
         <section class="content">
+          <script src="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/7.29.2/sweetalert2.all.js"></script>
           {% if success_message %}
           <script>
             // Show SweetAlert success message
@@ -41,18 +43,32 @@
               window.location.href = "/forum"; // Redirect to the forum after the alert
             });;
           </script>
-          {% endif %} {% if post %}
+          {% endif %}
+          
+          {% if messages %}
+          {% for message in messages %}
+              <script>
+                  swal({
+                      title: "{{ message }}",
+                      text: "Congratulations",
+                      type: "success",
+                      showConfirmButton: true,
+                  });
+              </script>
+          {% endfor %}
+      {% endif %}{% if post %}
           <div class="containerViewPost">
             <h1 class="subject">{{post.subject}}</h1>
             <div class="titleViewPost">  <span class="black_font">{{ post.title }}</span></div>
 
             <div class="comment-section"></div>
-
+          
             <div class="black_font">{{ post.content|safe }}</div>
             <div class="label-container">
               {% for tag in post.tags %}
               <span class="tag-label"># {{ tag }}</span>
               {% endfor %}
+              
             </div>
 
             <div class="post-details">
@@ -62,9 +78,16 @@
               <div class="view_post_time">
                 <span class="black_font">Post Time :</span>{{ post.timestamp }}
               </div>
+              {% if user_data.role != 'admin'%}
               <span class="add-comment" id="addCommentBtn">Add A Comment</span>
+              {% endif %}
+              {% if post.author == user_email %}
+              <button class="delete-btn">
+                  <i class="material-icons"  onclick="deletePost('{{ post.PostID }}')">delete</i>
+              </button>
+              {% endif %}
             </div>
-
+          
             <form method="POST" action="{% url 'submit_comment' post.PostID %}">
               {% csrf_token %}
               <div id="commentModal" class="modal">
@@ -78,6 +101,7 @@
                 </div>
               </div>
             </div>
+            
             </form>
             <div class="comment-section">
               <span class="comment-header"><h3>Reply</h3></span>
@@ -86,12 +110,22 @@
               <div class="containerViewPost">
                 <div class="black_font">{{ reply_data.content|safe  }}</div>
                 <div class="post-details">
+                  <form method="POST" action="{% url 'delete_reply' post.PostID reply_key %}">
+                    {% csrf_token %}
+                    {% if reply_data.author == user_data.email %}
+                    <button class="delete-btn-reply" type="submit">
+                        <i class="material-icons">delete</i>
+                    </button>
+                  </form>
+                  {% endif %}
                   <div class="question-details">
                     <span class="black_font">Replied by:</span> {{ reply_data.author }}
                   </div>
                   <div class="view_post_time">
                     <span class="black_font">Replied Time :</span>{{ reply_data.timestamp }}
+                  
                   </div>
+                
                 </div>
               </div>
                   {% endfor %}

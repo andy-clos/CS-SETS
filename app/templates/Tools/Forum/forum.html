@@ -14,7 +14,8 @@
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
     />
-  </head>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+  
   <body>
     <div class="container">
       {% include 'navbar.html' %} {% include 'header.html' %}
@@ -54,15 +55,19 @@
               value="{{ search_query }}"
               />
             </div>
-          </form>
+         
             <button type="submit" class="create-post-btn">Search</button>
+          </form>
+          {% if user_data.role == 'student' %}
           <a href="/createPost">
             <button class="create-post-btn">Create post</button>
           </a>
+          {% endif %}
         
         </header>
         <div class="post-container">
           {% if posts %} {% for post in posts %}
+  
           <div class="post">
             <div class="ContainerViewPost">
               <a href="{% url 'view_post' post.PostID %}" class="black_font">
@@ -86,6 +91,7 @@
                 </div>
                 <span class="comment">{{post.reply_count }} comments</span>
               </div>
+           
             </div>
           </div>
           {% endfor %} {% else %}
@@ -98,6 +104,7 @@
     </div>
     <script src="{% static 'js/backend.js' %}"></script>
     <script>
+
       function closeModal() {
         document.getElementById("successModal").style.display = "none";
       }

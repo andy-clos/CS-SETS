@@ -2,16 +2,27 @@ function updateActiveMenu() {
   const menuItems = document.querySelectorAll(".menu-item");
   const currentPath = window.location.pathname; // Get the current path
 
-  // Remove active class from all items and set the active class for the current path
+  // Remove active class from all items
+  menuItems.forEach((item) => {
+    item.classList.remove("active");
+  });
+
+  // Set active class for the current path
   menuItems.forEach((item) => {
     const itemPath = item.getAttribute("href");
-    
-    // Remove active class from all items
-    item.classList.remove("active");
 
-    // Set active class for the current path
-    if (currentPath.startsWith(itemPath)) {
+    // Check if the current path includes the item path
+    if (currentPath.includes(itemPath)) {
       item.classList.add("active"); // Add active class to the current menu item
+    }
+
+    const keywords = ["post", "quizz", "cgpa", "timetable", "resume", "forum"];
+    const toolsMenuItem = document.querySelector('.menu-item[href="/tools"]');
+
+    if (keywords.some((keyword) => currentPath.includes(keyword))) {
+      if (toolsMenuItem) {
+        toolsMenuItem.classList.add("active"); // Keep "Tools" active
+      }
     }
   });
 }
@@ -19,7 +30,7 @@ function updateActiveMenu() {
 // Function to handle menu item clicks
 function activateMenu(event) {
   const menuItems = document.querySelectorAll(".menu-item");
-  
+
   // Remove active class from all items
   menuItems.forEach((item) => {
     item.classList.remove("active");
@@ -27,7 +38,9 @@ function activateMenu(event) {
 
   // Check if the logo is clicked
   if (event.currentTarget.classList.contains("logo-brand")) {
-    const dashboardMenuItem = document.querySelector('.menu-item[href="/dashboard"]');
+    const dashboardMenuItem = document.querySelector(
+      '.menu-item[href="/dashboard"]'
+    );
     if (dashboardMenuItem) {
       dashboardMenuItem.classList.add("active"); // Set active class for Dashboard
     }
@@ -66,43 +79,45 @@ if (logoBrand) {
   logoBrand.addEventListener("click", activateMenu);
 }
 
-document.querySelectorAll('.menu-item, .logo-brand').forEach(item => {
-  item.addEventListener('click', activateMenu);
+document.querySelectorAll(".menu-item, .logo-brand").forEach((item) => {
+  item.addEventListener("click", activateMenu);
 });
 
 async function logout() {
-    try {
-        // Make a GET request to the logout endpoint
-        const response = await fetch('/logout', {  // Remove trailing slash
-            method: 'GET',
-            headers: {
-                'Cache-Control': 'no-cache',
-                'Pragma': 'no-cache'
-            },
-            credentials: 'same-origin'  // Include credentials
-        });
+  try {
+    // Make a GET request to the logout endpoint
+    const response = await fetch("/logout", {
+      // Remove trailing slash
+      method: "GET",
+      headers: {
+        "Cache-Control": "no-cache",
+        Pragma: "no-cache",
+      },
+      credentials: "same-origin", // Include credentials
+    });
 
-        if (response.ok) {
-            // Clear all client-side storage
-            localStorage.clear();
-            sessionStorage.clear();
-            
-            // Clear cookies
-            document.cookie.split(";").forEach(function(c) {
-                document.cookie = c.replace(/^ +/, "")
-                    .replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
-            });
-            
-            // Force reload to clear any cached pages
-            window.location.href = "/login";
-        } else {
-            console.error('Logout failed');
-            window.location.href = "/login";
-        }
-    } catch (error) {
-        console.error('Error during logout:', error);
-        window.location.href = "/login";
+    if (response.ok) {
+      // Clear all client-side storage
+      localStorage.clear();
+      sessionStorage.clear();
+
+      // Clear cookies
+      document.cookie.split(";").forEach(function (c) {
+        document.cookie = c
+          .replace(/^ +/, "")
+          .replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+      });
+
+      // Force reload to clear any cached pages
+      window.location.href = "/login";
+    } else {
+      console.error("Logout failed");
+      window.location.href = "/login";
     }
+  } catch (error) {
+    console.error("Error during logout:", error);
+    window.location.href = "/login";
+  }
 }
 
 function searchCourse() {
@@ -249,40 +264,40 @@ function removeVenueTimeField(id) {
 }
 
 document.addEventListener("DOMContentLoaded", function () {
-    var acc = document.getElementsByClassName("accordion");
-    var i;
+  var acc = document.getElementsByClassName("accordion");
+  var i;
 
-    for (i = 0; i < acc.length; i++) {
-        acc[i].addEventListener("click", function () {
-            this.classList.toggle("active");
-            var panel = this.nextElementSibling;
-            if (panel.style.maxHeight) {
-                panel.style.maxHeight = null;
-            } else {
-                panel.style.maxHeight = panel.scrollHeight + "px";
-            }
-        });
-    }
+  for (i = 0; i < acc.length; i++) {
+    acc[i].addEventListener("click", function () {
+      this.classList.toggle("active");
+      var panel = this.nextElementSibling;
+      if (panel.style.maxHeight) {
+        panel.style.maxHeight = null;
+      } else {
+        panel.style.maxHeight = panel.scrollHeight + "px";
+      }
+    });
+  }
 });
 
 let courseworkCount = 1;
 
 function addCourseworkField() {
-    //Remove the minus button from the previous field, if it exists
-    if (courseworkCount > 1) {
-        const previousButton = document.querySelector(
-            `#coursework-container div:last-child button.remove-btn`
-        );
-        if (previousButton) {
-            previousButton.remove();
-        }
+  //Remove the minus button from the previous field, if it exists
+  if (courseworkCount > 1) {
+    const previousButton = document.querySelector(
+      `#coursework-container div:last-child button.remove-btn`
+    );
+    if (previousButton) {
+      previousButton.remove();
     }
+  }
 
-    courseworkCount++;
-    const container = document.getElementById('coursework-container');
-    const newField = document.createElement('div');
-    newField.setAttribute('id', `coursework${courseworkCount}`);
-    newField.innerHTML = `
+  courseworkCount++;
+  const container = document.getElementById("coursework-container");
+  const newField = document.createElement("div");
+  newField.setAttribute("id", `coursework${courseworkCount}`);
+  newField.innerHTML = `
         <label>Coursework Type ${courseworkCount}: </label>
         <input type="text" id="coursework_type${courseworkCount}" 
                name="coursework_type${courseworkCount}" 
@@ -296,52 +311,61 @@ function addCourseworkField() {
                 onclick="removeCourseworkField(${courseworkCount})">-</button>
         <br>
     `;
-    container.appendChild(newField);
+  container.appendChild(newField);
 }
 
 function removeCourseworkField(id) {
-    const field = document.getElementById(`coursework${id}`);
-    field.remove();
-    courseworkCount--;
+  const field = document.getElementById(`coursework${id}`);
+  field.remove();
+  courseworkCount--;
 
-    // Add the minus button to the new last field, if there are still fields left
-    if (courseworkCount > 1) {
-        const lastField = document.querySelector(
-            `#coursework-container div:last-child`
-        );
-        if (lastField) {
-            // Remove any existing remove button first
-            const existingRemoveBtn = lastField.querySelector('.remove-btn');
-            if (existingRemoveBtn) {
-                existingRemoveBtn.remove();
-            }
-            const newButton = document.createElement('button');
-            newButton.type = 'button';
-            newButton.textContent = '-';
-            newButton.className = 'remove-btn';
-            newButton.setAttribute(
-                'onclick',
-                `removeCourseworkField(${courseworkCount})`
-            );
-            // Insert the button after the total mark input
-            const totalMarkInput = lastField.querySelector(`input[name="total_mark${courseworkCount}"]`);
-            if (totalMarkInput) {
-                totalMarkInput.insertAdjacentElement('afterend', newButton);
-            }
-        }
+  // Add the minus button to the new last field, if there are still fields left
+  if (courseworkCount > 1) {
+    const lastField = document.querySelector(
+      `#coursework-container div:last-child`
+    );
+    if (lastField) {
+      // Remove any existing remove button first
+      const existingRemoveBtn = lastField.querySelector(".remove-btn");
+      if (existingRemoveBtn) {
+        existingRemoveBtn.remove();
+      }
+      const newButton = document.createElement("button");
+      newButton.type = "button";
+      newButton.textContent = "-";
+      newButton.className = "remove-btn";
+      newButton.setAttribute(
+        "onclick",
+        `removeCourseworkField(${courseworkCount})`
+      );
+      // Insert the button after the total mark input
+      const totalMarkInput = lastField.querySelector(
+        `input[name="total_mark${courseworkCount}"]`
+      );
+      if (totalMarkInput) {
+        totalMarkInput.insertAdjacentElement("afterend", newButton);
+      }
     }
+  }
 }
 
-function openAnnouncement(title, content, author, timestamp, authorProfilePhoto) {
-    // Populate the form with the announcement details
-    document.getElementById("form-title").innerText = title;
-    document.getElementById("form-content").innerText = content;
-    document.getElementById("form-author").innerText = "Author: " + author;
-    document.getElementById("form-timestamp").innerText = "Timestamp: " + timestamp;
-    document.getElementById("form-author-photo").src = authorProfilePhoto;
+function openAnnouncement(
+  title,
+  content,
+  author,
+  timestamp,
+  authorProfilePhoto
+) {
+  // Populate the form with the announcement details
+  document.getElementById("form-title").innerText = title;
+  document.getElementById("form-content").innerText = content;
+  document.getElementById("form-author").innerText = "Author: " + author;
+  document.getElementById("form-timestamp").innerText =
+    "Timestamp: " + timestamp;
+  document.getElementById("form-author-photo").src = authorProfilePhoto;
 
-    // Show the form
-    document.getElementById("announcement-form").style.display = "block";
+  // Show the form
+  document.getElementById("announcement-form").style.display = "block";
 }
 
 // Add event listeners to menu items
@@ -349,7 +373,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // Set the active menu item on page load
   updateActiveMenu();
 
-  document.querySelectorAll('.menu-item, .logo-brand').forEach(item => {
-    item.addEventListener('click', activateMenu);
+  document.querySelectorAll(".menu-item, .logo-brand").forEach((item) => {
+    item.addEventListener("click", activateMenu);
   });
 });

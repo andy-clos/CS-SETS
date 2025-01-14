@@ -9,6 +9,7 @@ header {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  margin-left: 10px;
 }
 
 .ql-toolbar {
@@ -43,6 +44,8 @@ header {
   display: flex;
   align-items: center;
   flex: 1;
+  margin-bottom: 10px;
+  margin-left: 10px;
 }
 
 .search-container input[type="text"] {
@@ -51,6 +54,7 @@ header {
   border: 1px solid #ccc;
   border-radius: 4px;
   font-size: 14px;
+  margin-right: 10px;
 }
 
 button {
@@ -63,10 +67,10 @@ button {
   cursor: pointer;
   margin-left: 10px;
 }
-
+/* 
 button:hover {
   background-color: #e68400;
-}
+} */
 
 .create-post-btn a {
   text-decoration: none;
@@ -79,8 +83,21 @@ button:hover {
 
 .label {
   display: flex;
+  align-items: center;
   justify-content: space-between;
+  margin-top: 10px;
 }
+
+.tag {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.sort-options {
+  margin-left: 10px;
+}
+
 /*create post*/
 
 .form-container {
@@ -355,4 +372,55 @@ button:hover {
   text-align: center;
   margin: 15% auto; /* Center the modal */
   width: 80%; /* Width of the modal */
+}
+
+.sort-options {
+  padding: 10px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  height: 40px;
+  margin-left: 10px;
+}
+
+.options-container {
+  margin-left: 10px;
+  padding: 10px;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.post.approved {
+  background-color: #64cf68; /* Green for approved */
+  color: white; /* Text color for better contrast */
+}
+
+.post.pending {
+  background-color: #f5c853; /* Yellow for pending */
+  color: black; /* Text color for better contrast */
+}
+
+.post.rejected {
+  background-color: #f55353; /* Red for rejected */
+  color: white; /* Text color for better contrast */
+}
+
+.post {
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-bottom: 15px; /* Space between posts */
+}
+
+.delete-btn {
+  background: none; /* No background */
+  border: none; /* No border */
+  cursor: pointer; /* Pointer cursor */
+  color: white; /* Icon color */
+  font-size: 20px; /* Icon size */
+  margin-left: 10px; /* Space between title and button */
+}
+
+.delete-btn:hover {
+  color: black; /* Change color on hover */
 }

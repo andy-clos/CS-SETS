@@ -1,7 +1,7 @@
 import joblib
 import os
 from django.shortcuts import render, redirect
-from django.http import JsonResponse, HttpResponse
+from django.http import JsonResponse, HttpResponse, HttpResponseBadRequest
 from firebase_admin import auth, db as admin_db
 import json
 import pyrebase
@@ -1113,11 +1113,7 @@ def createpost_view(request):
             content = request.POST.get('content')
             tags = json.loads(request.POST.get('tags', '[]'))
             author_email = get_current_user(request)
-            
-            # Get current timestamp
-            current_timestamp =int(datetime.datetime.now(pytz.UTC).timestamp() * 1000)
-            formatted_date = datetime.datetime.fromtimestamp(current_timestamp / 1000).strftime('%d/%m/%Y %H:%M:%S')
-
+        
             # Retrieve all posts
             all_posts = database.child("forum").get()
             
@@ -1140,15 +1136,15 @@ def createpost_view(request):
                 "content": content,
                 "tags": tags,
                 "author": author_email,
-                "timestamp": formatted_date,
-                "approved": False
+                "timestamp": datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                "status": "pending"
             }
             
             # Save to Firebase
             database.child("forum").child("posts").push(post_data)
             
             # Set success message
-            success_message = "Post created successfully!"
+            success_message = "Post created successfully! Once Admin approved, it will be visible to all users."
             return render(request, 'Tools/Forum/createPost.html', {'success_message': success_message, 'course_enrolled': course_enrolled})
         except Exception as e:
             return render(request, 'Tools/Forum/createPost.html', {'error': str(e), 'course_enrolled': course_enrolled})
@@ -1163,7 +1159,7 @@ def getPosts():
         for post in posts.each():
             post_data = post.val()
             # Only include posts that are approved
-            if post_data.get("approved", False):  # Check for boolean True
+            if post_data.get("status") == "approved":  # Check for boolean True
                 replies = post_data.get("replies", {})
                 reply_count = len(replies) if isinstance(replies, dict) else 0
                 # Add reply count to the post data
@@ -1174,6 +1170,9 @@ def getPosts():
     return post_list  
 @login_required
 def viewPost(request, post_id):
+    user_email = get_current_user(request)
+    encoded_email = user_email.replace('.', '-dot-').replace('@', '-at-')
+    user_data = database.child("users").child(encoded_email).get().val()
     try:
         posts = database.child("forum").child("posts").get()
         if posts.val():
@@ -1182,11 +1181,11 @@ def viewPost(request, post_id):
             # Find the post with the matching PostID
             post = next((p for p in post_list if p.get("PostID") == post_id), None)
             if post:
-                return render(request, 'Tools/Forum/viewPost.html', {'post': post})
-        return render(request, 'Tools/Forum/viewPost.html', {'error': 'Post not found'})
+                return render(request, 'Tools/Forum/viewPost.html', {'post': post, 'user_data': user_data})
+        return render(request, 'Tools/Forum/viewPost.html', {'error': 'Post not found', 'user_data': user_data})
     except Exception as e:
         print(f"Error fetching post: {e}")
-        return render(request, 'Tools/Forum/viewPost.html', {'error': 'An error occurred'})
+        return render(request, 'Tools/Forum/viewPost.html', {'error': 'An error occurred', 'user_data': user_data})
 @login_required
 def submit_comment(request, post_id):
     if request.method == 'POST':
@@ -1194,10 +1193,7 @@ def submit_comment(request, post_id):
             # Get the comment content from the request
             content = request.POST.get('content')  # Get the comment content
             user_email = get_current_user(request)
-            # Get current timestamp
-            current_timestamp = int(datetime.datetime.now(pytz.UTC).timestamp() * 1000)
-            formatted_date = datetime.datetime.fromtimestamp(current_timestamp / 1000).strftime('%d/%m/%Y %H:%M:%S')
-
+    
             # Reference to the specific post in Firebase using post_id
             post_data = database.child("forum").child("posts").order_by_child("PostID").equal_to(post_id).get().val()
             if post_data:
@@ -1206,7 +1202,7 @@ def submit_comment(request, post_id):
                 reply_data = {
                     "content": content,
                     "author": user_email,
-                    "timestamp": formatted_date
+                    "timestamp":datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                 }
 
                 database.child("forum").child("posts").child(post_key).child("replies").push(reply_data)
@@ -1219,7 +1215,7 @@ def submit_comment(request, post_id):
                 messages.success(request, "Comment added successfully!")
                 
                 # Redirect to the forum page
-                return redirect('forum')  
+                return redirect('/forum/view/' + str(post_id))
             else:
                 return render({'status': 'error', 'message': 'Post not found.'}, status=404)
 
@@ -1230,60 +1226,65 @@ def submit_comment(request, post_id):
 @login_required
 def timetable_view(request):
     # Fetch course data from the database
-    courses_data = database.child("course").get().val()
-    subject_codes = []
+    user_email = get_current_user(request)
+    encoded_email = user_email.replace('.', '-dot-').replace('@', '-at-')
+    user_data = database.child("users").child(encoded_email).get().val()
+    if user_data.get("role") == "student":
+        courses_data = database.child("course").get().val()
+        subject_codes = []
 
-    # Find the latest academic year and semester
-    if courses_data:
-        # Sort academic years in descending order
-        sorted_years = sorted(courses_data.keys(), reverse=True)
-        latest_year = sorted_years[0] if sorted_years else None
+        # Find the latest academic year and semester
+        if courses_data:
+            # Sort academic years in descending order
+            sorted_years = sorted(courses_data.keys(), reverse=True)
+            latest_year = sorted_years[0] if sorted_years else None
 
-        if latest_year:
-            semesters = courses_data[latest_year]
-            # Find the highest semester number
-            latest_semester = max(range(len(semesters)), key=lambda x: x if isinstance(semesters[x], dict) else -1)
+            if latest_year:
+                semesters = courses_data[latest_year]
+                # Find the highest semester number
+                latest_semester = max(range(len(semesters)), key=lambda x: x if isinstance(semesters[x], dict) else -1)
 
-            # Process only the latest year and semester
-            courses_in_semester = semesters[latest_semester]
-            if isinstance(courses_in_semester, dict):
-                for code, course_info in courses_in_semester.items():
-                    lecturers = course_info.get('lecturers', [])
-                    lecturers = [lecturer for lecturer in lecturers if lecturer]
-                    venue_time = course_info.get('venue and time', [])
-                    
-                    if isinstance(venue_time, dict):
-                        venue_time = [vt for vt in venue_time.values() if vt]
-                    else:
-                        venue_time = [vt for vt in venue_time if vt]
+                # Process only the latest year and semester
+                courses_in_semester = semesters[latest_semester]
+                if isinstance(courses_in_semester, dict):
+                    for code, course_info in courses_in_semester.items():
+                        lecturers = course_info.get('lecturers', [])
+                        lecturers = [lecturer for lecturer in lecturers if lecturer]
+                        venue_time = course_info.get('venue and time', [])
+                        
+                        if isinstance(venue_time, dict):
+                            venue_time = [vt for vt in venue_time.values() if vt]
+                        else:
+                            venue_time = [vt for vt in venue_time if vt]
 
-                    lecturer_count = len(lecturers)
-                    subject_codes.append({
-                        'course_code': code,
-                        'course_name': course_info.get('course_name', ''),
-                        'lecturers': lecturers,
-                        'lecturer_count': lecturer_count,
-                        'venue_time': venue_time
-                    })
+                        lecturer_count = len(lecturers)
+                        subject_codes.append({
+                            'course_code': code,
+                            'course_name': course_info.get('course_name', ''),
+                            'lecturers': lecturers,
+                            'lecturer_count': lecturer_count,
+                            'venue_time': venue_time
+                        })
 
-    # Handle timetable generation
-    timetable_html = None
-    if request.method == 'POST':
-        selected_courses = request.POST.getlist('course')
-        if selected_courses:
-            #call function  generate_timetable
-            timetable_html = generate_timetable(selected_courses, subject_codes, request)
-            return render(request, 'Tools/Timetable/index.html', {
-                'courses': subject_codes,
-                'timetable': timetable_html,
-                'selected_courses': selected_courses
-            })
+        # Handle timetable generation
+        timetable_html = None
+        if request.method == 'POST':
+            selected_courses = request.POST.getlist('course')
+            if selected_courses:
+                #call function  generate_timetable
+                timetable_html = generate_timetable(selected_courses, subject_codes, request)
+                return render(request, 'Tools/Timetable/index.html', {
+                    'courses': subject_codes,
+                    'timetable': timetable_html,
+                    'selected_courses': selected_courses
+                })
 
-    return render(request, 'Tools/Timetable/index.html', {
-        'courses': subject_codes,
-        'timetable': None
-    })
-@login_required
+        return render(request, 'Tools/Timetable/index.html', {
+            'courses': subject_codes,
+            'timetable': None
+        })
+    else:
+        return redirect('/logout')
 def generate_timetable(selected_courses, subject_codes, request):
     days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
     
@@ -1376,8 +1377,11 @@ def generate_timetable(selected_courses, subject_codes, request):
     request.session['timetable_html'] = table_html
     
     return table_html
-@login_required
+
 def download_timetable(request):
+
+    
+
     if request.method == 'POST':
         # Get the HTML content from session
         html_content = request.session.get('timetable_html')
@@ -2719,10 +2723,8 @@ def view_proof(request, achievement_key, encoded_email):
             response['Cache-Control'] = 'public, max-age=0'
             response['Pragma'] = 'public'
             
-            print("here is response ")
             print(response)
             return response
-            
 
         except Exception as e:
             return HttpResponse(f'Error decoding certificate: {str(e)}', status=500)
@@ -2757,4 +2759,90 @@ def delete_user_view(request, user_email):
         print("encoded email")
 
         # Remove the user from
-        return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=400)@login_required
+def approvePost(request):
+    user_email = get_current_user(request)
+    encoded_email = user_email.replace('.', '-dot-').replace('@', '-at-')
+    user_data = database.child("users").child(encoded_email).get().val()    
+    print(user_data)
+    print(request.method)
+    
+    if user_data.get('role') == 'admin':
+        search_query = request.GET.get('search', '')  # Get the search query from the URL
+        posts = database.child("forum").child("posts").get()
+            
+        # Initialize post_list
+        post_list = []
+
+        # Check if posts exist
+        if posts.val():
+            for post in posts.each():
+                post_data = post.val()
+                post_list.append(post_data)
+        # Filter posts based on the search query in title or subject
+        if search_query:
+            post_list = [post for post in post_list if search_query.lower() in post['title'].lower() or search_query.lower() in post['subject'].lower()]
+
+        return render(request, "Tools/Forum/approvePost.html", {"post_list": post_list, "search_query": search_query})
+    else:
+        return redirect('/logout',{'error_message': 'You are not authorized to access this page.'})
+
+@login_required
+def delete_post(request, post_id):
+    user_email = get_current_user(request)
+    encoded_email = user_email.replace('.', '-dot-').replace('@', '-at-')
+    user_data = database.child("users").child(encoded_email).get().val()    
+    print(user_data)
+    print(request.method)
+    
+    if user_data.get('role') == 'admin':
+        if request.method == 'POST':
+            print("delete post")
+            # Convert post_id to an integer
+            post_id = int(post_id)  # Ensure post_id is an integer
+            
+            post_data = database.child("forum").child("posts").order_by_child("PostID").equal_to(post_id).get().val()
+            if post_data:
+                post_key = list(post_data.keys())[0] 
+
+                database.child("forum").child("posts").child(post_key).remove()
+                messages.success(request, "Post deleted successfully!")  
+                return redirect('approvePost') 
+
+    return HttpResponseBadRequest("Invalid request method")
+
+
+@login_required
+def change_status(request, post_id):
+    user_email = get_current_user(request)
+    encoded_email = user_email.replace('.', '-dot-').replace('@', '-at-')
+    user_data = database.child("users").child(encoded_email).get().val()    
+    post_id = int(post_id)  # Ensure post_id is an integer
+    if user_data.get('role') == 'admin':
+        post_data = database.child("forum").child("posts").order_by_child("PostID").equal_to(post_id).get().val()
+        if post_data:
+            post_key = list(post_data.keys())[0] 
+
+            database.child("forum").child("posts").child(post_key).child("status").set(request.POST.get('status'))
+            messages.success(request, "Status Updated successfully!")  
+            return redirect('approvePost') 
+    return HttpResponseBadRequest("Invalid request method")
+
+@login_required
+def delete_reply(request, post_id, reply_key):
+    print(post_id)
+    print(reply_key)
+    post_id = int(post_id)  # Ensure post_id is an integer
+    post_data = database.child("forum").child("posts").order_by_child("PostID").equal_to(post_id).get().val()
+    print("post data")
+    print(post_data)
+    if post_data:
+        post_key = list(post_data.keys())[0] 
+        post_data = database.child("forum").child("posts").child(post_key).child("replies").child(reply_key).remove()
+        print(post_data)
+        messages.success(request, "Reply deleted successfully!")  
+        return redirect('/forum/view/' + str(post_id))
+    return redirect('/forum/view/' + str(post_id))
+
+def example_function():
+    print("Combined version")
