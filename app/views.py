@@ -1224,60 +1224,65 @@ def submit_comment(request, post_id):
 @login_required
 def timetable_view(request):
     # Fetch course data from the database
-    courses_data = database.child("course").get().val()
-    subject_codes = []
+    user_email = get_current_user(request)
+    encoded_email = user_email.replace('.', '-dot-').replace('@', '-at-')
+    user_data = database.child("users").child(encoded_email).get().val()
+    if user_data.get("role") == "student":
+        courses_data = database.child("course").get().val()
+        subject_codes = []
 
-    # Find the latest academic year and semester
-    if courses_data:
-        # Sort academic years in descending order
-        sorted_years = sorted(courses_data.keys(), reverse=True)
-        latest_year = sorted_years[0] if sorted_years else None
+        # Find the latest academic year and semester
+        if courses_data:
+            # Sort academic years in descending order
+            sorted_years = sorted(courses_data.keys(), reverse=True)
+            latest_year = sorted_years[0] if sorted_years else None
 
-        if latest_year:
-            semesters = courses_data[latest_year]
-            # Find the highest semester number
-            latest_semester = max(range(len(semesters)), key=lambda x: x if isinstance(semesters[x], dict) else -1)
+            if latest_year:
+                semesters = courses_data[latest_year]
+                # Find the highest semester number
+                latest_semester = max(range(len(semesters)), key=lambda x: x if isinstance(semesters[x], dict) else -1)
 
-            # Process only the latest year and semester
-            courses_in_semester = semesters[latest_semester]
-            if isinstance(courses_in_semester, dict):
-                for code, course_info in courses_in_semester.items():
-                    lecturers = course_info.get('lecturers', [])
-                    lecturers = [lecturer for lecturer in lecturers if lecturer]
-                    venue_time = course_info.get('venue and time', [])
-                    
-                    if isinstance(venue_time, dict):
-                        venue_time = [vt for vt in venue_time.values() if vt]
-                    else:
-                        venue_time = [vt for vt in venue_time if vt]
+                # Process only the latest year and semester
+                courses_in_semester = semesters[latest_semester]
+                if isinstance(courses_in_semester, dict):
+                    for code, course_info in courses_in_semester.items():
+                        lecturers = course_info.get('lecturers', [])
+                        lecturers = [lecturer for lecturer in lecturers if lecturer]
+                        venue_time = course_info.get('venue and time', [])
+                        
+                        if isinstance(venue_time, dict):
+                            venue_time = [vt for vt in venue_time.values() if vt]
+                        else:
+                            venue_time = [vt for vt in venue_time if vt]
 
-                    lecturer_count = len(lecturers)
-                    subject_codes.append({
-                        'course_code': code,
-                        'course_name': course_info.get('course_name', ''),
-                        'lecturers': lecturers,
-                        'lecturer_count': lecturer_count,
-                        'venue_time': venue_time
-                    })
+                        lecturer_count = len(lecturers)
+                        subject_codes.append({
+                            'course_code': code,
+                            'course_name': course_info.get('course_name', ''),
+                            'lecturers': lecturers,
+                            'lecturer_count': lecturer_count,
+                            'venue_time': venue_time
+                        })
 
-    # Handle timetable generation
-    timetable_html = None
-    if request.method == 'POST':
-        selected_courses = request.POST.getlist('course')
-        if selected_courses:
-            #call function  generate_timetable
-            timetable_html = generate_timetable(selected_courses, subject_codes, request)
-            return render(request, 'Tools/Timetable/index.html', {
-                'courses': subject_codes,
-                'timetable': timetable_html,
-                'selected_courses': selected_courses
-            })
+        # Handle timetable generation
+        timetable_html = None
+        if request.method == 'POST':
+            selected_courses = request.POST.getlist('course')
+            if selected_courses:
+                #call function  generate_timetable
+                timetable_html = generate_timetable(selected_courses, subject_codes, request)
+                return render(request, 'Tools/Timetable/index.html', {
+                    'courses': subject_codes,
+                    'timetable': timetable_html,
+                    'selected_courses': selected_courses
+                })
 
-    return render(request, 'Tools/Timetable/index.html', {
-        'courses': subject_codes,
-        'timetable': None
-    })
-
+        return render(request, 'Tools/Timetable/index.html', {
+            'courses': subject_codes,
+            'timetable': None
+        })
+    else:
+        return redirect('/logout')
 def generate_timetable(selected_courses, subject_codes, request):
     days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
     
@@ -1372,6 +1377,9 @@ def generate_timetable(selected_courses, subject_codes, request):
     return table_html
 
 def download_timetable(request):
+
+    
+
     if request.method == 'POST':
         # Get the HTML content from session
         html_content = request.session.get('timetable_html')
@@ -2759,7 +2767,7 @@ def approvePost(request):
 
         return render(request, "Tools/Forum/approvePost.html", {"post_list": post_list, "search_query": search_query})
     else:
-        return redirect('/',{'error_message': 'You are not authorized to access this page.'})
+        return redirect('/logout',{'error_message': 'You are not authorized to access this page.'})
 
 @login_required
 def delete_post(request, post_id):
