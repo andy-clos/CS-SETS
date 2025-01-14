@@ -47,4 +47,5 @@ urlpatterns = [
     path('flashcard/<int:quiz_id>/', views.flashcard_view, name='flashcard'),
     path('logout', views.logout_view, name='logout'),
     path('delete_user/<str:user_email>/', views.delete_user_view, name='delete_user'),
+    path('delete_user_achievement/<str:achievement_key>/<str:user_email>/', views.delete_user_achievement, name='delete_user_achievement'),
 ]

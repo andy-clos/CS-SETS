@@ -457,6 +457,7 @@ def dashboard_view(request):
 
             # Get the top 5 users
             top_users = user_achievement_counts[:5]
+            all_users_achievements = user_achievement_counts    
 
             # Prepare user achievements for display
             for user in top_users:
@@ -533,6 +534,7 @@ def dashboard_view(request):
                 'mbti': mbti,
                 'character': character,
                 'description': description,
+                'all_users_achievements': all_users_achievements,
                 'top_users': top_users,
                 'user_achievements': user_achievements,
                 'lecturer_latest_courses': lecturer_latest_courses,
@@ -1857,9 +1859,27 @@ def delete_achievement(request, achievement_key):
         database.child("users").child(encoded_email).child("achievements").child(achievement_key).remove()
 
         return JsonResponse({'status': 'success'})
-
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': str(e)})
+    
+@require_POST
+def delete_user_achievement(request, achievement_key, user_email):
+    try:
+        # Delete the achievement
+        database.child("users").child(user_email).child("achievements").child(achievement_key).remove()
+        print("User email:")
+        print(user_email)
+        print("Achievement key:")
+        print(achievement_key)
+
+        return JsonResponse({'status': 'success'})
+    except Exception as e:
+        print("User email:")
+        print(user_email)
+        print("Achievement key:")
+        print(achievement_key)
+        return JsonResponse({'status': 'error', 'message': str(e)})
+
 
 @require_GET
 def view_certificate(request, achievement_key):

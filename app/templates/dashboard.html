@@ -26,7 +26,6 @@
         }
         /* Modal styles */
         .modal {
-            background-color: #f5c6cb;
             display: none;
             position: fixed;
             z-index: 1000;
@@ -40,8 +39,9 @@
             transition: opacity 0.5s ease;
         }
         .modal-content {
-            background-color: #f5c6cb;
-            margin: 15% auto;
+            border-radius: 20px;
+            background-color: #f9c784;
+            margin-left: 12%;
             padding: 20px;
             border: 1px solid #888;
             width: 80%;
@@ -289,10 +289,6 @@
                                                         onclick="openUpdateModal('{{ announcement.id }}', '{{ announcement.course_code }}', '{{ announcement.title|escapejs }}', '{{ announcement.content|escapejs }}')">
                                                     Update
                                                 </button>
-                                                <button class="btn btn-danger" 
-                                                        onclick="deleteAnnouncement('{{ announcement.id }}', '{{ announcement.course_code }}')">
-                                                    Delete
-                                                </button>
                                             </div>
                                             <p class="announcement-author">Posted by: {{ announcement.author }}</p>
                                             <p class="announcement-time">{{ announcement.timestamp }}</p>
@@ -301,10 +297,47 @@
                                     </div>
                                     </div>
                                 </div>
-                            {% endif %}
+                                {% else %}
+                                    <p>No announcements available for this course.</p>
+                                {% endif %}
                         {% endfor %}
                     </div>
                 {% endfor %}
+            </div>
+            <div>
+                <input id="searchbar" style="margin-top: 20px;margin-bottom: 10px;width: 100%;padding: 10px;" type="text" onkeyup="searchUsers()" name="searchUsers" placeholder="Search users by name or email">
+                <table class="table table-striped table-bordered">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Profile Picture</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="userTableBody">
+                        {% for user in all_users_achievements %}
+                            {% if user.achievement_count > 0 %}
+                                <tr class="user-row">
+                                    <td>{{ forloop.counter }}</td>
+                                    <td>
+                                        <img src="{% if user.profile_picture and user.achievement_count > 0 %}data:image/jpeg;base64,{{ user.profile_picture }}{% else %}{% static 'image/user.png' %}{% endif %}" alt="Profile Picture" class="profile-img" style="width: 50px; height: 50px; border-radius: 50%;">
+                                    </td>
+                                    <td>{% if user.achievement_count > 0 %}{{ user.name }}{% else %}-{% endif %}</td>
+                                    <td>{{ user.email }}</td>
+                                    <td>
+                                        <button class="btn btn-info leaderboard-details" 
+                                                {% if user.achievement_count == 0 %}disabled{% endif %} 
+                                                onclick="openLeaderboardDetails('{{ user.name }}', {{ user }}, {{ user_achievements }})">
+                                            View Details
+                                        </button>
+                                    </td>
+                                </tr>
+                            {% endif %}
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
         </main>
         {% endif %}
@@ -359,6 +392,26 @@
                 {% endif %}
 
                 <script>
+                    function searchUsers() {
+                        let input = document.getElementById("searchbar").value.toLowerCase();
+                        let userRows = document.querySelectorAll("#userTableBody .user-row");
+                
+                        // Debugging: Log the input value
+                        console.log("Search input:", input);
+
+                        for (let i = 0; i < userRows.length; i++) {
+                            let nameCell = userRows[i].querySelector("td:nth-child(3)");
+                            let emailCell = userRows[i].querySelector("td:nth-child(4)");
+                
+                            if ((nameCell && !nameCell.innerHTML.toLowerCase().includes(input)) &&
+                                (emailCell && !emailCell.innerHTML.toLowerCase().includes(input))) {
+                                userRows[i].style.display = "none";
+                            } else {
+                                userRows[i].style.display = "";
+                            }
+                        }
+                    }
+                    
                     function submitAnnouncement(event) {
                         event.preventDefault();
                         
@@ -499,7 +552,9 @@
 
 <script>
     document.querySelector('.btn-add-announce').addEventListener('click', function() {
-        var myModal = new bootstrap.Modal(document.getElementById('createAnnouncement'));
+        var myModal = new bootstrap.Modal(document.getElementById('createAnnouncement'), {
+            backdrop: false // Disable the backdrop
+        });
         myModal.show();
     });
 </script>
@@ -757,7 +812,7 @@ function openLeaderboardDetails(userName, user, user_achievements) {
                 .replace('PLACEHOLDER_EMAIL', userEmail); // Replace with encoded user email
             
             // Check if the achievement belongs to the user being viewed
-            if (achievement.email === userEmail) { // Assuming `owner_id` is the field that identifies the user who holds the achievement
+            if (achievement.email === userEmail) {
                 modalBody.innerHTML += `
                     <div class="achievement-item">
                         <h5>${achievement.title}</h5>
@@ -766,6 +821,9 @@ function openLeaderboardDetails(userName, user, user_achievements) {
                             <a href="${url}" target="_blank" style="color: white;">
                                 View Certificate
                             </a>
+                        </button>
+                        <button class="btn-dashboard" style="background-color: red; margin-top: 10px;margin-bottom: 10px;" onclick="delete_user_achievement('${achievementKey}', '${userEmail}')">
+                            Delete
                         </button>
                         <p>Date Posted: ${achievement.date_added}</p>
                     </div>
@@ -841,6 +899,82 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
     });
+</script>
+
+<script>
+    function delete_user_achievement(achievementKey, userEmail) {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "This achievement will be permanently deleted.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, delete it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                fetch(`/delete_user_achievement/${achievementKey}/${userEmail}/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        Swal.fire(
+                            'Deleted!',
+                            'Achievement has been deleted.',
+                            'success'
+                        ).then(() => {
+                            location.reload(); // Reload the page to reflect changes
+                        });
+                    } else {
+                        Swal.fire(
+                            'Error!',
+                            data.message,
+                            'error'
+                        );
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    Swal.fire(
+                        'Error!',
+                        'An unexpected error occurred.',
+                        'error'
+                    );
+                });
+            }
+        });
+    }
+</script>
+
+<script>
+    function searchUsers() {
+        let input = document.getElementById("searchbar").value.toLowerCase();
+        let userRows = document.querySelectorAll("#userTableBody .user-row");
+
+        // Debugging: Log the input value
+        console.log("Search input:", input);
+
+        for (let i = 0; i < userRows.length; i++) {
+            let nameCell = userRows[i].querySelector("td:nth-child(3)");
+            let emailCell = userRows[i].querySelector("td:nth-child(4)");
+
+            // Debugging: Log the cell values
+            console.log("Name:", nameCell ? nameCell.innerHTML.toLowerCase() : "N/A", 
+                        "Email:", emailCell ? emailCell.innerHTML.toLowerCase() : "N/A");
+
+            // Check if either the name or email includes the search input
+            if ((nameCell && nameCell.innerHTML.toLowerCase().includes(input)) ||
+                (emailCell && emailCell.innerHTML.toLowerCase().includes(input))) {
+                userRows[i].style.display = ""; // Show the row if it matches
+            } else {
+                userRows[i].style.display = "none"; // Hide the row if it doesn't match
+            }
+        }
+    }
 </script>
 
 </body>
