@@ -977,7 +977,17 @@ def getSubject():
 
 @login_required
 def users_management_view(request):
-    return render(request, 'users-management.html')
+    users = database.child("users").get().val()
+
+    # Prepare a list of users with formatted email keys
+    formatted_users = {}
+    for user_key, user_info in users.items():
+        formatted_key = user_key.replace('-at-', '@').replace('-dot-', '.')
+        formatted_users[formatted_key] = user_info
+    context = {
+        'users': formatted_users,
+    }
+    return render(request, 'users-management.html', context)
 
 @login_required
 def profile_view(request):
@@ -2723,14 +2733,36 @@ def view_proof(request, achievement_key, encoded_email):
             
 
         except Exception as e:
-            print(f"Error decoding certificate: {str(e)}")  # Debug print
             return HttpResponse(f'Error decoding certificate: {str(e)}', status=500)
 
     except Exception as e:
-        print(f"Error: {str(e)}")  # Debug print
         return HttpResponse(f'Error: {str(e)}', status=500)
 
 DEVIL_AI_API_KEY = '693550-4bddea-2efd1e-e5badd'
 DEVIL_AI_BASE_URL = 'https://api.devil.ai/v1'
 
+@login_required
+def delete_user_view(request, user_email):
+    # Decode the email for Firebase Authentication
+    encoded_email = user_email.replace('@', '-at-').replace('.', '-dot-')
 
+    try:
+        # Use the encoded email to fetch user data
+        user_data = database.child("users").child(encoded_email).get().val()
+        if user_data is None:
+            return JsonResponse({'status': 'error', 'message': 'User not found in database.'}, status=404)
+
+        
+        uid = user_data.get('uid')
+        auth.delete_user(uid)
+        database.child("users").child(encoded_email).remove()
+
+        return JsonResponse({'status': 'success'})
+    except Exception as e:
+        print("Here is the views.py failure")
+        print("user email")
+        print(user_email)
+        print("encoded email")
+
+        # Remove the user from
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=400)

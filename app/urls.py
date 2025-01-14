@@ -46,4 +46,5 @@ urlpatterns = [
     path('create_quizz/', views.create_quizz, name='create_quizz'),
     path('flashcard/<int:quiz_id>/', views.flashcard_view, name='flashcard'),
     path('logout', views.logout_view, name='logout'),
+    path('delete_user/<str:user_email>/', views.delete_user_view, name='delete_user'),
 ]
