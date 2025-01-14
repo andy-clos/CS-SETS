@@ -52,5 +52,6 @@ urlpatterns = [
     path('change_status/<str:post_id>/', views.change_status, name='change_status'),
     path('delete_post/<str:post_id>/', views.delete_post, name='delete_post'),
     path('delete_reply/<str:post_id>/<str:reply_key>/', views.delete_reply, name='delete_reply'),
+    path('delete_flashcard/<str:quiz_id>/', views.delete_flashcard, name='delete_flashcard'),
 ]
 

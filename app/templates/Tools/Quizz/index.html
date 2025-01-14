@@ -24,6 +24,18 @@
       {% include 'navbar.html' %} {% include 'header.html' %}
 
       <main>
+        {% if messages %}
+        <!-- SweetAlert JS -->
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@9"></script>
+        <script>
+          // Show SweetAlert success message\
+          Swal.fire({
+            title: "{{ message }}",
+            text: "Deleted successfully.",
+            icon: "success",
+          });
+        </script>
+        {% endif %}
         <section class="content">
           <h2 class="section-title">Study Tool</h2>
           <div class="options-container">
