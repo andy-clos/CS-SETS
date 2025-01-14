@@ -1213,7 +1213,7 @@ def submit_comment(request, post_id):
                 messages.success(request, "Comment added successfully!")
                 
                 # Redirect to the forum page
-                return redirect('forum')  
+                return redirect('/forum/view/' + str(post_id))
             else:
                 return render({'status': 'error', 'message': 'Post not found.'}, status=404)
 
@@ -1277,7 +1277,7 @@ def timetable_view(request):
         'courses': subject_codes,
         'timetable': None
     })
-@login_required
+
 def generate_timetable(selected_courses, subject_codes, request):
     days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
     
@@ -1370,7 +1370,7 @@ def generate_timetable(selected_courses, subject_codes, request):
     request.session['timetable_html'] = table_html
     
     return table_html
-@login_required
+
 def download_timetable(request):
     if request.method == 'POST':
         # Get the HTML content from session
