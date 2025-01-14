@@ -398,7 +398,7 @@ def dashboard_view(request):
                 if is_course_lecturer:
                     lecturer_course_data = {
                         'course_code': course_code,
-                        'course_name': course_info.get('course_name', '')
+                        'course_name': course_info.get('course_name', ''),
                     }
                     lecturer_latest_courses.append(lecturer_course_data)
                 

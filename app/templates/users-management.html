@@ -56,7 +56,6 @@
                                                 <td>{{ user.role }}</td>
                                                 <td>
                                                     <div class="btn-group" role="group">
-                                                        <button class="btn btn-primary" style="margin-right: 10px;" onclick="populateUpdateForm('{{ user.name }}', '{{ user.role }}', '{{ user_key }}')">View</button>
                                                         <button class="btn btn-danger" onclick="confirmDelete('{{ user_key }}')">Delete</button>
                                                     </div>
                                                 </td>
@@ -70,40 +69,6 @@
                             </div>
             </section>
         </main>
-                <!-- Update User Modal -->
-                <div class="modal fade" id="updateUserModal" tabindex="-1" aria-labelledby="updateUserModalLabel" aria-hidden="true">
-                    <div class="modal-dialog">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h5 class="modal-title" id="updateUserModalLabel">User Details</h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                            </div>
-                            <div class="modal-body">
-                                <form id="updateUserForm">
-                                    {% csrf_token %}
-                                    <input type="hidden" name="user_email" id="user_email">
-                                    <div class="mb-3">
-                                        <label for="user_name" class="form-label">Name</label>
-                                        <input type="text" class="form-control" id="user_name" name="user_name" required disabled>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label for="user_role" class="form-label">Email</label>
-                                        <input type="text" class="form-control" id="user_email" name="user_email" required disabled>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label for="user_role" class="form-label">Role</label>
-                                        <select class="form-control" id="user_role" name="user_role" required disabled>
-                                            <option value="admin" {% if user.role == 'admin' %}selected{% endif %}>Admin</option>
-                                            <option value="lecturer" {% if user.role == 'lecturer' %}selected{% endif %}>Lecturer</option>
-                                            <option value="student" {% if user.role == 'student' %}selected{% endif %}>Student</option>
-                                        </select>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
         {% include 'footer.html' %} 
     </div>
     <script src="{% static 'js/backend.js' %}"></script>
@@ -124,17 +89,6 @@
             }
         }
     }
-
-
-    function populateUpdateForm(name, role, email) {
-        document.getElementById('user_name').value = name;
-        document.getElementById('user_role').value = role;
-        document.getElementById('user_email').value = email.replace('-at-', '@').replace('-dot-', '.');
-        // Show the modal
-        var myModal = new bootstrap.Modal(document.getElementById('updateUserModal'));
-        myModal.show();
-    }
-
     
     function confirmDelete(userEmail) {
         Swal.fire({
