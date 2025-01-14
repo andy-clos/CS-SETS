@@ -27,12 +27,14 @@ header {
   margin-right: 20px;
 }
 
-.profile-icon {
-  font-size: 32px;
-  color: #888;
+.user-profile-picture {
+  width: 50px; /* Set the width to a smaller size */
+  height: 50px; /* Set the height to a smaller size */
+  border-radius: 50%; /* Makes the image circular */
+  object-fit: cover; /* Ensures the image covers the area without distortion */
+  border: 2px solid #ddd; /* Optional: adds a border around the image */
   margin-right: 10px;
 }
-
 .user-info .username {
   font-weight: bold;
 }
@@ -49,7 +51,6 @@ header {
   border: 1px solid #ccc;
   border-radius: 4px;
   font-size: 14px;
-  width: 710px;
 }
 
 button {

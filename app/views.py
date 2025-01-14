@@ -951,17 +951,18 @@ def delete_course_view(request, semester_year, course_code):
         'status': 'error',
         'message': 'Invalid request method'
     }, status=400)
-
+@login_required
 def tools_view(request):
     return render(request, 'Tools/tools.html')
 
 @login_required
 def appointments_view(request):
     return render(request, 'appointments.html')
-
 @login_required
 def forum_view(request):
     user_email = get_current_user(request)
+    encoded_email = user_email.replace('.', '-dot-').replace('@', '-at-')
+    user_data = database.child("users").child(encoded_email).get().val()    
     search_query = request.GET.get('search', '')  # Get the search query from the URL
     posts = getPosts()  # Call the getPosts function to retrieve posts
 
@@ -969,7 +970,7 @@ def forum_view(request):
     if search_query:
         posts = [post for post in posts if search_query.lower() in post['title'].lower() or search_query.lower() in post['subject'].lower()]
 
-    return render(request, "Tools/Forum/forum.html", {"user_email": user_email, "posts": posts, "search_query": search_query})
+    return render(request, "Tools/Forum/forum.html", { "posts": posts, "search_query": search_query, "user_data": user_data})
 
 def getSubject():
     subject = database.child("forum").child("posts").get()
@@ -1069,8 +1070,17 @@ def verify_token(request):
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=401)
     return JsonResponse({'error': 'Invalid request method'}, status=400)
-
+@login_required
 def createpost_view(request):
+    user_email = request.session.get('user_email')
+    encoded_email = user_email.replace('.', '-dot-').replace('@', '-at-')
+    course_enrolled = database.child("users").child(encoded_email).child("courses").get()
+    if course_enrolled.val():
+        course_enrolled = [course.val() for course in course_enrolled.each()]   
+        print(course_enrolled)
+    else:
+        course_enrolled = []
+
     if request.method == 'POST':
         print(request.POST)
         try:
@@ -1109,6 +1119,7 @@ def createpost_view(request):
                 "tags": tags,
                 "author": author_email,
                 "timestamp": formatted_date,
+                "approved": False
             }
             
             # Save to Firebase
@@ -1116,31 +1127,31 @@ def createpost_view(request):
             
             # Set success message
             success_message = "Post created successfully!"
-            return render(request, 'Tools/Forum/createPost.html', {'success_message': success_message})
+            return render(request, 'Tools/Forum/createPost.html', {'success_message': success_message, 'course_enrolled': course_enrolled})
         except Exception as e:
             print(f"Error creating post: {e}")
-            return render(request, 'Tools/Forum/createPost.html', {'error': str(e)})
+            return render(request, 'Tools/Forum/createPost.html', {'error': str(e), 'course_enrolled': course_enrolled})
             
-    return render(request, 'Tools/Forum/createPost.html')
+    return render(request, 'Tools/Forum/createPost.html',{'course_enrolled':course_enrolled})
 
 def getPosts():
     posts = database.child("forum").child("posts").get()
-    #check if post exist
+    # Check if posts exist
     if posts.val():
         post_list = []
         for post in posts.each():
             post_data = post.val()
-            # Count replies if 'replies' key exists
-            replies = post_data.get("replies", {})
-            reply_count = len(replies) if isinstance(replies, dict) else 0
-            # Add reply count to the post data
-            post_data['reply_count'] = reply_count
-            post_list.append(post_data)
-            print(post_list)
+            # Only include posts that are approved
+            if post_data.get("approved", False):  # Check for boolean True
+                replies = post_data.get("replies", {})
+                reply_count = len(replies) if isinstance(replies, dict) else 0
+                # Add reply count to the post data
+                post_data['reply_count'] = reply_count
+                post_list.append(post_data)
     else:
-        post_list=[]  
+        post_list = []  
     return post_list  
-
+@login_required
 def viewPost(request, post_id):
     try:
         posts = database.child("forum").child("posts").get()
@@ -1155,7 +1166,7 @@ def viewPost(request, post_id):
     except Exception as e:
         print(f"Error fetching post: {e}")
         return render(request, 'Tools/Forum/viewPost.html', {'error': 'An error occurred'})
-
+@login_required
 def submit_comment(request, post_id):
     if request.method == 'POST':
         try:
@@ -1197,7 +1208,7 @@ def submit_comment(request, post_id):
             return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
 
     return JsonResponse({'status': 'error', 'message': 'Invalid request method.'}, status=405)
-
+@login_required
 def timetable_view(request):
     # Fetch course data from the database
     courses_data = database.child("course").get().val()
@@ -1253,7 +1264,7 @@ def timetable_view(request):
         'courses': subject_codes,
         'timetable': None
     })
-
+@login_required
 def generate_timetable(selected_courses, subject_codes, request):
     days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
     
@@ -1348,7 +1359,7 @@ def generate_timetable(selected_courses, subject_codes, request):
     request.session['timetable_html'] = table_html
     
     return table_html
-
+@login_required
 def download_timetable(request):
     if request.method == 'POST':
         # Get the HTML content from session
@@ -2145,12 +2156,12 @@ def delete_announcement(request):
 def resume_view(request):
     user_email = get_current_user(request)
     encoded_email = user_email.replace('.', '-dot-').replace('@', '-at-')
-    print("resume view")
-    print(request.POST)
     user_data = database.child("users").child(encoded_email).get().val()
     resume_data = database.child("resume").child(encoded_email).get().val()
+
     if resume_data is None:
         resume_data = {}  # Initialize as an empty dictionary if no data is found
+
     if request.method == 'POST':
         print("resume view post")
         resume_data = extract_data(request, user_email, user_data,resume_data)
