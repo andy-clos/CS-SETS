@@ -744,7 +744,7 @@ function openLeaderboardDetails(userName, user, user_achievements) {
         modalBody.innerHTML = `<p>No achievements available for ${userName}.</p>`;
     } else {
         console.log("Achievements data:", achievementsArray); // Debugging line
-        achievementsArray.forEach((achievement, index) => {
+        achievementsArray.forEach((achievement) => {
             const userEmail = user.email.replace(/\./g, '-dot-').replace(/@/g, '-at-'); // Encode email for URL
             const achievementKey = achievement.achievement_key; // Escape for JavaScript
 
@@ -775,8 +775,10 @@ function openLeaderboardDetails(userName, user, user_achievements) {
         });
     }
 
-    // Show the modal
-    const modal = new bootstrap.Modal(document.getElementById('leaderboardDetailsModal'));
+    // Show the modal without backdrop
+    const modal = new bootstrap.Modal(document.getElementById('leaderboardDetailsModal'), {
+        backdrop: false // Disable the backdrop
+    });
     modal.show();
 }
 
