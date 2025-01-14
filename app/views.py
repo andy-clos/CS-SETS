@@ -302,6 +302,7 @@ def dashboard_view(request):
                 title = data.get('add-title')
                 content = data.get('add-content')
                 current_user = request.session.get('user_name')
+                author_email = request.session.get('user_email')
                 
                 # Get latest academic year and semester
                 courses_data = database.child("course").get().val()
@@ -311,6 +312,7 @@ def dashboard_view(request):
                 
                 # Create announcement data
                 announcement_data = {
+                    'author_email': author_email,
                     'title': title,
                     'content': content,
                     'author': current_user,
@@ -413,7 +415,8 @@ def dashboard_view(request):
                                 'title': ann_data.get('title', ''),
                                 'content': content,  # Use truncated or full content
                                 'author': ann_data.get('author', ''),
-                                'timestamp': ann_data.get('timestamp', '')
+                                'timestamp': ann_data.get('timestamp', ''),
+                                'author_email': ann_data.get('author_email', 'no email available')
                             }
                             announcements.append(announcement)
 

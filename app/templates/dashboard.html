@@ -197,7 +197,7 @@
                                         <div class="display-ann-details">
                                             <div class="display-ann-details-header">
                                                 <div style="margin-bottom: 20px;">
-                                                    {% if request.session.user_name == announcement.author %}
+                                                    {% if request.session.user_email == announcement.author_email %}
                                                         <button class="btn btn-primary" 
                                                                 onclick="openUpdateModal('{{ announcement.id }}', '{{ announcement.course_code }}', '{{ announcement.title|escapejs }}', '{{ announcement.content|escapejs }}')">
                                                             Update
@@ -215,6 +215,8 @@
                                         </div>
                                         </div>
                                     </div>
+                                {% else %}
+                                    <p>No announcements available for this course.</p>
                                 {% endif %}
                             {% endfor %}
                         </div>
@@ -324,11 +326,6 @@
                         const title = document.getElementById('add-title').value;
                         const content = document.getElementById('add-content').value;
                         const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-
-                        console.log('Submitting announcement:');
-                        console.log('Course:', selectedCourse);
-                        console.log('Title:', title);
-                        console.log('Content:', content);
 
                         fetch('{% url "dashboard" %}', {
                             method: 'POST',
