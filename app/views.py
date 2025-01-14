@@ -491,6 +491,33 @@ def dashboard_view(request):
             # Get the corresponding character and description
             character, description = mbti_info.get(mbti, ('Unknown', 'No description available.'))
 
+            # Retrieve alert data for the current user
+            current_user_email = request.session.get('user_email').replace('.', '-dot-').replace('@', '-at-')
+            print(f"Querying alert data at: users/{current_user_email}/courses")
+            courses_data = database.child("users").child(current_user_email).child("courses").get().val()
+
+            feedback_count = 0
+            feedback_list = []
+
+            if courses_data:
+                for course_id, course_info in courses_data.items():
+                    alerts = course_info.get('alerts')  # Access the alerts for each course
+                    if alerts:
+                        for alert_id, alert_data in alerts.items():
+                            feedback_count += 1
+                            feedback_list.append({
+                                'course_code': course_info.get('course_code'),  # Adjust this if you have a specific course code
+                                'feedback': alert_data.get('feedback'),  # Get the feedback from the alert
+                                'current_progress': alert_data.get('current_progress'),  # Optional: include current progress
+                                'recommended_actions': alert_data.get('recommended_actions')  # Optional: include recommended actions
+                            })
+            else:
+                print("No courses found for the current user.")  # Debug print if no data
+
+            print("Number of alerts found:", feedback_count)
+            print("Alert details:", feedback_list)
+
+            # Pass feedback_count and feedback_list to the context
             context = {
                 'mbti': mbti,
                 'character': character,
@@ -500,10 +527,12 @@ def dashboard_view(request):
                 'lecturer_latest_courses': lecturer_latest_courses,
                 'latest_courses': latest_courses,
                 'announcements': announcements,
-                'latest_announcements': latest_announcements,  # Add this for carousel
+                'latest_announcements': latest_announcements,
                 'current_year': current_year,
                 'current_semester': current_semester,
                 'sem_year': f"sem{current_semester}year{current_year}",
+                'feedback_count': feedback_count,
+                'feedback_list': feedback_list,
             }
             return render(request, 'dashboard.html', context)
             

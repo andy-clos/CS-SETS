@@ -140,7 +140,6 @@
 }
 
 .leaderboard-header {
-    display: flex;
     align-items: flex-start;
     gap: 15px;
 }
@@ -833,4 +832,43 @@
     margin: 10px;
     text-align: right;
     color: black;
+}
+
+.redirect-profile{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    font-size: 1.5rem;
+}
+
+.redirect-profile-link{
+    padding: 15px 30px;
+    font-size: 1.5rem;
+}
+
+.redirect-profile-container{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    row-gap: 20px;
+}
+
+.feedback-code{
+    font-weight: bold;
+    text-decoration: underline;
+}
+
+.subject{
+    width: 100%;
+    color:white; 
+    text-align: center;
+}
+
+.scrollable-feedback {
+    max-height: 400px; /* Set a fixed height */
+    overflow-y: auto;  /* Enable vertical scrolling */
+    overflow-x: hidden; /* Prevent horizontal scrolling */
 }

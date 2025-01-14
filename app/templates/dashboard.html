@@ -104,41 +104,69 @@
                             <div class="academic-content">
                                 <!-- CGPA Section -->
                                 <div class="academic-cgpa-section">
-                                    <p class="personality-title">Your Personality is {{ mbti }}</p>
-                                    <div class="image-container">
-                                        <img src="/static/image/{{ mbti|lower }}.png" alt="Personal Management" class="academic-image" style="max-width: 80%; height: auto;">
-                                    </div>
-                                    <div class="mbti-info">
-                                        <b><p>{{ character }}</p></b>
-                                        <p>{{ description }}</p>
-                                    </div>
+                                    {% if mbti %}
+                                        <p class="personality-title">Your Personality is {{ mbti }}</p>
+                                        <div class="image-container">
+                                            <img src="/static/image/{{ mbti|lower }}.png" alt="Personal Management" class="academic-image" style="max-width: 80%; height: auto;">
+                                        </div>
+                                        <div class="mbti-info">
+                                            <b><p>{{ character }}</p></b>
+                                            <p>{{ description }}</p>
+                                        </div>
+                                    {% else %}
+                                        <div class="redirect-profile-container">
+                                            <p class="personality-title">No personality test taken</p>
+                                            <a href="{% url 'profile' %}" class="btn-dashboard">Go to Profile</a>
+                                        </div>
+                                    {% endif %}
                                 </div>
                 
                                 <!-- Feedback Section -->
                                 <div class="academic-feedback-section">
-                                    <ul class="feedback-list">
-                                        <li class="feedback-item">
-                                            <p class="feedback-text subject">Subject that has risk to fail: 0</p>
-                                        </li>
-                                        <li class="feedback-item">
-                                            <button class="btn-dashboard" style="margin-left: auto;margin-right: auto;">View details</button>
-                                        </li>
-                                        <li class="feedback-item feedback">
-                                            <span class="feedback-icon positive-icon">&#128077;</span>
-                                            <p class="feedback-text">Maintain your academic result</p>
-                                        </li>
-                                        <li class="feedback-item feedback">
-                                            <span class="feedback-icon neutral-icon">&#128200;</span>
-                                            <p class="feedback-text">You still have the chance to improve</p>
-                                        </li>
-                                        <li class="feedback-item feedback">
-                                            <span class="feedback-icon warning-icon">&#10060;</span>
-                                            <p class="feedback-text">You might fail if next CPT123 test is below 50 marks</p>
-                                        </li>
-                                        <li class="feedback-item feedback">
-                                            <span class="feedback-icon encouragement-icon">&#127800;</span>
-                                            <p class="feedback-text">Work harder to achieve more</p>
-                                        </li>
+                                    <ul class="feedback-list scrollable-feedback">
+                                        {% if feedback_count > 0 %}
+                                            <li class="feedback-item">
+                                                <p class="feedback-text btn-dashboard subject">Courses with feedback: {{ feedback_count }}</p>
+                                            </li>
+                                            {% for feedback in feedback_list %}
+                                                <li class="feedback-item feedback">
+                                                    <span class="feedback-icon positive-icon">⭐</span>
+                                                    <p class="feedback-code">{{ feedback.course_code }}</p>
+                                                </li>
+                                                <li class="feedback-item feedback">
+                                                    <p class="feedback-text">{{ feedback.feedback }}</p>
+                                                </li>
+                                                <p class="progress-text">Current progress: {{ feedback.current_progress|floatformat:2 }}</p>
+                                                <li class="feedback-item">
+                                                    <div class="progress-bar-container">
+                                                        <div class="progress-bar" style="width: {{ feedback.current_progress }}%;"></div>
+                                                    </div>
+                                                </li>
+                                            {% endfor %}
+                                        {% else %}
+                                            <li class="feedback-item">
+                                                <p class="feedback-text btn-dashboard subject">No feedback available for your courses.</p>
+                                            </li>
+                                            <li class="feedback-item">
+                                                <p class="feedback-text">Subject that has risk to fail: 0</p>
+                                            </li>
+                                            <li class="feedback-item feedback">
+                                                <span class="feedback-icon positive-icon">&#128077;</span>
+                                                <p class="feedback-text">Today a reader. Tomorrow a leader.</p>
+                                            </li>
+                                            <li class="feedback-item feedback">
+                                                <span class="feedback-icon neutral-icon">&#128200;</span>
+                                                <p class="feedback-text">The best way to predict your future is to create it.</p>
+                                            </li>
+                                            <li class="feedback-item feedback">
+                                                <span class="feedback-icon warning-icon">&#10060;</span>
+                                                <p class="feedback-text">Self-belief and hard work will always earn you success.</p>
+                                            </li>
+                                            <li class="feedback-item feedback">
+                                                <span class="feedback-icon encouragement-icon">&#127800;</span>
+                                                <p class="feedback-text">The more that you read, the more things you will know, the more that you learn, the more places you'll go.</p>
+                                            </li>
+                                        {% endif %}
                                     </ul>
                                 </div>
                             </div>
@@ -404,31 +432,33 @@
     </div>
 </div>
 
-{% comment %} {% if request.session.user_role == 'student' %}
+{% if request.session.user_role == 'student' %}
 <script>
-    const progressBarContainer = document.querySelector('.progress-bar-container');
-
     function createGlitterEffect() {
-        const glitter = document.createElement('div');
-        glitter.classList.add('glitter');
-        
-        const maxWidth = progressBarContainer.offsetWidth;
-        const randomPositionX = Math.random() * maxWidth;
-        const randomDelay = Math.random() * 2;
+        const progressBarContainers = document.querySelectorAll('.progress-bar-container');
 
-        glitter.style.left = `${randomPositionX}px`;
-        glitter.style.animationDelay = `-${randomDelay}s`;
+        progressBarContainers.forEach(progressBarContainer => {
+            const glitter = document.createElement('div');
+            glitter.classList.add('glitter');
+            
+            const maxWidth = progressBarContainer.offsetWidth;
+            const randomPositionX = Math.random() * maxWidth;
+            const randomDelay = Math.random() * 2;
 
-        progressBarContainer.appendChild(glitter);
+            glitter.style.left = `${randomPositionX}px`;
+            glitter.style.animationDelay = `-${randomDelay}s`;
 
-        setTimeout(() => {
-            glitter.remove();
-        }, 2000); 
+            progressBarContainer.appendChild(glitter);
+
+            setTimeout(() => {
+                glitter.remove();
+            }, 2000); 
+        });
     }
 
     setInterval(createGlitterEffect, 100);
 </script>
-{% endif %} {% endcomment %}
+{% endif %}
 
 <script>
     document.querySelector('.btn-add-announce').addEventListener('click', function() {
