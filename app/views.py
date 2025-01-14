@@ -2567,7 +2567,10 @@ def get_coursework_breakdown(student_email, course_data):
         return {}
 
 def flashcard_view(request,quiz_id):
-    print(quiz_id)
+  
+    user_email = get_current_user(request)
+    encoded_email = user_email.replace('.', '-dot-').replace('@', '-at-')
+    user_data = database.child("users").child(encoded_email).get().val()    
     try:
         # Fetch the quiz details from the database using the quiz_id
         quiz_details = database.child("quizzes").child('flashcard').get()
@@ -2576,12 +2579,26 @@ def flashcard_view(request,quiz_id):
             # Find the post with the matching PostID
             quiz = next((p for p in quiz_list if p.get("QuizID") == quiz_id), None)
             if quiz:
-                return render(request, 'Tools/Quizz/flashcard.html', {'quiz': quiz})
+                return render(request, 'Tools/Quizz/flashcard.html', {'quiz': quiz,'user_data':user_data})
         return render(request, 'Tools/Quizz/flashcard.html', {'error': 'Quiz not found'})
 
     except Exception as e:
         print(f"Error fetching quiz details: {str(e)}")
         return render(request, 'Tools/Quizz/flashcard.html', {'error_message': 'An error occurred while fetching quiz details.'})
+
+def delete_flashcard(request, quiz_id):
+  # Convert post_id to an integer
+    quiz_id = int(quiz_id)  # Ensure post_id is an integer
+            
+    quiz_data = database.child("quizzes").child('flashcard').order_by_child("QuizID").equal_to(quiz_id).get().val()
+    print(quiz_data)
+    if quiz_data:
+        quiz_key = list(quiz_data.keys())[0] 
+        print(quiz_id)
+        database.child("quizzes").child('flashcard').child(quiz_key).remove()
+        messages.success(request, "Flashcard deleted successfully!")  
+        return redirect('/quizzMenu')
+    return HttpResponseBadRequest("Invalid request method")
 
 
 def quizz_menu(request):
@@ -2830,8 +2847,7 @@ def change_status(request, post_id):
 
 @login_required
 def delete_reply(request, post_id, reply_key):
-    print(post_id)
-    print(reply_key)
+
     post_id = int(post_id)  # Ensure post_id is an integer
     post_data = database.child("forum").child("posts").order_by_child("PostID").equal_to(post_id).get().val()
     print("post data")
@@ -2846,3 +2862,4 @@ def delete_reply(request, post_id, reply_key):
 
 def example_function():
     print("Combined version")
+
