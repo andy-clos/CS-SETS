@@ -100,6 +100,7 @@ def login_view(request):
                     request.session.update(session_data)
                     request.session['welcome_message'] = f"Welcome back, {user_data.get('name', email)}!"
                     request.session.modified = True
+                    request.session['login_success'] = True
                     
                     return JsonResponse({
                         'status': 'success',
@@ -174,7 +175,6 @@ def logout_view(request):
         return response
         
     except Exception as e:
-        print(f"Logout error: {str(e)}")  # Add debug print
         messages.error(request, "Error during logout. Please try again.")
         return redirect('login')
 
@@ -293,6 +293,14 @@ def register_view(request):
 # Dashboard page
 @login_required
 def dashboard_view(request):
+
+        # Check if the user has just logged in
+    if request.session.get('login_success'):
+        welcome_message = "Welcome back! You have successfully logged in."
+        request.session['login_success'] = None  # Clear the session variable after displaying the message
+    else:
+        welcome_message = None
+
     try:
         # Handle POST request for creating announcement
         if request.method == 'POST':
@@ -365,7 +373,6 @@ def dashboard_view(request):
                 user_email = request.session.get('user_email')
                 encoded_email = user_email.replace('.', '-dot-').replace('@', '-at-')
                 user_courses = []
-                
                 # Get student's enrolled courses
                 enrolled_courses = database.child("users").child(encoded_email).child("courses").get().val()
                 if enrolled_courses:
@@ -515,13 +522,14 @@ def dashboard_view(request):
                                 'recommended_actions': alert_data.get('recommended_actions')  # Optional: include recommended actions
                             })
             else:
-                print("No courses found for the current user.")  # Debug print if no data
+                print("No courses found for the current user.")
 
             print("Number of alerts found:", feedback_count)
             print("Alert details:", feedback_list)
 
             # Pass feedback_count and feedback_list to the context
             context = {
+                'welcome_message': welcome_message,
                 'mbti': mbti,
                 'character': character,
                 'description': description,
@@ -537,6 +545,12 @@ def dashboard_view(request):
                 'feedback_count': feedback_count,
                 'feedback_list': feedback_list,
             }
+
+            # Check if the user has just logged in
+            if request.session.get('login_success'):
+                # Clear the session variable after displaying the message
+                request.session['login_success'] = None
+
             return render(request, 'dashboard.html', context)
             
     except Exception as e:
@@ -753,8 +767,6 @@ def academic_view(request):
         'latest_semester': latest_semester
     }
 
-    print("this is student courses", student_courses)
-
     return render(request, 'academic.html', context)
 
 @login_required
@@ -856,9 +868,6 @@ def course_detail_view(request, semester_year, course_code):
                                             'courseworks': processed_courseworks,
                                             'announcements': announcements  # Add announcements to the course data
                                         })
-
-                                        print(announcements)
-                                        print('this is the announcements')
 
         # Process enrolled students
         users = database.child("users").get().val()
@@ -1095,7 +1104,6 @@ def createpost_view(request):
         course_enrolled = []
 
     if request.method == 'POST':
-        print(request.POST)
         try:
             # Get form data
             subject = request.POST.get('subject')
@@ -1107,7 +1115,6 @@ def createpost_view(request):
             # Get current timestamp
             current_timestamp =int(datetime.datetime.now(pytz.UTC).timestamp() * 1000)
             formatted_date = datetime.datetime.fromtimestamp(current_timestamp / 1000).strftime('%d/%m/%Y %H:%M:%S')
-            print("Current Timestamp:", current_timestamp)
 
             # Retrieve all posts
             all_posts = database.child("forum").get()
@@ -1142,7 +1149,6 @@ def createpost_view(request):
             success_message = "Post created successfully!"
             return render(request, 'Tools/Forum/createPost.html', {'success_message': success_message, 'course_enrolled': course_enrolled})
         except Exception as e:
-            print(f"Error creating post: {e}")
             return render(request, 'Tools/Forum/createPost.html', {'error': str(e), 'course_enrolled': course_enrolled})
             
     return render(request, 'Tools/Forum/createPost.html',{'course_enrolled':course_enrolled})
@@ -1208,8 +1214,6 @@ def submit_comment(request, post_id):
                 new_count = current_count + 1
                 post_data.update({"comments_count": new_count})
 
-                  # Add a success message
-                print("Adding success message") 
                 messages.success(request, "Comment added successfully!")
                 
                 # Redirect to the forum page
@@ -1304,8 +1308,6 @@ def generate_timetable(selected_courses, subject_codes, request):
     
     #sort in ascending order
     time_slots = sorted(list(time_slots))
-
-    print(time_slots)
     
     #defines a dictionary for loop the days and slot 
     timetable = {day: {slot: [] for slot in time_slots} for day in days}
@@ -1525,8 +1527,6 @@ def check_student_course(request):
 def update_marks(request, semester_year, course_code, student_email):
     if request.method == 'POST':
         try:
-            # Debug prints
-            print("POST data:", request.POST)
             
             # Parse academic year and semester
             academic_year = semester_year[semester_year.index("year") + 4:]
@@ -1537,7 +1537,6 @@ def update_marks(request, semester_year, course_code, student_email):
             
             # Get course data to get coursework types
             course_data = database.child("course").child(academic_year).child(semester).child(course_code).get().val()
-            print("Course data:", course_data)
             
             if not course_data or 'courseworks' not in course_data:
                 raise ValueError("Course or coursework data not found")
@@ -1556,7 +1555,6 @@ def update_marks(request, semester_year, course_code, student_email):
             
             # Get the marks from POST data using the actual coursework types
             marks = {}
-            print("Processing courseworks:", course_data['courseworks'])
             
             for coursework in course_data['courseworks'].values():
                 coursework_type = coursework['type']
@@ -1618,9 +1616,6 @@ def unenroll_student(request):
         if user_courses:
             # Find and delete the specific course
             for course_key, course_info in user_courses.items():
-                # Print debug information
-                print(f"Checking course: {course_info}")
-                print(f"Looking for: code={course_code}, year={academic_year}, sem={semester}")
                 
                 # Match exact values from the database structure
                 if (course_info.get('course_code') == course_code and 
@@ -1838,16 +1833,13 @@ def add_achievement(request):
 
             # Update directly under the user's node with the unique ID
             database.child("users").child(encoded_email).child("achievements").child(achievement_id).set(achievement_data)
-            
-            print(f"Achievement added for user: {encoded_email} with ID: {achievement_id}")  # Debug print
+
             return JsonResponse({'status': 'success'})
 
         except Exception as e:
-            print(f"Database error: {str(e)}")  # Debug print
             return JsonResponse({'status': 'error', 'message': f'Database error: {str(e)}'})
 
     except Exception as e:
-        print(f"General error: {str(e)}")  # Debug print
         return JsonResponse({'status': 'error', 'message': str(e)})
 
 @require_POST
@@ -1937,11 +1929,9 @@ def view_certificate(request, achievement_key):
             return response
 
         except Exception as e:
-            print(f"Error decoding certificate: {str(e)}")  # Debug print
             return HttpResponse(f'Error decoding certificate: {str(e)}', status=500)
 
     except Exception as e:
-        print(f"Error: {str(e)}")  # Debug print
         return HttpResponse(f'Error: {str(e)}', status=500)
 
 DEVIL_AI_API_KEY = '693550-4bddea-2efd1e-e5badd'
@@ -2022,14 +2012,12 @@ def check_test_result(request):
                 database.child("users").child(encoded_email).update({
                     'personality': personality_data
                 })
-                print(f"Saved personality data for user {encoded_email}: {personality_data}")  # Debug log
 
                 return JsonResponse({
                     'status': 'success',
                     'message': 'Personality test results saved successfully'
                 })
             except Exception as e:
-                print(f"Firebase error: {str(e)}")
                 return JsonResponse({
                     'status': 'error',
                     'message': 'Failed to save results to database'
@@ -2066,7 +2054,6 @@ def get_mbti_questions(request):
         })
 
     except Exception as e:
-        print(f"Error fetching questions: {str(e)}")  # Debug print
         return JsonResponse({
             'status': 'error',
             'message': str(e)
@@ -2085,13 +2072,7 @@ def update_announcement(request):
             year = data.get('year').replace('/', '-')  # Convert 2025/2026 to 2025-2026
             semester = data.get('semester')
             current_user = request.session.get('user_name')
-            
-            print(f"Updating announcement:")
-            print(f"ID: {announcement_id}")
-            print(f"Course: {course_code}")
-            print(f"Year: {year}")
-            print(f"Semester: {semester}")
-            
+
             # Update the announcement
             database.child("course")\
                    .child(year)\
@@ -2111,7 +2092,6 @@ def update_announcement(request):
             })
             
         except Exception as e:
-            print(f"Error updating announcement: {e}")
             import traceback
             traceback.print_exc()
             return JsonResponse({
@@ -2152,7 +2132,6 @@ def delete_announcement(request):
             })
                 
         except Exception as e:
-            print(f"Error in delete_announcement: {e}")
             import traceback
             traceback.print_exc()
             return JsonResponse({
@@ -2445,9 +2424,6 @@ def send_student_alert(request):
     try:
         data = json.loads(request.body)
         
-        # Debug print
-        print("Received data:", data)
-        
         # Create alert data structure
         alert_data = {
             'timestamp': datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
@@ -2468,9 +2444,6 @@ def send_student_alert(request):
         
         if not semester or not academic_year:
             raise Exception(f'Invalid semester_year format: {data["semester_year"]}')
-            
-        print(f"Parsed semester: {semester}, academic_year: {academic_year}")  # Debug print
-        
         # Get all courses for this student
         courses = database.child("users").child(student_ref).child("courses").get().val()
         
@@ -2479,7 +2452,6 @@ def send_student_alert(request):
             
         # Find the specific course and store alert
         for course_id, course_data in courses.items():
-            print(f"Checking course: {course_data}")  # Debug print
             
             if (course_data.get('course_code') == data['course_code'] and 
                 course_data.get('academic_year') == academic_year and 
@@ -2496,7 +2468,6 @@ def send_student_alert(request):
         raise Exception(f'Course {data["course_code"]} not found for student in semester {semester} {academic_year}')
 
     except Exception as e:
-        print(f"Error sending alert: {str(e)}")
         return JsonResponse({
             'status': 'error',
             'message': str(e)
@@ -2564,8 +2535,7 @@ def get_coursework_breakdown(student_email, course_data):
                     'total': total,
                     'percentage': (achieved / total * 100) if total > 0 else 0
                 }
-        
-        print(f"Coursework breakdown for {student_email}:", coursework_data)  # Debug print
+
         return coursework_data
         
     except Exception as e:
@@ -2604,7 +2574,6 @@ def quizz_menu(request):
 def create_quizz(request):
     if request.method == 'POST':
         data = request.POST
-        print(data)  # Debug print to see incoming data
 
         # Extract title and description
         title = data.get('title')
