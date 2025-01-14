@@ -47,4 +47,9 @@ urlpatterns = [
     path('flashcard/<int:quiz_id>/', views.flashcard_view, name='flashcard'),
     path('logout', views.logout_view, name='logout'),
     path('delete_user/<str:user_email>/', views.delete_user_view, name='delete_user'),
+    path('approvePost/', views.approvePost, name='approvePost'),
+    path('change_status/<str:post_id>/', views.change_status, name='change_status'),
+    path('delete_post/<str:post_id>/', views.delete_post, name='delete_post'),
+    path('delete_reply/<str:post_id>/<str:reply_key>/', views.delete_reply, name='delete_reply'),
 ]
+

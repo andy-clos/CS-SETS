@@ -1,0 +1,196 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CS SETS</title>
+    <link rel="stylesheet" href="{% static 'css/navbar.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/header.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/style.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/footer.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/tools/forum.css' %}" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
+    />
+  </head>
+  <style>
+    
+.tag-label {
+  display: inline-flex;
+  align-items: center;
+  background-color: white;
+  padding: 5px 10px;
+  border-radius: 15px;
+  margin: 2px;
+  color: black;
+}
+
+.tag-text {
+  color: black;
+  margin-right: 5px;
+}
+
+.remove-btn {
+  cursor: pointer;
+  color: white;
+  font-size: 14px;
+}
+
+.remove-btn:hover {
+  color: #ffffff;
+}
+
+.post-details {
+    display: flex;
+    flex-direction: column; /* Stack items vertically */
+    margin-top: 10px; /* Space above the details */
+}
+
+.question-details,
+.view_post_time {
+    color: #555; /* Darker gray for better readability */
+    font-size: 14px; /* Slightly larger font size */
+    margin: 2px 0; /* Space between lines */
+}
+
+.post-author {
+    font-weight: bold; /* Make the author's name bold */
+    color: #007bff; /* Change color to blue for emphasis */
+}
+
+.post-time {
+    font-style: italic; /* Italicize the timestamp */
+    color: #888; /* Lighter gray for the timestamp */
+}
+
+  </style>
+  <body>
+    <div class="container">
+      {% include 'navbar.html' %} {% include 'header.html' %}
+
+      <main>
+        <section class="content">
+          <h2 class="section-title">Approve Post</h2>
+        
+        </section>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/7.29.2/sweetalert2.all.js"></script>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+        {% if messages %} {% for message in messages %}
+        <script>
+          swal({
+            title: "{{ message }}",
+            text: "Congratulations",
+            type: "success",
+            showConfirmButton: true,
+          });
+        </script>
+
+        {% endfor %} {% endif %}
+        <header>
+
+            <div class="search-container">
+              <form method="GET" action="{% url 'approvePost' %}">
+              <input
+              type="text"
+              name="search"
+              placeholder="Search to post"
+              value="{{ search_query }}"
+              />
+            </div>
+          
+            <button type="submit" class="create-post-btn">Search</button>
+          </form>
+          <select id="sort-options" class="sort-options" onchange="filterPosts(this.value)">
+            <option value="all">All</option>
+            <option value="approved">Approved</option>
+            <option value="pending">Pending</option>
+            <option value="rejected">Rejected</option>
+            <option value="last_updated">Last Updated</option>
+          </select>
+        </header>
+        <div class="post-container">
+            {% if post_list %}
+                {% for post in post_list %}
+                    <div class="post {{ post.status }}">
+                        <div class="ContainerViewPost">
+                            <a href="{% url 'view_post' post.PostID %}" class="black_font">{{ post.title }}</a>
+                            <div class="post-details">
+                                <div class="post-details"></div>
+                               
+                              
+                                 <form method="POST" action="{% url 'delete_post' post.PostID %}">
+                                    {% csrf_token %}
+                                    <button type="submit" class="delete-btn">
+                                        <i class="material-icons">delete</i>
+                                    </button>
+                                </form>
+                                <form method="POST" action="{% url 'change_status' post.PostID %}">
+                                    {% csrf_token %}
+                                    <select name="status" class="sort-options" onchange="this.form.submit()">
+                                        <option value="approved" {% if post.status == 'approved' %}selected{% endif %}>Approved</option>
+                                        <option value="pending" {% if post.status == 'pending' %}selected{% endif %}>Pending</option>
+                                        <option value="rejected" {% if post.status == 'rejected' %}selected{% endif %}>Rejected</option>
+                                </select>
+                                <div class="question-details">
+                                    <span class="black_font">Posted by:{{ post.author }}</span>
+                                </div>
+                                <div class="view_post_time">
+                                    <span class="black_font">Posted time: {{ post.timestamp }}</span>
+                                </div> 
+                            </div>
+                            <div class="label">
+                                <div class="tag">
+                                    <span class="tag-label">{{ post.subject }}</span>
+                                    {% for tag in post.tags %}
+                                        <span class="tag-label"># {{ tag }}</span>
+                                    {% endfor %}
+                                </div> 
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p>No posts available.</p>
+            {% endif %}
+        </div>
+      </main>
+
+      {% include 'footer.html' %}
+    </div>
+    <script src="{% static 'js/backend.js' %}"></script>
+    <script>
+      function closeModal() {
+        document.getElementById("successModal").style.display = "none";
+      }
+
+      function filterPosts(status) {
+        const posts = document.querySelectorAll('.post');
+        const postArray = Array.from(posts);
+
+    if (status === 'last_updated') {
+            postArray.sort((a, b) => {
+                const aTime = new Date(a.querySelector('.view_post_time span').innerText);
+                const bTime = new Date(b.querySelector('.view_post_time span').innerText);
+                console.log(aTime, bTime);
+                return bTime - aTime; // Sort in descending order
+            });
+        } else {
+            postArray.forEach(post => {
+                if (status === 'all' || post.classList.contains(status)) {
+                    post.style.display = 'block';
+                } else {
+                    post.style.display = 'none';
+                }
+            });
+        }
+
+        // Append sorted posts back to the container
+        const postContainer = document.querySelector('.post-container');
+        postContainer.innerHTML = ''; // Clear existing posts
+        postArray.forEach(post => postContainer.appendChild(post)); // Append sorted posts
+      }
+    </script>
+  </body>
+</html>

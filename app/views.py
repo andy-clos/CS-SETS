@@ -1,7 +1,7 @@
 import joblib
 import os
 from django.shortcuts import render, redirect
-from django.http import JsonResponse, HttpResponse
+from django.http import JsonResponse, HttpResponse, HttpResponseBadRequest
 from firebase_admin import auth, db as admin_db
 import json
 import pyrebase
@@ -1111,11 +1111,7 @@ def createpost_view(request):
             content = request.POST.get('content')
             tags = json.loads(request.POST.get('tags', '[]'))
             author_email = get_current_user(request)
-            
-            # Get current timestamp
-            current_timestamp =int(datetime.datetime.now(pytz.UTC).timestamp() * 1000)
-            formatted_date = datetime.datetime.fromtimestamp(current_timestamp / 1000).strftime('%d/%m/%Y %H:%M:%S')
-
+        
             # Retrieve all posts
             all_posts = database.child("forum").get()
             
@@ -1138,15 +1134,15 @@ def createpost_view(request):
                 "content": content,
                 "tags": tags,
                 "author": author_email,
-                "timestamp": formatted_date,
-                "approved": False
+                "timestamp": datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                "status": "pending"
             }
             
             # Save to Firebase
             database.child("forum").child("posts").push(post_data)
             
             # Set success message
-            success_message = "Post created successfully!"
+            success_message = "Post created successfully! Once Admin approved, it will be visible to all users."
             return render(request, 'Tools/Forum/createPost.html', {'success_message': success_message, 'course_enrolled': course_enrolled})
         except Exception as e:
             return render(request, 'Tools/Forum/createPost.html', {'error': str(e), 'course_enrolled': course_enrolled})
@@ -1161,7 +1157,7 @@ def getPosts():
         for post in posts.each():
             post_data = post.val()
             # Only include posts that are approved
-            if post_data.get("approved", False):  # Check for boolean True
+            if post_data.get("status") == "approved":  # Check for boolean True
                 replies = post_data.get("replies", {})
                 reply_count = len(replies) if isinstance(replies, dict) else 0
                 # Add reply count to the post data
@@ -1172,6 +1168,9 @@ def getPosts():
     return post_list  
 @login_required
 def viewPost(request, post_id):
+    user_email = get_current_user(request)
+    encoded_email = user_email.replace('.', '-dot-').replace('@', '-at-')
+    user_data = database.child("users").child(encoded_email).get().val()
     try:
         posts = database.child("forum").child("posts").get()
         if posts.val():
@@ -1180,11 +1179,11 @@ def viewPost(request, post_id):
             # Find the post with the matching PostID
             post = next((p for p in post_list if p.get("PostID") == post_id), None)
             if post:
-                return render(request, 'Tools/Forum/viewPost.html', {'post': post})
-        return render(request, 'Tools/Forum/viewPost.html', {'error': 'Post not found'})
+                return render(request, 'Tools/Forum/viewPost.html', {'post': post, 'user_data': user_data})
+        return render(request, 'Tools/Forum/viewPost.html', {'error': 'Post not found', 'user_data': user_data})
     except Exception as e:
         print(f"Error fetching post: {e}")
-        return render(request, 'Tools/Forum/viewPost.html', {'error': 'An error occurred'})
+        return render(request, 'Tools/Forum/viewPost.html', {'error': 'An error occurred', 'user_data': user_data})
 @login_required
 def submit_comment(request, post_id):
     if request.method == 'POST':
@@ -1192,10 +1191,7 @@ def submit_comment(request, post_id):
             # Get the comment content from the request
             content = request.POST.get('content')  # Get the comment content
             user_email = get_current_user(request)
-            # Get current timestamp
-            current_timestamp = int(datetime.datetime.now(pytz.UTC).timestamp() * 1000)
-            formatted_date = datetime.datetime.fromtimestamp(current_timestamp / 1000).strftime('%d/%m/%Y %H:%M:%S')
-
+    
             # Reference to the specific post in Firebase using post_id
             post_data = database.child("forum").child("posts").order_by_child("PostID").equal_to(post_id).get().val()
             if post_data:
@@ -1204,7 +1200,7 @@ def submit_comment(request, post_id):
                 reply_data = {
                     "content": content,
                     "author": user_email,
-                    "timestamp": formatted_date
+                    "timestamp":datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                 }
 
                 database.child("forum").child("posts").child(post_key).child("replies").push(reply_data)
@@ -2737,4 +2733,87 @@ def delete_user_view(request, user_email):
         print("encoded email")
 
         # Remove the user from
-        return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=400)@login_required
+def approvePost(request):
+    user_email = get_current_user(request)
+    encoded_email = user_email.replace('.', '-dot-').replace('@', '-at-')
+    user_data = database.child("users").child(encoded_email).get().val()    
+    print(user_data)
+    print(request.method)
+    
+    if user_data.get('role') == 'admin':
+        search_query = request.GET.get('search', '')  # Get the search query from the URL
+        posts = database.child("forum").child("posts").get()
+            
+        # Initialize post_list
+        post_list = []
+
+        # Check if posts exist
+        if posts.val():
+            for post in posts.each():
+                post_data = post.val()
+                post_list.append(post_data)
+        # Filter posts based on the search query in title or subject
+        if search_query:
+            post_list = [post for post in post_list if search_query.lower() in post['title'].lower() or search_query.lower() in post['subject'].lower()]
+
+        return render(request, "Tools/Forum/approvePost.html", {"post_list": post_list, "search_query": search_query})
+    else:
+        return redirect('/',{'error_message': 'You are not authorized to access this page.'})
+
+@login_required
+def delete_post(request, post_id):
+    user_email = get_current_user(request)
+    encoded_email = user_email.replace('.', '-dot-').replace('@', '-at-')
+    user_data = database.child("users").child(encoded_email).get().val()    
+    print(user_data)
+    print(request.method)
+    
+    if user_data.get('role') == 'admin':
+        if request.method == 'POST':
+            print("delete post")
+            # Convert post_id to an integer
+            post_id = int(post_id)  # Ensure post_id is an integer
+            
+            post_data = database.child("forum").child("posts").order_by_child("PostID").equal_to(post_id).get().val()
+            if post_data:
+                post_key = list(post_data.keys())[0] 
+
+                database.child("forum").child("posts").child(post_key).remove()
+                messages.success(request, "Post deleted successfully!")  
+                return redirect('approvePost') 
+
+    return HttpResponseBadRequest("Invalid request method")
+
+
+@login_required
+def change_status(request, post_id):
+    user_email = get_current_user(request)
+    encoded_email = user_email.replace('.', '-dot-').replace('@', '-at-')
+    user_data = database.child("users").child(encoded_email).get().val()    
+    post_id = int(post_id)  # Ensure post_id is an integer
+    if user_data.get('role') == 'admin':
+        post_data = database.child("forum").child("posts").order_by_child("PostID").equal_to(post_id).get().val()
+        if post_data:
+            post_key = list(post_data.keys())[0] 
+
+            database.child("forum").child("posts").child(post_key).child("status").set(request.POST.get('status'))
+            messages.success(request, "Status Updated successfully!")  
+            return redirect('approvePost') 
+    return HttpResponseBadRequest("Invalid request method")
+
+@login_required
+def delete_reply(request, post_id, reply_key):
+    print(post_id)
+    print(reply_key)
+    post_id = int(post_id)  # Ensure post_id is an integer
+    post_data = database.child("forum").child("posts").order_by_child("PostID").equal_to(post_id).get().val()
+    print("post data")
+    print(post_data)
+    if post_data:
+        post_key = list(post_data.keys())[0] 
+        post_data = database.child("forum").child("posts").child(post_key).child("replies").child(reply_key).remove()
+        print(post_data)
+        messages.success(request, "Reply deleted successfully!")  
+        return redirect('/forum/view/' + str(post_id))
+    return redirect('/forum/view/' + str(post_id))
