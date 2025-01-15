@@ -117,9 +117,6 @@
                         <div class="ContainerViewPost">
                             <a href="{% url 'view_post' post.PostID %}" class="black_font">{{ post.title }}</a>
                             <div class="post-details">
-                                <div class="post-details"></div>
-                               
-                              
                                  <form method="POST" action="{% url 'delete_post' post.PostID %}">
                                     {% csrf_token %}
                                     <button type="submit" class="delete-btn">
@@ -133,6 +130,7 @@
                                         <option value="pending" {% if post.status == 'pending' %}selected{% endif %}>Pending</option>
                                         <option value="rejected" {% if post.status == 'rejected' %}selected{% endif %}>Rejected</option>
                                 </select>
+                                </form>
                                 <div class="question-details">
                                     <span class="black_font">Posted by:{{ post.author }}</span>
                                 </div>
