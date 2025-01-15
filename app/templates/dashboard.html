@@ -779,6 +779,21 @@ window.deleteAnnouncement = function(announcementId, courseCode) {
 function openLeaderboardDetails(userName, user, user_achievements) {
     const modalBody = document.getElementById('leaderboardDetailsModalBody');
     modalBody.innerHTML = ''; // Clear previous content
+    curent_user_email = "{{request.session.user_email}}";
+    current_user_role = "{{request.session.user_role}}";
+    
+    console.log(current_user_role);
+    console.log(curent_user_email);
+
+    let display = "display: inline;";
+    if (curent_user_email == user.email) {
+        display = "display: inline;";
+    } else if (current_user_role == "admin") {
+        display = "display: inline;";
+    }
+    else{
+        display = "display: none;";
+    }
 
     // Convert achievements object to an array
     const achievementsArray = user_achievements; // Get an array of achievement values
@@ -789,8 +804,9 @@ function openLeaderboardDetails(userName, user, user_achievements) {
     } else {
         console.log("Achievements data:", achievementsArray); // Debugging line
         achievementsArray.forEach((achievement) => {
-            const userEmail = user.email.replace(/\./g, '-dot-').replace(/@/g, '-at-'); // Encode email for URL
+            // Encode email for URL
             const achievementKey = achievement.achievement_key; // Escape for JavaScript
+            const userEmail = user.email.replace(/\./g, '-dot-').replace(/@/g, '-at-');
 
             // Construct the base URL using Django's url tag with placeholders
             const baseUrl = "{% url 'view-proof' achievement_key='PLACEHOLDER_KEY' encoded_email='PLACEHOLDER_EMAIL' %}";
@@ -811,7 +827,7 @@ function openLeaderboardDetails(userName, user, user_achievements) {
                                 View Certificate
                             </a>
                         </button>
-                        <button class="btn-dashboard" style="background-color: red; margin-top: 10px;margin-bottom: 10px;" onclick="delete_user_achievement('${achievementKey}', '${userEmail}')">
+                        <button class="btn-dashboard" style="background-color: red; margin-top: 10px;margin-bottom: 10px; ${display}" onclick="delete_user_achievement('${achievementKey}', '${userEmail}')">
                             Delete
                         </button>
                         <p>Date Posted: ${achievement.date_added}</p>
@@ -827,6 +843,55 @@ function openLeaderboardDetails(userName, user, user_achievements) {
         backdrop: false // Disable the backdrop
     });
     modal.show();
+}
+
+// Ensure delete_user_achievement function is defined
+function delete_user_achievement(achievementKey, userEmail) {
+    console.log('Delete button clicked for achievement:', achievementKey, 'User:', userEmail); // Debugging line
+    Swal.fire({
+        title: 'Are you sure?',
+        text: "This achievement will be permanently deleted.",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Yes, delete it!'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            fetch(`/delete_user_achievement/${achievementKey}/${userEmail}/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    Swal.fire(
+                        'Deleted!',
+                        'Achievement has been deleted.',
+                        'success'
+                    ).then(() => {
+                        location.reload(); // Reload the page to reflect changes
+                    });
+                } else {
+                    Swal.fire(
+                        'Error!',
+                        data.message,
+                        'error'
+                    );
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                Swal.fire(
+                    'Error!',
+                    'An unexpected error occurred.',
+                    'error'
+                );
+            });
+        }
+    });
 }
 
 // Make sure the document is loaded before attaching event listeners
