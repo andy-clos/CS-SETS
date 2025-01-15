@@ -525,8 +525,13 @@
                                         </div>
                                         <div class="mb-3">
                                             <label class="form-label">Proof (Certificate)</label>
-                                            <input type="file" class="form-control" name="proof" accept=".pdf,.jpg,.jpeg,.png">
-                                            <small class="text-muted">Upload PDF or image files only</small>
+                                            <input type="file" 
+                                                   class="form-control" 
+                                                   name="proof" 
+                                                   id="achievementProof"
+                                                   accept=".pdf,.jpg,.jpeg,.png"
+                                                   required>
+                                            <small class="text-muted">Upload PDF or image files only (Required)</small>
                                         </div>
                                     </form>
                                 </div>
@@ -760,8 +765,43 @@
             });
         }
 
-        function submitAchievement() {
+        async function submitAchievement() {
             const form = document.getElementById('achievementForm');
+            const fileInput = document.getElementById('achievementProof');
+            
+            // Check if file is selected
+            if (!fileInput.files || fileInput.files.length === 0) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Please upload a proof document (PDF or image)'
+                });
+                return;
+            }
+
+            // Check file type
+            const file = fileInput.files[0];
+            const validTypes = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png'];
+            if (!validTypes.includes(file.type)) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Invalid File Type',
+                    text: 'Please upload only PDF or image files (jpg, jpeg, png)'
+                });
+                return;
+            }
+
+            // Check file size (max 5MB)
+            const maxSize = 5 * 1024 * 1024; // 5MB in bytes
+            if (file.size > maxSize) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'File Too Large',
+                    text: 'File size should not exceed 5MB'
+                });
+                return;
+            }
+
             const formData = new FormData(form);
 
             // Show loading state
@@ -775,15 +815,17 @@
                 }
             });
 
-            fetch('/add-achievement/', {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
+            try {
+                const response = await fetch('/add-achievement/', {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                    }
+                });
+
+                const data = await response.json();
+                
                 if (data.status === 'success') {
                     Swal.fire({
                         title: 'Success!',
@@ -793,20 +835,15 @@
                         window.location.reload();
                     });
                 } else {
-                    Swal.fire({
-                        title: 'Error!',
-                        text: data.message,
-                        icon: 'error'
-                    });
+                    throw new Error(data.message || 'Failed to add achievement');
                 }
-            })
-            .catch(error => {
+            } catch (error) {
                 Swal.fire({
                     title: 'Error!',
-                    text: 'An unexpected error occurred',
+                    text: error.message || 'An unexpected error occurred',
                     icon: 'error'
                 });
-            });
+            }
         }
 
         function deleteAchievement(achievementKey) {
