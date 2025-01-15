@@ -288,6 +288,10 @@
                                                         onclick="openUpdateModal('{{ announcement.id }}', '{{ announcement.course_code }}', '{{ announcement.title|escapejs }}', '{{ announcement.content|escapejs }}')">
                                                     Update
                                                 </button>
+                                                <button class="btn btn-danger" 
+                                                onclick="deleteAnnouncement('{{ announcement.id }}', '{{ announcement.course_code }}', '{{ announcement.title|escapejs }}', '{{ announcement.content|escapejs }}')">
+                                                    Delete
+                                                </button>
                                             </div>
                                             <p class="announcement-author">Posted by: {{ announcement.author }}</p>
                                             <p class="announcement-time">{{ announcement.timestamp }}</p>
