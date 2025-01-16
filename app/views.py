@@ -606,8 +606,8 @@ def academic_view(request):
                             venue_time[venue_index] = {
                                 "class_venue": row[f'venue_{venue_index}'].upper(),
                                 "class_day": row[f'day_{venue_index}'],
-                                "class_start_time": row[f'start_time_{venue_index}'],
-                                "class_end_time": row[f'end_time_{venue_index}']
+                                "class_start_time": format_time(str(row[f'start_time_{venue_index}'])),
+                                "class_end_time": format_time(str(row[f'end_time_{venue_index}']))
                             }
                             venue_index += 1
 
@@ -722,8 +722,8 @@ def academic_view(request):
                     venue_time[venue_time_index] = {
                         "class_venue": class_venue.upper(),
                         "class_day": class_day,
-                        "class_start_time": class_start_time,
-                        "class_end_time": class_end_time
+                        "class_start_time": format_time(class_start_time),
+                        "class_end_time": format_time(class_end_time)
                     }
                     venue_time_index += 1
 
@@ -2994,4 +2994,20 @@ def create_course_template(request):
     except Exception as e:
         messages.error(request, f'Error generating template: {str(e)}')
         return redirect('academic')
+
+def format_time(time_str):
+    """Format time to ensure HH:MM format with leading zeros"""
+    if not time_str:
+        return time_str
+    try:
+        # Split time into hours and minutes
+        parts = time_str.split(':')
+        if len(parts) == 2:
+            hour = int(parts[0])
+            minute = int(parts[1])
+            # Format with leading zeros
+            return f"{hour:02d}:{minute:02d}"
+    except:
+        pass
+    return time_str
 
