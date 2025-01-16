@@ -2914,7 +2914,7 @@ def delete_post(request, post_id):
                 post_key = list(post_data.keys())[0] 
 
                 database.child("forum").child("posts").child(post_key).remove()
-                messages.success(request, "Post deleted successfully!")  
+                messages.info(request, "Post deleted successfully!")  
                 return redirect('approvePost') 
 
     return HttpResponseBadRequest("Invalid request method")
@@ -2932,7 +2932,7 @@ def change_status(request, post_id):
             post_key = list(post_data.keys())[0] 
 
             database.child("forum").child("posts").child(post_key).child("status").set(request.POST.get('status'))
-            messages.success(request, "Status Updated successfully!")  
+            messages.info(request, "Status Updated successfully!")  
             return redirect('approvePost') 
     return HttpResponseBadRequest("Invalid request method")
 

@@ -78,14 +78,16 @@
         <script src="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/7.29.2/sweetalert2.all.js"></script>
         <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
         {% if messages %} {% for message in messages %}
+        {% if message.tags == 'info' %}
         <script>
-          swal({
-            title: "{{ message }}",
-            text: "Congratulations",
-            type: "success",
+        swal({
+            title: "Congratualations",
+            text: "{{ message }}",
+            icon: "success",  // Use 'icon' instead of 'type' for SweetAlert2
             showConfirmButton: true,
-          });
-        </script>
+        });
+      </script>
+    {% endif %}
 
         {% endfor %} {% endif %}
         <header>
