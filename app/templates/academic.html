@@ -528,29 +528,34 @@
                     {% if academic_year >= first_course.academic_year %}
                       <h2>Academic Session {{ data.display }}</h2>
                       {% for semester, semester_courses in data.semesters.items %}
-                          <button class="accordion">Semester {{ semester }}</button>
-                          <div class="panel">
-                          {% for course in semester_courses %}
-                            {% for student_course in student_courses %}
-                              {% if course.course_code == student_course.course_code and semester == student_course.semester %}
-                                <div class="courses-grid">
+                        <button class="accordion">Semester {{ semester }}</button>
+                        <div class="panel">
+                          <div class="courses-grid">
+                            {% for course in semester_courses %}
+                              {% for student_course in student_courses %}
+                                {% if course.course_code == student_course.course_code and semester == student_course.semester %}
                                   <div class="course-card">
-                                    <a href="{% url 'course-detail' semester_year='sem'|add:semester|add:'year'|add:academic_year course_code=course.course_code %}" style="text-decoration: none;">
+                                    <a href="{% url 'course-detail' semester_year='sem'|add:semester|add:'year'|add:academic_year course_code=course.course_code %}" class="card-img-link">
                                       <img src="{% static 'image/cat304.png' %}" alt="{{ course.course_code }}">
                                     </a>
-                                    <a href="{% url 'course-detail' semester_year='sem'|add:semester|add:'year'|add:academic_year course_code=course.course_code %}" style="text-decoration: none;">
-                                      <h2>{{ course.course_code }} {{ course.course_name }}</h2>
-                                    </a>
-                                    <p>👥 Student: {{ course.student_count }} 👨‍🏫 Lecturer: {{ course.lecturer_count }}</p>
-                                    <a href="{% url 'course-detail' semester_year='sem'|add:semester|add:'year'|add:academic_year course_code=course.course_code %}">
-                                      <button>View Details</button>
-                                    </a>
+                                    <div class="course-card-content">
+                                      <a href="{% url 'course-detail' semester_year='sem'|add:semester|add:'year'|add:academic_year course_code=course.course_code %}" style="text-decoration: none;">
+                                        <h2>{{ course.course_code }} {{ course.course_name }}</h2>
+                                      </a>
+                                      <div class="course-stats">
+                                        <span>👥 {{ course.student_count }} Students</span>
+                                        <span>👨‍🏫 {{ course.lecturer_count }} Lecturers</span>
+                                      </div>
+                                      <a href="{% url 'course-detail' semester_year='sem'|add:semester|add:'year'|add:academic_year course_code=course.course_code %}" class="btn-view">
+                                        View Details
+                                      </a>
+                                    </div>
                                   </div>
-                                </div>
-                              {% endif %}
+                                {% endif %}
+                              {% endfor %}
                             {% endfor %}
-                          {% endfor %}
                           </div>
+                        </div>
                       {% endfor %}
                     {% endif %}
                   {% endfor %}
@@ -570,16 +575,21 @@
                         {% for lecturer in course.lecturers %}
                           {% if lecturer.lecturer_email == request.session.user_email %}
                             <div class="course-card">
-                              <a href="{% url 'course-detail' semester_year='sem'|add:semester|add:'year'|add:academic_year course_code=course.course_code %}" style="text-decoration: none;">
+                              <a href="{% url 'course-detail' semester_year='sem'|add:semester|add:'year'|add:academic_year course_code=course.course_code %}" class="card-img-link">
                                 <img src="{% static 'image/cat304.png' %}" alt="{{ course.course_code }}">
                               </a>
-                              <a href="{% url 'course-detail' semester_year='sem'|add:semester|add:'year'|add:academic_year course_code=course.course_code %}" style="text-decoration: none;">
-                                <h2>{{ course.course_code }} {{ course.course_name }}</h2>
-                              </a>
-                              <p>👥 Student: {{ course.student_count }} 👨‍🏫 Lecturer: {{ course.lecturer_count }}</p>
-                              <a href="{% url 'course-detail' semester_year='sem'|add:semester|add:'year'|add:academic_year course_code=course.course_code %}">
-                                <button>View Details</button>
-                              </a>
+                              <div class="course-card-content">
+                                <a href="{% url 'course-detail' semester_year='sem'|add:semester|add:'year'|add:academic_year course_code=course.course_code %}" style="text-decoration: none;">
+                                  <h2>{{ course.course_code }} {{ course.course_name }}</h2>
+                                </a>
+                                <div class="course-stats">
+                                  <span>👥 {{ course.student_count }} Students</span>
+                                  <span>👨‍🏫 {{ course.lecturer_count }} Lecturers</span>
+                                </div>
+                                <a href="{% url 'course-detail' semester_year='sem'|add:semester|add:'year'|add:academic_year course_code=course.course_code %}" class="btn-view">
+                                  View Details
+                                </a>
+                              </div>
                             </div>
                           {% endif %}
                         {% endfor %}
