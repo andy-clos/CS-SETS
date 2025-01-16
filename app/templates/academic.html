@@ -146,6 +146,43 @@
                 {% if request.session.user_role == 'admin' %}Add Course{% elif request.session.user_role == 'student' %}Enroll Course{% endif %}
               </button>
 
+              {% if request.session.user_role == 'admin' %}
+              <div class="bulk-upload-section" style="margin: 20px 0;">
+                  <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#bulkUploadModal">
+                      Bulk Upload Courses
+                  </button>
+                  <a href="{% url 'download-course-template' %}" class="btn btn-info">
+                      Download Template
+                  </a>
+              </div>
+
+              <div class="modal fade" id="bulkUploadModal" tabindex="-1">
+                  <div class="modal-dialog">
+                      <div class="modal-content">
+                          <div class="modal-header">
+                              <h5 class="modal-title">Bulk Upload Courses</h5>
+                              <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                          </div>
+                          <div class="modal-body">
+                              <form method="POST" enctype="multipart/form-data" id="bulkUploadForm" onsubmit="return validateBulkUpload(event)">
+                                  {% csrf_token %}
+                                  <input type="hidden" name="action" value="bulk_upload">
+                                  <div class="mb-3">
+                                      <label class="form-label">Upload CSV/Excel File</label>
+                                      <input type="file" class="form-control" name="course_file" accept=".csv,.xlsx,.xls" required>
+                                      <small class="text-muted">
+                                          Please use the template file and maintain the required format.<br>
+                                          Supported formats: CSV, Excel (.xlsx, .xls)
+                                      </small>
+                                  </div>
+                                  <button type="submit" class="btn btn-primary">Upload</button>
+                              </form>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+              {% endif %}
+
               <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
                 <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
                   <div class="modal-content">
@@ -224,22 +261,22 @@
                             <button type="submit" class="btn btn-primary">Add</button>
                         </form>
                       {% elif request.session.user_role == 'student' %}
-                        <form method="POST" action="{% url 'academic' %}" id="studentCourseForm" onsubmit="return validateStudentForm(event)">
-                          {% csrf_token %}
-                          <h4 class="mb-4">Enroll course for Academic Session {{ latest_year|slice:"0:4" }}/{{ latest_year|slice:"5:9" }}, Semester {{ latest_semester }}</h4>
-                          <input type="hidden" name="action" value="add_student_course">
-                          <input type="hidden" name="academic_year" value="{{ latest_year }}">
-                          <input type="hidden" name="semester" value="{{ latest_semester }}">
-                          <label>Available Courses:</label>
-                          <select name="selected_course" required>
-                            <option value="">Select a course</option>
-                            {% for course in latest_courses %}
-                              <option value="{{ course.course_code }}">
-                                {{ course.course_code }} - {{ course.course_name }}
-                              </option>
-                            {% endfor %}
-                          </select>
-                          <button type="submit" class="btn btn-primary">Enroll</button>
+                        <form method="POST" action="{% url 'academic' %}" id="studentEnrollForm" onsubmit="return validateStudentForm(event)">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="student_enroll">
+                            <h4 class="mb-4">Enroll course for Academic Session {{ latest_year|slice:"0:4" }}/{{ latest_year|slice:"5:9" }}, Semester {{ latest_semester }}</h4>
+                            <input type="hidden" name="academic_year" value="{{ latest_year }}">
+                            <input type="hidden" name="semester" value="{{ latest_semester }}">
+                            <label>Available Courses:</label>
+                            <select name="selected_course" required>
+                                <option value="">Select a course</option>
+                                {% for course in latest_courses %}
+                                    <option value="{{ course.course_code }}">
+                                        {{ course.course_code }} - {{ course.course_name }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                            <button type="submit" class="btn btn-primary">Enroll</button>
                         </form>
                       {% endif %}
                     </div>
@@ -433,31 +470,46 @@
       async function validateStudentForm(event) {
           event.preventDefault();
           
-          const selectedCourse = document.querySelector('select[name="selected_course"]').value;
-          const semester = document.querySelector('input[name="semester"]').value;
-          const academicYear = document.querySelector('input[name="academic_year"]').value;
-          
           try {
-              const response = await fetch(`/check-student-course/?code=${selectedCourse}&semester=${semester}&year=${academicYear}`);
-              const data = await response.json();
+              const form = event.target;
+              const courseCode = form.querySelector('select[name="selected_course"]').value;
+              const academicYear = form.querySelector('input[name="academic_year"]').value;
+              const semester = form.querySelector('input[name="semester"]').value;
+
+              // Check for duplicate enrollment
+              const checkResponse = await fetch(
+                  `/check-student-course/?code=${courseCode}&year=${academicYear}&semester=${semester}`
+              );
+              const checkData = await checkResponse.json();
               
-              if (data.exists) {
+              if (checkData.exists) {
                   Swal.fire({
                       icon: 'error',
                       title: 'Already Enrolled',
-                      text: 'You are already enrolled in this course for this semester'
+                      text: 'You are already enrolled in this course for the selected semester'
                   });
                   return false;
               }
-              
+
+              // Show loading state
+              Swal.fire({
+                  title: 'Processing...',
+                  text: 'Please wait while we enroll you in the course',
+                  allowOutsideClick: false,
+                  showConfirmButton: false,
+                  willOpen: () => {
+                      Swal.showLoading();
+                  }
+              });
+
               // Submit form data using fetch
-              const formData = new FormData(event.target);
-              const submitResponse = await fetch("{% url 'academic' %}", {
+              const formData = new FormData(form);
+              const response = await fetch("{% url 'academic' %}", {
                   method: 'POST',
                   body: formData
               });
               
-              const result = await submitResponse.json();
+              const result = await response.json();
               
               if (result.status === 'success') {
                   await Swal.fire({
@@ -469,11 +521,7 @@
                   });
                   window.location.reload();
               } else {
-                  Swal.fire({
-                      icon: 'error',
-                      title: 'Error',
-                      text: result.message
-                  });
+                  throw new Error(result.message || 'Failed to enroll in course');
               }
               
           } catch (error) {
@@ -481,7 +529,72 @@
               Swal.fire({
                   icon: 'error',
                   title: 'Error',
-                  text: 'An error occurred while processing your request'
+                  text: error.message || 'An unexpected error occurred'
+              });
+          }
+          
+          return false;
+      }
+
+      async function validateBulkUpload(event) {
+          event.preventDefault();
+          
+          const fileInput = document.querySelector('input[name="course_file"]');
+          const file = fileInput.files[0];
+          
+          if (!file) {
+              Swal.fire({
+                  icon: 'error',
+                  title: 'Error',
+                  text: 'Please select a file to upload'
+              });
+              return false;
+          }
+
+          // Show loading state
+          Swal.fire({
+              title: 'Uploading...',
+              text: 'Please wait while we process your file',
+              allowOutsideClick: false,
+              showConfirmButton: false,
+              willOpen: () => {
+                  Swal.showLoading();
+              }
+          });
+
+          try {
+              const formData = new FormData(event.target);
+              const response = await fetch("{% url 'academic' %}", {
+                  method: 'POST',
+                  body: formData
+              });
+              
+              const result = await response.json();
+              
+              if (result.status === 'success') {
+                  let message = result.message;
+                  if (result.errors) {
+                      message += '\n\nErrors:\n' + result.errors.join('\n');
+                  }
+                  
+                  await Swal.fire({
+                      icon: 'success',
+                      title: 'Upload Complete',
+                      text: message,
+                      confirmButtonText: 'OK'
+                  });
+                  
+                  if (!result.errors || result.errors.length === 0) {
+                      window.location.reload();
+                  }
+              } else {
+                  throw new Error(result.message);
+              }
+          } catch (error) {
+              Swal.fire({
+                  icon: 'error',
+                  title: 'Error',
+                  text: error.message || 'An error occurred while processing your request'
               });
           }
       }

@@ -36,6 +36,7 @@ import numpy as np
 import pandas as pd
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import logout
+from django.core.files.storage import default_storage
 
 
 
@@ -561,7 +562,132 @@ def dashboard_view(request):
 @login_required
 def academic_view(request):
     if request.method == 'POST':
-        if 'action' not in request.POST:  # This is for admin adding a course
+        # Check action type from POST data
+        action = request.POST.get('action')
+        
+        if action == 'bulk_upload':
+            try:
+                file = request.FILES['course_file']
+                
+                # Save file temporarily
+                temp_path = default_storage.save('temp_courses.csv', file)
+                
+                # Read file based on extension
+                file_ext = os.path.splitext(file.name)[1].lower()
+                if file_ext == '.csv':
+                    df = pd.read_csv(default_storage.path(temp_path))
+                else:  # Excel files
+                    df = pd.read_excel(default_storage.path(temp_path))
+                
+                # Clean up temp file
+                default_storage.delete(temp_path)
+                
+                success_count = 0
+                error_count = 0
+                errors = []
+
+                # Process each row
+                for index, row in df.iterrows():
+                    try:
+                        # Process lecturers
+                        lecturers = {}
+                        lecturer_index = 1
+                        while f'lecturer_name_{lecturer_index}' in row and pd.notna(row[f'lecturer_name_{lecturer_index}']):
+                            lecturers[lecturer_index] = {
+                                "lecturer_name": row[f'lecturer_name_{lecturer_index}'].title(),
+                                "lecturer_email": row[f'lecturer_email_{lecturer_index}'].lower()
+                            }
+                            lecturer_index += 1
+
+                        # Process venue and time
+                        venue_time = {}
+                        venue_index = 1
+                        while f'venue_{venue_index}' in row and pd.notna(row[f'venue_{venue_index}']):
+                            venue_time[venue_index] = {
+                                "class_venue": row[f'venue_{venue_index}'].upper(),
+                                "class_day": row[f'day_{venue_index}'],
+                                "class_start_time": row[f'start_time_{venue_index}'],
+                                "class_end_time": row[f'end_time_{venue_index}']
+                            }
+                            venue_index += 1
+
+                        # Process courseworks
+                        courseworks = {}
+                        coursework_index = 1
+                        while f'coursework_type_{coursework_index}' in row and pd.notna(row[f'coursework_type_{coursework_index}']):
+                            courseworks[f'coursework{coursework_index}'] = {
+                                "type": row[f'coursework_type_{coursework_index}'],
+                                "total_mark": int(row[f'total_mark_{coursework_index}'])
+                            }
+                            coursework_index += 1
+
+                        # Create course data structure
+                        course_data = {
+                            "course_name": row['course_name'],
+                            "lecturers": lecturers,
+                            "venue and time": venue_time,
+                            "courseworks": courseworks
+                        }
+
+                        # Save to Firebase
+                        academic_year = str(row['academic_year']).replace('/', '-')
+                        semester = str(int(row['semester']))
+                        course_code = str(row['course_code']).upper()
+                        
+                        database.child("course").child(academic_year).child(semester).child(course_code).set(course_data)
+                        success_count += 1
+                        
+                    except Exception as e:
+                        error_count += 1
+                        errors.append(f"Row {index + 2}: {str(e)}")
+
+                message = f"Successfully added {success_count} courses."
+                if error_count > 0:
+                    message += f" Failed to add {error_count} courses."
+                    
+                return JsonResponse({
+                    'status': 'success',
+                    'message': message,
+                    'errors': errors if errors else None
+                })
+
+            except Exception as e:
+                return JsonResponse({
+                    'status': 'error',
+                    'message': f'Error processing file: {str(e)}'
+                }, status=500)
+                
+        elif action == 'student_enroll':
+            try:
+                user_email = get_current_user(request)
+                encoded_email = user_email.replace('.', '-dot-').replace('@', '-at-')
+                selected_course = request.POST.get('selected_course')
+                
+                courses_data = database.child("course").get().val()
+                latest_year = sorted(courses_data.keys(), reverse=True)[0]
+                latest_semester = max(range(len(courses_data[latest_year])), 
+                                   key=lambda x: x if isinstance(courses_data[latest_year][x], dict) else -1)
+
+                course_info = {
+                    'academic_year': latest_year,
+                    'semester': str(latest_semester),
+                    'course_code': selected_course
+                }
+                
+                database.child("users").child(encoded_email).child("courses").push(course_info)
+                
+                return JsonResponse({
+                    'status': 'success',
+                    'message': f'Successfully enrolled in {selected_course}.'
+                })
+                
+            except Exception as e:
+                return JsonResponse({
+                    'status': 'error',
+                    'message': str(e)
+                }, status=500)
+                
+        else:  # This is for admin adding a course manually
             try:
                 # Get form data
                 semester = request.POST.get('semester')
@@ -632,36 +758,6 @@ def academic_view(request):
                     'message': f'Course {course_code} has been successfully added.'
                 })
 
-            except Exception as e:
-                return JsonResponse({
-                    'status': 'error',
-                    'message': str(e)
-                }, status=500)
-
-        else:  # This is for student adding a course
-            try:
-                user_email = get_current_user(request)
-                encoded_email = user_email.replace('.', '-dot-').replace('@', '-at-')
-                selected_course = request.POST.get('selected_course')
-                
-                courses_data = database.child("course").get().val()
-                latest_year = sorted(courses_data.keys(), reverse=True)[0]
-                latest_semester = max(range(len(courses_data[latest_year])), 
-                                   key=lambda x: x if isinstance(courses_data[latest_year][x], dict) else -1)
-
-                course_info = {
-                    'academic_year': latest_year,
-                    'semester': str(latest_semester),  # Make sure to store the semester
-                    'course_code': selected_course
-                }
-                
-                database.child("users").child(encoded_email).child("courses").push(course_info)
-                
-                return JsonResponse({
-                    'status': 'success',
-                    'message': f'Successfully enrolled in {selected_course}.'
-                })
-                
             except Exception as e:
                 return JsonResponse({
                     'status': 'error',
@@ -1500,30 +1596,27 @@ def check_course(request):
         }, status=500)
 
 def check_student_course(request):
+    """Check if student is already enrolled in the course"""
     try:
-        code = request.GET.get('code')
+        course_code = request.GET.get('code')
+        academic_year = request.GET.get('year')
         semester = request.GET.get('semester')
-        year = request.GET.get('year')
         
+        # Get current user's email
         user_email = get_current_user(request)
         encoded_email = user_email.replace('.', '-dot-').replace('@', '-at-')
         
-        # Get user's courses
+        # Check user's courses in Firebase
         user_courses = database.child("users").child(encoded_email).child("courses").get().val()
         
-        # Check if course exists in user's courses for the specific semester and year
-        exists = False
         if user_courses:
-            for course in user_courses.values():
-                if (course.get('course_code') == code and 
-                    course.get('semester') == semester and 
-                    course.get('academic_year') == year):
-                    exists = True
-                    break
-                    
-        return JsonResponse({
-            'exists': exists
-        })
+            for _, course_info in user_courses.items():
+                if (course_info.get('course_code') == course_code and 
+                    course_info.get('academic_year') == academic_year and 
+                    course_info.get('semester') == semester):
+                    return JsonResponse({'exists': True})
+        
+        return JsonResponse({'exists': False})
         
     except Exception as e:
         return JsonResponse({
@@ -2860,4 +2953,45 @@ def delete_reply(request, post_id, reply_key):
 
 def example_function():
     print("Combined version")
+
+def create_course_template(request):
+    """Generate and serve course template CSV file"""
+    try:
+        # Create response object with CSV content type
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename="course_template.csv"'
+        
+        # Create CSV writer
+        writer = csv.writer(response)
+        
+        # Write headers
+        headers = [
+            'semester', 'academic_year', 'course_code', 'course_name',
+            'lecturer_name_1', 'lecturer_email_1', 'lecturer_name_2', 'lecturer_email_2', 'lecturer_name_3', 'lecturer_email_3',
+            'venue_1', 'day_1', 'start_time_1', 'end_time_1',
+            'venue_2', 'day_2', 'start_time_2', 'end_time_2',
+            'venue_3', 'day_3', 'start_time_3', 'end_time_3',
+            'coursework_type_1', 'total_mark_1',
+            'coursework_type_2', 'total_mark_2',
+            'coursework_type_3', 'total_mark_3'
+        ]
+        writer.writerow(headers)
+        
+        # Write example row
+        example_row = [
+            '1', '2024/2025', 'CAT304', 'Software Engineering',
+            'Dr John', 'john@usm.my', 'Dr Jane', 'jane@usm.my', '', '',
+            'DK1', 'Monday', '09:00', '11:00',
+            'DK2', 'Wednesday', '14:00', '16:00', '', '', '', '',
+            'Test 1', '30',
+            'Assignment', '30',
+            'Final', '40'
+        ]
+        writer.writerow(example_row)
+        
+        return response
+        
+    except Exception as e:
+        messages.error(request, f'Error generating template: {str(e)}')
+        return redirect('academic')
 
