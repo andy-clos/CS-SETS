@@ -4,19 +4,118 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>CS SETS</title>
+    <title>Quizzes - CS SETS</title>
     <link rel="stylesheet" href="{% static 'css/navbar.css' %}" />
     <link rel="stylesheet" href="{% static 'css/header.css' %}" />
     <link rel="stylesheet" href="{% static 'css/style.css' %}" />
     <link rel="stylesheet" href="{% static 'css/footer.css' %}" />
     <link rel="stylesheet" href="{% static 'css/tools/quizz.css' %}" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/icon?family=Material+Icons"
+    />
 
     <style>
-      .section-title {
-        font-size: 40px;
-        font-weight: bold;
-        margin-bottom: 10px;
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f4;
+        margin: 0;
+        padding: 0;
       }
+      .container {
+        max-width: 1200px;
+        margin: auto;
+        padding: 20px;
+      }
+      .section-title {
+        font-size: 36px;
+        font-weight: bold;
+        margin-bottom: 20px;
+        text-align: center;
+      }
+
+      .options-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+      }
+      .files-section {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 20px;
+      }
+      .file-card {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        padding: 15px;
+        transition: transform 0.2s;
+      }
+      .file-card:hover {
+        transform: scale(1.05);
+      }
+      .file-info h3 {
+        margin: 0;
+        font-size: 20px;
+      }
+      .file-info span {
+        display: block;
+        margin-top: 5px;
+      }
+      .file-actions {
+        margin-top: 10px;
+        text-align: right;
+      }
+      .file-actions button {
+        padding: 8px 12px;
+        background-color: #28a745;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+      .file-actions button:hover {
+        background-color: #218838;
+      }
+      .create-new-button {
+        padding: 10px 15px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+      .create-new-button:hover {
+        background-color: #0056b3;
+      }
+      .tag-label {
+        display: inline-flex; /* Use inline-flex to allow the container to size based on content */
+        align-items: center; /* Center the text vertically */
+        background-color: #c82333; /* Background color for the tag */
+        padding: 5px 10px; /* Padding around the text */
+        border-radius: 15px; /* Rounded corners */
+        margin: 2px; /* Space between tags */
+        color: white; /* Change text color to white */
+        font-size: 14px; /* Font size */
+        font-weight: 500; /* Font weight */
+        white-space: nowrap; /* Prevent text from wrapping */
+        max-width: fit-content; /* Ensure the background does not extend too long */
+      }
+      .tag {
+    display: flex; /* Use flexbox to arrange tags in a row */
+    flex-wrap: wrap; /* Allow tags to wrap to the next line if they exceed the container width */
+    margin-top: 10px; /* Add some space above the tags */
+}
+.tag {
+    display: flex; /* Use flexbox to arrange tags in a row */
+    flex-wrap: wrap; /* Allow tags to wrap to the next line if they exceed the container width */
+    margin-top: 10px; /* Add some space above the tags */
+}
     </style>
   </head>
   <body>
@@ -24,68 +123,70 @@
       {% include 'navbar.html' %} {% include 'header.html' %}
 
       <main>
-        <!-- SweetAlert JS -->
+        <h2 class="section-title">Quizzes</h2>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/7.29.2/sweetalert2.all.js"></script>
         <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
         {% if messages %} {% for message in messages %}
         {% if message.tags == 'info' %}
         <script>
         swal({
-            title: "Deleted successfully",
+            title: "Congratualations",
             text: "{{ message }}",
             icon: "success",  // Use 'icon' instead of 'type' for SweetAlert2
             showConfirmButton: true,
         });
       </script>
     {% endif %}
-    {% endfor %}
-    {% endif %}
-        <section class="content">
-          <h2 class="section-title">Study Tool</h2>
-          <div class="options-container">
-            <button
-              class="create-new"
-              onclick="window.location.href='{% url 'create_quizz' %}'"
-            >
-              + Create new
-            </button>
 
-            <select class="sort-options" onchange="sortQuizzes(this.value)">
-              <option value="last_updated">Last Updated</option>
-              <option value="alphabetical">Alphabetical</option>
+        {% endfor %} {% endif %}
+        <div class="options-container">
+          <div>
+            <label for="sort-options">Sort by:</label>
+            <select
+              id="sort-options"
+              class="sort-options"
+              onchange="sortQuizzes(this.value)"
+            >
+              <option value="default">Default</option>
+              <option value="title">Title</option>
+              <option value="timestamp">Date</option>
             </select>
           </div>
-          {%if quizzes%} {%for quiz in quizzes%}
-          <div class="files-section">
-            <div class="file-card">
-              <div class="file-info">
-                <h3>{{quiz.title}}</h3>
+          <button
+            class="create-new-button"
+            onclick="window.location.href='{% url 'create_quizz' %}'"
+          >
+            Create New Flashcard
+          </button>
+        </div>
 
-                <span class="file-type">{{quiz.QueAns|length}} questions</span>
-                <span class="studied"></span>
-                <span class="timestamp">{{quiz.timestamp}}</span>
-                <div class="tag">
-                  {% for tag in quiz.tags %}
-                  <span class="tag-label"># {{ tag }}</span>
-                  {% endfor %}
-                </div>
-              </div>
-              <div class="file-actions">
-                <button
-                  class="preview-btn"
-                  onclick="window.location.href='{% url 'flashcard' quiz.QuizID %}'"
-                >
-                  Preview
-                </button>
+        <div class="files-section">
+          {% if quizzes %} {% for quiz in quizzes %}
+          <div class="file-card">
+            <div class="file-info">
+              <h3>{{ quiz.title }}</h3>
+              <span class="file-type">{{ quiz.QueAns|length }} questions</span>
+              <span class="timestamp">{{ quiz.timestamp }}</span>
+              <div class="tag">
+                {% for tag in quiz.tags %}
+                <span class="tag-label"># {{ tag }}</span>
+                {% endfor %}
               </div>
             </div>
+            <div class="file-actions">
+              <button
+                onclick="window.location.href='{% url 'flashcard' quiz.QuizID %}'"
+              >
+                Preview
+              </button>
+            </div>
           </div>
-          {%endfor%} {%else%}
+          {% endfor %} {% else %}
           <p>
-            No quizzes found. Go to <a href="/create_quizz">create</a> a quiz
+            No quizzes found. Go to <a href="/create_quizz">create</a> a quiz.
           </p>
-          {%endif%}
-        </section>
+          {% endif %}
+        </div>
       </main>
 
       {% include 'footer.html' %}
@@ -93,30 +194,30 @@
     <script src="{% static 'js/backend.js' %}"></script>
     <script>
       function sortQuizzes(criteria) {
-        const quizCards = document.querySelectorAll(".file-card");
-        const quizArray = Array.from(quizCards);
+        const quizzesContainer = document.querySelector(".files-section");
+        const quizzes = Array.from(quizzesContainer.children);
 
-        if (criteria === "last_updated") {
-          quizArray.sort((a, b) => {
-            const aTimestamp = new Date(
-              a.querySelector(".timestamp").textContent
-            );
-            const bTimestamp = new Date(
-              b.querySelector(".timestamp").textContent
-            );
-            return bTimestamp - aTimestamp; // Sort descending
-          });
-        } else if (criteria === "alphabetical") {
-          quizArray.sort((a, b) => {
-            const aTitle = a.querySelector("h3").textContent.toLowerCase();
-            const bTitle = b.querySelector("h3").textContent.toLowerCase();
-            return aTitle.localeCompare(bTitle); // Sort alphabetically
-          });
-        }
+        quizzes.sort((a, b) => {
+          const titleA = a
+            .querySelector(".file-info h3")
+            .textContent.toLowerCase();
+          const titleB = b
+            .querySelector(".file-info h3")
+            .textContent.toLowerCase();
+          const dateA = new Date(a.querySelector(".timestamp").textContent);
+          const dateB = new Date(b.querySelector(".timestamp").textContent);
 
-        const container = document.querySelector(".files-section");
-        container.innerHTML = ""; // Clear existing quizzes
-        quizArray.forEach((quiz) => container.appendChild(quiz)); // Append sorted quizzes
+          if (criteria === "title") {
+            return titleA.localeCompare(titleB);
+          } else if (criteria === "timestamp") {
+            return dateB - dateA; // Sort by date descending
+          }
+          return 0; // Default case
+        });
+
+        // Clear the container and append sorted quizzes
+        quizzesContainer.innerHTML = "";
+        quizzes.forEach((quiz) => quizzesContainer.appendChild(quiz));
       }
     </script>
   </body>
