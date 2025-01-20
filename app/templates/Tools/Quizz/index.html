@@ -24,18 +24,22 @@
       {% include 'navbar.html' %} {% include 'header.html' %}
 
       <main>
-        {% if messages %}
         <!-- SweetAlert JS -->
-        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@9"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/7.29.2/sweetalert2.all.js"></script>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+        {% if messages %} {% for message in messages %}
+        {% if message.tags == 'info' %}
         <script>
-          // Show SweetAlert success message\
-          Swal.fire({
-            title: "{{ message }}",
-            text: "Deleted successfully.",
-            icon: "success",
-          });
-        </script>
-        {% endif %}
+        swal({
+            title: "Deleted successfully",
+            text: "{{ message }}",
+            icon: "success",  // Use 'icon' instead of 'type' for SweetAlert2
+            showConfirmButton: true,
+        });
+      </script>
+    {% endif %}
+    {% endfor %}
+    {% endif %}
         <section class="content">
           <h2 class="section-title">Study Tool</h2>
           <div class="options-container">

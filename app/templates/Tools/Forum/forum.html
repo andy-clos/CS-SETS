@@ -26,15 +26,16 @@
         </section>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/7.29.2/sweetalert2.all.js"></script>
         {% if messages %} {% for message in messages %}
+        {% if message.tags == 'info' %}
         <script>
           swal({
-            title: "{{ message }}",
-            text: "Congratulations",
-            type: "success",
+            title: "Congratulations",
+            text: "{{ message }}",
+            icon: "success",
             showConfirmButton: true,
           });
         </script>
-
+        {% endif %}
         {% endfor %} {% endif %}
         <header>
           <div class="user-profile">

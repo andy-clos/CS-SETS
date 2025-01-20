@@ -1308,7 +1308,7 @@ def submit_comment(request, post_id):
                 new_count = current_count + 1
                 post_data.update({"comments_count": new_count})
 
-                messages.success(request, "Comment added successfully!")
+                messages.info(request, "Comment added successfully!")
                 
                 # Redirect to the forum page
                 return redirect('/forum/view/' + str(post_id))
@@ -2687,7 +2687,7 @@ def delete_flashcard(request, quiz_id):
         quiz_key = list(quiz_data.keys())[0] 
         print(quiz_id)
         database.child("quizzes").child('flashcard').child(quiz_key).remove()
-        messages.success(request, "Flashcard deleted successfully!")  
+        messages.info(request, "Flashcard deleted successfully!")  
         return redirect('/quizzMenu')
     return HttpResponseBadRequest("Invalid request method")
 
@@ -2947,7 +2947,7 @@ def delete_reply(request, post_id, reply_key):
         post_key = list(post_data.keys())[0] 
         post_data = database.child("forum").child("posts").child(post_key).child("replies").child(reply_key).remove()
         print(post_data)
-        messages.success(request, "Reply deleted successfully!")  
+        messages.info(request, "Reply deleted successfully!")  
         return redirect('/forum/view/' + str(post_id))
     return redirect('/forum/view/' + str(post_id))
 
