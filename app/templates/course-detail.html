@@ -1817,46 +1817,51 @@
         }
     });
 
-    document.getElementById('uploadMarksForm').addEventListener('submit', async function(e) {
+    document.getElementById('uploadMarksForm').addEventListener('submit', function(e) {
         e.preventDefault();
         
+        // Show loading alert
+        Swal.fire({
+            title: 'Processing CSV File',
+            html: 'Please wait while we process the student marks...',
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
+
+        // Submit the form
         const formData = new FormData(this);
-        
-        try {
-            const response = await fetch(this.action, {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'X-CSRFToken': formData.get('csrfmiddlewaretoken')
+        fetch(this.action, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': formData.get('csrfmiddlewaretoken')
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            // Close loading alert and show result
+            Swal.fire({
+                icon: data.status === 'success' ? 'success' : 'error',
+                title: data.status === 'success' ? 'Success!' : 'Error!',
+                text: data.message,
+                timer: data.status === 'success' ? 2000 : undefined,
+                showConfirmButton: data.status !== 'success'
+            }).then(() => {
+                if (data.status === 'success') {
+                    window.location.reload();
                 }
             });
-            
-            const data = await response.json();
-            
-            if (data.status === 'success') {
-                await Swal.fire({
-                    icon: 'success',
-                    title: 'Success!',
-                    text: data.message,
-                    timer: 2000,
-                    showConfirmButton: false
-                });
-                window.location.reload();
-            } else {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: data.message || 'An error occurred while uploading marks.'
-                });
-            }
-        } catch (error) {
-            console.error('Error:', error);
+        })
+        .catch(error => {
             Swal.fire({
                 icon: 'error',
                 title: 'Error',
-                text: 'An error occurred while processing your request.'
+                text: 'An error occurred while processing the file.'
             });
-        }
+        });
     });
 
     async function predictStudentRisks() {
