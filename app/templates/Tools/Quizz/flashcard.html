@@ -125,7 +125,7 @@
           </div>
         </div>
         {%if user_data%} {%if quiz.author == user_data.email%}
-        <form method="POST" action="{% url 'delete_flashcard' quiz.QuizID %}">
+        <form method="POST" action="{% url 'delete_flashcard' quiz.QuizID %}" onsubmit="confirmDelete(event, this);">
           {% csrf_token %}
           <button id="delete-button" class="delete-button" type="submit">
             Delete Flashcard
@@ -202,6 +202,27 @@
                     console.error("Failed to copy: ", err);
                 });
         });
+
+        function confirmDelete(event, form) {
+    event.preventDefault(); // Prevent the default form submission
+
+    Swal.fire({
+        title: 'Are you sure?',
+        text: "This action cannot be undone. Do you want to proceed?",
+        type: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Yes, delete it!'
+    }).then((result) => {
+      console.log(result)
+        if (result.value==true) {
+ 
+            form.submit(); // Submit the form if confirmed
+        }
+        // If cancelled, nothing happens
+    });
+}
     </script>
   </body>
 </html>
