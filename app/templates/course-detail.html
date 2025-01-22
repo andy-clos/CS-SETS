@@ -1573,22 +1573,84 @@
     console.log('Template variables:', { semester_year, course_code });
 
     function confirmDelete() {
+        const isAdmin = "{{ request.session.user_role }}" === 'admin';
+        const userEmail = "{{ request.session.user_email }}";
+        
         Swal.fire({
             title: 'Are you sure?',
-            text: "{% if request.session.user_role == 'admin' %}This will delete the course for all students!{% else %}You will be unenrolled from this course!{% endif %}",
+            text: isAdmin ? "This will delete the course for all students!" : "You will be unenrolled from this course!",
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#d33',
             cancelButtonColor: '#3085d6',
-            confirmButtonText: 'Yes, delete it!',
+            confirmButtonText: isAdmin ? 'Yes, delete it!' : 'Yes, unenroll!',
             cancelButtonText: 'Cancel'
         }).then((result) => {
             if (result.isConfirmed) {
-                submitDeleteForm();
+                if (isAdmin) {
+                    submitDeleteForm();
+                } else {
+                    submitUnenrollForm(userEmail);
+                }
             }
         });
     }
 
+    async function submitUnenrollForm(studentEmail) {
+        // Get academic year from semester_year
+        const academicYear = "{{ semester_year }}".split('sem')[1].split('year')[1];
+        
+        const requestData = {
+            student_email: studentEmail,
+            course_code: "{{ course_code }}",
+            academic_year: academicYear,
+            semester: "{{ semester }}",
+            semester_year: "{{ semester_year }}"
+        };
+        
+        console.log('Unenroll Request Data:', requestData);
+
+        try {
+            const response = await fetch('/unenroll-student/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                },
+                body: JSON.stringify(requestData)
+            });
+
+            console.log('Response status:', response.status);
+            const data = await response.json();
+            console.log('Response data:', data);
+            
+            if (data.status === 'success') {
+                await Swal.fire({
+                    icon: 'success',
+                    title: 'Unenrolled!',
+                    text: 'You have been unenrolled from this course.',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+                window.location.href = "{% url 'academic' %}";
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: data.message || 'An error occurred while unenrolling from the course.'
+                });
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'An error occurred while processing your request.'
+            });
+        }
+    }
+
+    // Keep the original submitDeleteForm for admin use
     async function submitDeleteForm() {
         try {
             const form = document.getElementById('deleteCourseForm');
