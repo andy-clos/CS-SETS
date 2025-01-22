@@ -15,169 +15,186 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.32/dist/sweetalert2.all.min.js"></script>
 
     <style>
-    .section-title {
-        font-size: 40px;
-        font-weight: bold;
-        margin-bottom: 30px;
-    }
-
+    /* General Profile Styling */
     .profile-container {
-        max-width: 800px;
-        margin: 0 auto;
-        padding: 20px;
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 4px 20px rgba(78, 89, 140, 0.08);
+        padding: 2rem;
+        margin-bottom: 2rem;
     }
 
-    .profile-header {
-        display: flex;
-        align-items: center;
-        margin-bottom: 30px;
+    .section-title {
+        color: #4E598C;
+        font-size: 2rem;
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 3px solid #f9c784;
     }
 
+    /* Profile Form Styling */
+    .profile-form {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+    }
+
+    .form-group {
+        margin-bottom: 1.2rem;
+    }
+
+    .form-group label {
+        display: block;
+        color: #4E598C;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        font-size: 0.95rem;
+    }
+
+    .form-group input,
+    .form-group select {
+        width: 100%;
+        padding: 0.8rem 1rem;
+        border: 2px solid #e2e8f0;
+        border-radius: 8px;
+        font-size: 0.95rem;
+        color: #4E598C;
+        transition: all 0.3s ease;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus {
+        border-color: #f9c784;
+        box-shadow: 0 0 0 3px rgba(249, 199, 132, 0.2);
+        outline: none;
+    }
+
+    .form-group input[readonly] {
+        background-color: #f8fafc;
+        cursor: not-allowed;
+    }
+
+    /* Profile Picture Container */
     .profile-picture-container {
-        position: relative;
         width: 150px;
         height: 150px;
         border-radius: 50%;
         overflow: hidden;
+        border: 3px solid #f9c784;
+        box-shadow: 0 4px 12px rgba(78, 89, 140, 0.15);
+        margin-bottom: 2rem;
+        position: relative;  /* Added for overlay positioning */
         cursor: pointer;
     }
 
+    /* Profile Picture */
     .profile-picture {
         width: 100%;
         height: 100%;
         object-fit: cover;
-        transition: filter 0.3s ease;
+        transition: all 0.3s ease;
     }
 
+    /* Overlay Styling */
     .profile-picture-overlay {
         position: absolute;
         top: 0;
         left: 0;
         width: 100%;
         height: 100%;
-        background: rgba(0, 0, 0, 0.5);
+        background: rgba(78, 89, 140, 0.8);
         display: flex;
-        justify-content: center;
         align-items: center;
+        justify-content: center;
         opacity: 0;
         transition: opacity 0.3s ease;
     }
 
-    .profile-picture-container:hover .profile-picture {
-        filter: blur(2px);
-    }
-
+    /* Show overlay on hover */
     .profile-picture-container:hover .profile-picture-overlay {
         opacity: 1;
     }
 
+    /* Overlay Text */
     .profile-picture-text {
         color: white;
-        font-size: 14px;
         text-align: center;
+        font-size: 0.9rem;
+        padding: 1rem;
+        line-height: 1.4;
     }
 
+    /* Hide file input */
     .profile-picture-input {
         display: none;
     }
 
-    .profile-form {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 20px;
+    /* Button Container */
+    .button-group {
+        grid-column: 1 / -1;  /* Span full width in grid */
+        display: flex;
+        gap: 1rem;
+        margin-top: 1rem;
     }
 
-    .form-group {
-        margin-bottom: 15px;
-    }
-
-    .form-group label {
-        display: block;
-        margin-bottom: 5px;
-        font-weight: bold;
-    }
-
-    .form-group input {
-        width: 100%;
-        padding: 8px;
-        border: 1px solid #ddd;
-        border-radius: 4px;
+    /* Button Styling */
+    .submit-button,
+    .delete-button {
+        flex: 1;  /* Equal width */
+        padding: 0.8rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        text-align: center;
+        cursor: pointer;
+        min-width: 150px;  /* Minimum width */
+        font-size: 0.95rem;
     }
 
     .submit-button {
-        grid-column: span 2;
-        padding: 10px 20px;
-        background-color: #007bff;
+        background-color: #4E598C;
         color: white;
         border: none;
-        border-radius: 4px;
-        cursor: pointer;
     }
 
     .submit-button:hover {
-        background-color: #0056b3;
-    }
-
-    .messages {
-        margin-bottom: 20px;
-    }
-
-    .message {
-        padding: 10px;
-        margin-bottom: 10px;
-        border-radius: 4px;
-    }
-
-    .message.success {
-        background-color: #d4edda;
-        color: #155724;
-    }
-
-    .message.error {
-        background-color: #f8d7da;
-        color: #721c24;
+        background-color: #3d4b7c;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(78, 89, 140, 0.2);
     }
 
     .delete-button {
-        grid-column: span 2;
-        padding: 10px 20px;
         background-color: #dc3545;
         color: white;
         border: none;
-        border-radius: 4px;
-        cursor: pointer;
-        margin-top: 10px;
     }
 
     .delete-button:hover {
-        background-color: #c82333;
+        background-color: #bb2d3b;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(220, 53, 69, 0.2);
     }
 
-    .form-group select {
-        width: 100%;
-        padding: 8px;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-        background-color: white;
-        cursor: pointer;
-    }
-
-    .form-group select:focus {
-        outline: none;
-        border-color: #007bff;
-    }
-
+    /* Achievements Section */
     .achievements-section {
-        margin-top: 2rem;
+        background: white;
+        border-radius: 15px;
+        padding: 2rem;
     }
 
     .achievement-card {
-        background: white;
-        border: 1px solid #e0e0e0;
-        border-radius: 8px;
+        background: #fff;
+        border-radius: 12px;
         padding: 1.5rem;
         margin-bottom: 1rem;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        border: 1px solid #e2e8f0;
+        transition: all 0.3s ease;
+    }
+
+    .achievement-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(78, 89, 140, 0.1);
     }
 
     .achievement-header {
@@ -185,145 +202,120 @@
         justify-content: space-between;
         align-items: center;
         margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid #f9c784;
     }
 
     .achievement-header h4 {
+        color: #4E598C;
         margin: 0;
-        color: #2a5298;
+        font-weight: 600;
     }
 
-    .achievements-list {
-        max-height: 500px;
-        overflow-y: auto;
-        padding-right: 1rem;
+    /* Achievement Modal Styling */
+    #addAchievementModal .modal-content {
+        border-radius: 15px;
+        border: none;
     }
 
+    #addAchievementModal .modal-header {
+        background-color: #4E598C;
+        color: white;
+        border-radius: 15px 15px 0 0;
+        padding: 1.2rem 1.5rem;
+    }
+
+    #addAchievementModal .modal-body {
+        padding: 1.5rem;
+        background-color: #fff;
+    }
+
+    #addAchievementModal .modal-footer {
+        background-color: #f8fafc;
+        border-radius: 0 0 15px 15px;
+        padding: 1rem 1.5rem;
+    }
+
+    /* Personality Section */
     .personality-section {
         background: white;
-        border-radius: 8px;
+        border-radius: 15px;
         padding: 2rem;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-
-    .personality-traits {
-        margin: 2rem 0;
-    }
-
-    .trait-bar {
-        display: flex;
-        align-items: center;
-        margin: 1rem 0;
-        gap: 1rem;
-    }
-
-    .trait-bar .progress {
-        flex: 1;
-        height: 10px;
-    }
-
-    .trait-bar span {
-        width: 100px;
-        text-align: right;
-    }
-
-    .trait-bar span:last-child {
-        text-align: left;
-    }
-
-    .personality-description {
-        margin-top: 1rem;
-        padding: 1rem;
-        background: #f8f9fa;
-        border-radius: 4px;
-    }
-
-    #questionContainer {
-        min-height: 200px;
-    }
-
-    .question-item {
-        margin-bottom: 2rem;
-    }
-
-    .answer-options {
-        display: flex;
-        gap: 1rem;
-        margin-top: 1rem;
-    }
-
-    .answer-option {
-        flex: 1;
-        padding: 1rem;
-        border: 1px solid #dee2e6;
-        border-radius: 4px;
-        cursor: pointer;
-        transition: all 0.3s ease;
-    }
-
-    .answer-option:hover {
-        background: #f8f9fa;
-        border-color: #0d6efd;
-    }
-
-    .answer-option.selected {
-        background: #0d6efd;
-        color: white;
-        border-color: #0d6efd;
     }
 
     .personality-results {
-        padding: 20px;
-        background: white;
-        border-radius: 8px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        background: #f8fafc;
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-top: 1.5rem;
     }
 
     .predictions-grid {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-        gap: 10px;
-        margin-top: 10px;
+        gap: 1rem;
+        margin-top: 1rem;
     }
 
     .prediction-item {
-        padding: 10px;
-        background: #f8f9fa;
-        border-radius: 4px;
+        background: white;
+        padding: 1rem;
+        border-radius: 8px;
         text-align: center;
+        border: 1px solid #e2e8f0;
+        transition: all 0.3s ease;
+    }
+
+    .prediction-item:hover {
+        border-color: #f9c784;
+        transform: translateY(-2px);
     }
 
     .traits-section {
-        background: #f8f9fa;
-        padding: 15px;
-        border-radius: 4px;
+        background: #f8fafc;
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-top: 1.5rem;
     }
 
     .traits-list {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-        gap: 10px;
-        margin-top: 10px;
+        gap: 1rem;
     }
 
     .trait-item {
-        padding: 8px;
         background: white;
-        border-radius: 4px;
-        border: 1px solid #dee2e6;
+        padding: 1rem;
+        border-radius: 8px;
+        border: 1px solid #e2e8f0;
+        color: #4E598C;
+        transition: all 0.3s ease;
+    }
+
+    .trait-item:hover {
+        border-color: #f9c784;
+        transform: translateY(-2px);
+    }
+
+    /* Test Info Section */
+    .test-info {
+        margin-top: 1.5rem;
+        padding: 1.5rem;
+        background: #f8fafc;
+        border-radius: 12px;
     }
 
     .test-info .btn-group {
-        gap: 10px;
+        display: flex;
+        gap: 1rem;
+        margin-top: 1rem;
     }
 
     .test-info .btn {
-        display: inline-flex;
-        align-items: center;
-        gap: 5px;
-    }
-
-    .test-info .btn i {
-        font-size: 0.9em;
+        padding: 0.8rem 1.5rem;
+        border-radius: 8px;
+        transition: all 0.3s ease;
     }
     </style>
 </head>
@@ -461,9 +453,10 @@
                                 <input type="text" name="identity" value="{{ user.identity }}" readonly>
                             </div>
 
-                            <button type="submit" class="submit-button">Update Profile</button>
-                            <button type="button" class="delete-button" onclick="confirmDelete()">Delete Account</button>
-
+                            <div class="button-group">
+                                <button type="submit" class="submit-button">Update Profile</button>
+                                <button type="button" class="delete-button" onclick="confirmDelete()">Delete Account</button>
+                            </div>
                         </div>
                     </form>
                 </div>
@@ -474,7 +467,7 @@
                             <h3 class="section-title">Achievements</h3>
                             
                             <!-- Add Achievement Button -->
-                            <button type="button" class="btn btn-primary mb-4" data-bs-toggle="modal" data-bs-target="#addAchievementModal">
+                            <button type="button" class="btn btn-primary mb-4" data-bs-toggle="modal" data-bs-target="#addAchievementModal" style="margin-bottom: 20px;">
                                 <i class="fas fa-plus"></i> Add Achievement
                             </button>
 
