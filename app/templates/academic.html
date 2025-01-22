@@ -12,317 +12,489 @@
     <link rel="stylesheet" href="{% static 'css/bootstrap.css' %}">
     
     <style>
+      /* Main Container */
       .content {
         padding: 2rem;
-        background-color: #f8f9fa;
-        border-radius: 15px;
-        box-shadow: 0 0 20px rgba(0,0,0,0.05);
+        background-color: #f9c784;
+        min-height: 100vh;
+        border-radius: 10px;
+        
       }
 
+      /* Section Title */
       .section-title {
-        font-size: 2rem;
-        color: #2c3e50;
+        font-size: 1.75rem;
+        color: #1e293b;
         margin-bottom: 2rem;
         font-weight: 600;
       }
 
-      /* Action Buttons */
-      .action-buttons {
-        display: flex;
-        gap: 1rem;
-        margin-bottom: 2rem;
-        flex-wrap: wrap;
-      }
-
-      .btn {
-        padding: 0.8rem 1.5rem;
-        border-radius: 8px;
-        font-weight: 500;
-        transition: all 0.3s ease;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        font-size: 0.9rem;
-      }
-
-      .btn-primary {
-        background: #4361ee;
-        border: none;
-        box-shadow: 0 4px 15px rgba(67, 97, 238, 0.2);
-      }
-
-      .btn-primary:hover {
-        background: #3151e8;
-        transform: translateY(-2px);
-      }
-
-      .btn-success {
-        background: #2ecc71;
-        border: none;
-        box-shadow: 0 4px 15px rgba(46, 204, 113, 0.2);
-      }
-
-      .btn-info {
-        background: #3498db;
-        border: none;
-        box-shadow: 0 4px 15px rgba(52, 152, 219, 0.2);
-      }
-
-      /* Search Bar */
-      .search-bar {
-        background: white;
-        padding: 1rem;
-        border-radius: 12px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-        margin-bottom: 2rem;
-      }
-
-      .search-bar input {
-        width: 100%;
-        padding: 1rem;
-        border: 2px solid #e9ecef;
-        border-radius: 8px;
-        font-size: 1rem;
-        transition: all 0.3s ease;
-      }
-
-      .search-bar input:focus {
-        border-color: #4361ee;
-        outline: none;
-        box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
-      }
-
-      /* Courses Grid */
-      .courses-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-        gap: 2.5rem;
-        padding: 1.5rem 0;
-      }
-
-      .course-card {
-        background: white;
-        border-radius: 20px;
-        box-shadow: 0 4px 25px rgba(0,0,0,0.05);
-        transition: all 0.3s ease;
-        overflow: hidden;
-        width: 100%;
-        display: flex;
-        flex-direction: column;
-      }
-
-      .course-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 8px 30px rgba(67, 97, 238, 0.12);
-      }
-
-      .course-card img {
-        width: 100%;
-        height: 200px;
-        object-fit: cover;
-        transition: transform 0.3s ease;
-      }
-
-      .course-card:hover img {
-        transform: scale(1.05);
-      }
-
-      .course-card-content {
-        padding: 2rem;
-        flex-grow: 1;
-        display: flex;
-        flex-direction: column;
-      }
-
-      .course-card h2 {
-        font-size: 1.25rem;
-        color: #2c3e50;
-        margin-bottom: 1.5rem;
-        font-weight: 600;
-        line-height: 1.4;
-      }
-
-      .course-card .course-stats {
-        color: #6c757d;
-        font-size: 1rem;
-        margin-bottom: 1.5rem;
-        padding: 1rem;
-        background: #f8f9fa;
-        border-radius: 12px;
-        display: flex;
-        justify-content: center;
-        gap: 1.5rem;
-      }
-
-      .course-stats span {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-      }
-
-      .course-card .btn-view {
-        width: 100%;
-        padding: 1rem;
-        background: #4361ee;
-        color: white;
-        border: none;
-        border-radius: 12px;
-        font-weight: 500;
-        font-size: 1rem;
-        transition: all 0.3s ease;
-        text-align: center;
-        text-decoration: none;
-        margin-top: auto;
-      }
-
-      .course-card .btn-view:hover {
-        background: #3151e8;
-        transform: translateY(-2px);
-        box-shadow: 0 4px 15px rgba(67, 97, 238, 0.2);
-      }
-
-      /* Accordion Redesign */
-      .accordion-section {
-        margin: 2rem 0;
-      }
-
-      .academic-year-title {
+      /* Academic Year Title */
+      h2 {
         font-size: 1.5rem;
-        color: #2c3e50;
-        margin: 2rem 0 1rem;
+        color: #4361ee;
+        margin: 1.5rem 0;
         font-weight: 600;
       }
 
+      /* Accordion Styling */
       .accordion {
         background-color: white;
-        color: #2c3e50;
+        color: #1e293b;
         cursor: pointer;
-        padding: 1.2rem;
+        padding: 1rem 1.5rem;
         width: 100%;
         border: none;
+        text-align: left;
+        outline: none;
+        font-size: 1rem;
+        transition: all 0.3s ease;
         border-radius: 10px;
         margin-bottom: 0.5rem;
-        font-weight: 500;
-        text-align: left;
-        position: relative;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-        transition: all 0.3s ease;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        border: 1px solid #e2e8f0;
       }
 
-      .accordion:after {
-        content: '\002B';
-        color: #2c3e50;
-        font-weight: bold;
-        float: right;
-        margin-left: 5px;
-        font-size: 1.2rem;
-      }
-
-      .accordion.active:after {
-        content: "\2212";
-      }
-
-      .accordion:hover {
-        background-color: #f8f9fa;
-      }
-
-      .accordion.active {
-        background-color: #4361ee;
-        color: white;
-        border-radius: 10px 10px 0 0;
-      }
-
-      .accordion.active:after {
+      .accordion:hover, .accordion.active {
+        background-color: #4E598C;
         color: white;
       }
 
+      /* Panel Styling */
       .panel {
         background-color: white;
         max-height: 0;
         overflow: hidden;
         transition: max-height 0.3s ease-out;
-        border-radius: 0 0 10px 10px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        border-radius: 10px;
+        margin-bottom: 1rem;
       }
 
-      .panel.show {
-        max-height: 2000px;
+      /* Course Grid */
+      .courses-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 1.5rem;
         padding: 1.5rem;
+      }
+
+      /* Course Card */
+      .course-card {
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        border: 1px solid #e2e8f0;
+        height: 100%;
+      }
+
+      .course-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(67, 97, 238, 0.15);
+      }
+
+      .card-img-link img {
+        width: 100%;
+        height: 160px;
+        object-fit: cover;
+        transition: transform 0.3s ease;
+      }
+
+      .course-card:hover .card-img-link img {
+        transform: scale(1.05);
+      }
+
+      .course-card-content {
+        padding: 1.25rem;
+      }
+
+      .course-card-content h2 {
+        font-size: 1.1rem;
+        margin: 0 0 1rem 0;
+        color: #1e293b;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 100%;
+      }
+
+      /* Optional: Add tooltip on hover to show full text */
+      .course-card-content h2:hover {
+        position: relative;
+      }
+
+      .course-card-content h2:hover::after {
+        content: attr(title);
+        position: absolute;
+        left: 0;
+        top: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        color: white;
+        padding: 0.5rem;
+        border-radius: 4px;
+        font-size: 0.9rem;
+        z-index: 1000;
+        white-space: normal;
+        max-width: 200px;
+      }
+
+      .course-stats {
+        display: flex;
+        justify-content: space-between;
         margin-bottom: 1rem;
+        padding: 0.5rem;
+        background: #f1f5f9;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        color: #64748b;
+      }
+
+      /* Buttons */
+      .btn-view {
+        display: inline-block;
+        padding: 0.6rem 1rem;
+        background: #4361ee;
+        color: white;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        border: none;
+        text-align: center;
+        width: 100%;
+      }
+
+      .btn-view:hover {
+        background: #3151e8;
+        transform: translateY(-2px);
+      }
+
+      /* Action Buttons Container */
+      .action-buttons {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+        margin-bottom: 2rem;
+      }
+
+      /* Button Styling */
+      .btn-primary, 
+      .btn-success, 
+      .btn-info {
+        padding: 0.6rem 1.2rem;
+        border-radius: 8px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        border: none;
+      }
+
+      .btn-primary {
+        background-color: #4361ee;
+        color: white;
+      }
+
+      .btn-success {
+        background-color: #10b981;
+        color: white;
+      }
+
+      .btn-info {
+        background-color: #0ea5e9;
+        color: white;
+      }
+
+      .btn-primary:hover,
+      .btn-success:hover,
+      .btn-info:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      }
+
+      /* Remove default bulk-upload-section styling */
+      .bulk-upload-section {
+        display: inline-flex;
+        gap: 1rem;
+        margin: 0;
+        background: none;
+        padding: 0;
+        border: none;
       }
 
       /* Modal Styling */
       .modal-content {
-        border-radius: 15px;
+        border-radius: 12px;
         border: none;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
       }
 
       .modal-header {
-        border-bottom: 2px solid #f8f9fa;
-        padding: 1.5rem;
+        background: #4E598C;
+        color: white;
+        border-radius: 12px 12px 0 0;
+        padding: 1rem 1.5rem;
       }
 
       .modal-body {
-        padding: 2rem;
+        background-color: #f9c784;
+        padding: 1.5rem;
       }
 
-      .modal-body input,
-      .modal-body select {
-        width: 100%;
-        padding: 0.8rem;
-        margin-bottom: 1rem;
-        border: 2px solid #e9ecef;
+      /* Form Controls */
+      .form-control, select {
         border-radius: 8px;
+        border: 1px solid #e2e8f0;
+        padding: 0.6rem 1rem;
         transition: all 0.3s ease;
       }
 
-      .modal-body input:focus,
-      .modal-body select:focus {
+      .form-control:focus, select:focus {
         border-color: #4361ee;
-        outline: none;
         box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
       }
 
-      .modal-body label {
-        font-weight: 500;
-        color: #2c3e50;
-        margin-bottom: 0.5rem;
-        display: block;
+      /* Search Bar */
+      .search-bar {
+        margin: 1.5rem 0;
       }
 
-      /* Responsive Design */
-      @media (max-width: 768px) {
-        .content {
-          padding: 1rem;
-        }
+      .search-bar input {
+        width: 100%;
+        padding: 0.8rem 1.2rem;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+      }
 
-        .courses-grid {
-          grid-template-columns: 1fr;
-          gap: 2rem;
-          padding: 1rem 0;
-        }
+      .search-bar input:focus {
+        border-color: #4361ee;
+        box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
+        outline: none;
+      }
 
-        .action-buttons {
-          flex-direction: column;
-        }
+      /* Bulk Upload Form Styling */
+      #bulkUploadForm {
+        color: #1e293b;
+      }
 
-        .btn {
-          width: 100%;
-        }
+      #bulkUploadForm .form-label {
+        color: #1e293b;
+        font-weight: 500;
+        font-size: 1.1rem;
+        margin-bottom: 1rem;
+      }
 
-        .course-card-content {
-          padding: 1.5rem;
-        }
+      #bulkUploadForm .text-muted {
+        color: #475569 !important;  /* Override Bootstrap's text-muted */
+        font-size: 0.9rem;
+        line-height: 1.5;
+        margin-top: 1rem;
+      }
 
-        .course-card .course-stats {
-          padding: 0.8rem;
-          flex-direction: column;
-          align-items: center;
-          gap: 0.8rem;
+      #bulkUploadForm .btn-primary {
+        background-color: #4361ee;
+        border-color: #4361ee;
+        color: white;
+        padding: 0.6rem 1.2rem;
+        border-radius: 8px;
+        font-weight: 500;
+        margin-top: 1.5rem;
+        transition: all 0.3s ease;
+      }
+
+      #bulkUploadForm .btn-primary:hover {
+        background-color: #3151e8;
+        transform: translateY(-2px);
+      }
+
+      #bulkUploadForm .form-control {
+        border: 2px solid #e2e8f0;
+        padding: 0.8rem 1rem;
+        border-radius: 8px;
+        margin-top: 1rem;
+        background-color: white;
+        color: #1e293b;
+      }
+
+      #bulkUploadForm .form-control:focus {
+        border-color: #4361ee;
+        box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
+      }
+
+      /* Admin Course Form Styling */
+      #adminCourseForm {
+        display: grid;
+        gap: 1rem;
+        color: #1e293b;
+        padding: 1rem;
+      }
+
+      #adminCourseForm label {
+        display: block;
+        font-weight: 500;
+        margin-bottom: 0.3rem;
+        color: #1e293b;
+        font-size: 0.95rem;
+      }
+
+      #adminCourseForm input,
+      #adminCourseForm select {
+        width: 100%;
+        padding: 0.6rem 1rem;
+        border: 2px solid #e2e8f0;
+        border-radius: 8px;
+        font-size: 0.95rem;
+        background-color: #f8fafc;
+        color: #1e293b;
+        transition: all 0.3s ease;
+        margin-bottom: 0.8rem;
+      }
+
+      #adminCourseForm input:focus,
+      #adminCourseForm select:focus {
+        border-color: #4361ee;
+        box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
+        outline: none;
+      }
+
+      #adminCourseForm input::placeholder {
+        color: #94a3b8;
+      }
+
+      /* Container Sections Styling */
+      #lecturer-container,
+      #venue-time-container,
+      #coursework-container {
+        background-color: #f1f5f9;
+        padding: 1.2rem;
+        border-radius: 12px;
+        margin-bottom: 1rem;
+        border: 1px solid #e2e8f0;
+      }
+
+      /* Section Titles */
+      #lecturer-container::before,
+      #venue-time-container::before,
+      #coursework-container::before {
+        content: 'Lecturer Details';
+        display: block;
+        font-weight: 600;
+        color: #4361ee;
+        margin-bottom: 0.8rem;
+        font-size: 1.1rem;
+      }
+
+      #venue-time-container::before {
+        content: 'Class Schedule';
+      }
+
+      #coursework-container::before {
+        content: 'Coursework Details';
+      }
+
+      /* Remove extra line breaks */
+      #adminCourseForm br {
+        display: none;
+      }
+
+      /* Add Button Styling */
+      #adminCourseForm button[type="button"] {
+        background-color: #4361ee;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        padding: 0.4rem 0.8rem;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-top: 0.3rem;
+      }
+
+      /* Submit Button Styling */
+      #adminCourseForm button[type="submit"] {
+        background-color: #4361ee;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 0.8rem 1.5rem;
+        font-size: 1rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        width: 100%;
+        margin-top: 0.8rem;
+      }
+
+      /* Time Input Specific Styling */
+      #adminCourseForm input[type="time"] {
+        width: 100%;
+        padding: 0.8rem 1rem;
+      }
+
+      /* Responsive Grid for Inputs */
+      @media (min-width: 768px) {
+        .input-group {
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+          gap: 1rem;
         }
+      }
+
+      /* Student Enrollment Form Styling */
+      #studentEnrollForm {
+        padding: 1.2rem;
+        color: #1e293b;  /* Dark color for better visibility */
+      }
+
+      #studentEnrollForm h4 {
+        color: #1e293b;
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 1.2rem;
+        line-height: 1.4;
+      }
+
+      #studentEnrollForm label {
+        display: block;
+        font-weight: 500;
+        color: #1e293b;
+        font-size: 0.95rem;
+        margin-bottom: 0.5rem;
+      }
+
+      #studentEnrollForm select {
+        width: 100%;
+        padding: 0.8rem 1rem;
+        border: 2px solid #e2e8f0;
+        border-radius: 8px;
+        font-size: 0.95rem;
+        background-color: #f8fafc;
+        color: #1e293b;
+        margin-bottom: 1rem;
+        transition: all 0.3s ease;
+      }
+
+      #studentEnrollForm select:focus {
+        border-color: #4361ee;
+        box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
+        outline: none;
+      }
+
+      #studentEnrollForm .btn-primary {
+        background-color: #4361ee;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 0.8rem 1.5rem;
+        font-size: 1rem;
+        font-weight: 500;
+        width: 100%;
+        transition: all 0.3s ease;
+        margin-top: 1rem;
+      }
+
+      #studentEnrollForm .btn-primary:hover {
+        background-color: #3151e8;
+        transform: translateY(-2px);
       }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -337,150 +509,152 @@
         <main>
           <section class="content">
             <h2 class="section-title">Academic Management</h2>
-            {% if request.session.user_role == 'admin' or request.session.user_role == 'student' %}
-              <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
-                {% if request.session.user_role == 'admin' %}Add Course{% elif request.session.user_role == 'student' %}Enroll Course{% endif %}
-              </button>
+            <div class="action-buttons">
+                {% if request.session.user_role == 'admin' or request.session.user_role == 'student' %}
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                    {% if request.session.user_role == 'admin' %}Add Course{% elif request.session.user_role == 'student' %}Enroll Course{% endif %}
+                </button>
+                {% endif %}
+                
+                {% if request.session.user_role == 'admin' %}
+                <div class="bulk-upload-section">
+                    <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#bulkUploadModal">
+                        Bulk Upload Courses
+                    </button>
+                    <a href="{% url 'download-course-template' %}" class="btn btn-info">
+                        Download Template
+                    </a>
+                </div>
+                {% endif %}
+            </div>
 
-              {% if request.session.user_role == 'admin' %}
-              <div class="bulk-upload-section" style="margin: 20px 0;">
-                  <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#bulkUploadModal">
-                      Bulk Upload Courses
-                  </button>
-                  <a href="{% url 'download-course-template' %}" class="btn btn-info">
-                      Download Template
-                  </a>
-              </div>
-
-              <div class="modal fade" id="bulkUploadModal" tabindex="-1">
-                  <div class="modal-dialog">
-                      <div class="modal-content">
-                          <div class="modal-header">
-                              <h5 class="modal-title">Bulk Upload Courses</h5>
-                              <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                          </div>
-                          <div class="modal-body">
-                              <form method="POST" enctype="multipart/form-data" id="bulkUploadForm" onsubmit="return validateBulkUpload(event)">
-                                  {% csrf_token %}
-                                  <input type="hidden" name="action" value="bulk_upload">
-                                  <div class="mb-3">
-                                      <label class="form-label">Upload CSV/Excel File</label>
-                                      <input type="file" class="form-control" name="course_file" accept=".csv,.xlsx,.xls" required>
-                                      <small class="text-muted">
-                                          Please use the template file and maintain the required format.<br>
-                                          Supported formats: CSV, Excel (.xlsx, .xls)
-                                      </small>
-                                  </div>
-                                  <button type="submit" class="btn btn-primary">Upload</button>
-                              </form>
-                          </div>
-                      </div>
-                  </div>
-              </div>
-              {% endif %}
-
-              <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-                  <div class="modal-content">
-                    <div class="modal-header">
-                      <h5 class="modal-title" id="exampleModalLabel">
-                        {% if request.session.user_role == 'admin' %}ADD COURSE{% elif request.session.user_role == 'student' %}ENROLL COURSE{% endif %}
-                      </h5>
-                      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            <div class="modal fade" id="bulkUploadModal" tabindex="-1">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Bulk Upload Courses</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <form method="POST" enctype="multipart/form-data" id="bulkUploadForm" onsubmit="return validateBulkUpload(event)">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="bulk_upload">
+                                <div class="mb-3">
+                                    <label class="form-label">Upload CSV/Excel File</label>
+                                    <input type="file" class="form-control" name="course_file" accept=".csv,.xlsx,.xls" required style="margin-top: 20px;"> 
+                                    <h5 class="text-muted" style="margin-top: 20px;">
+                                        Please use the template file and maintain the required format.<br>
+                                        Supported formats: CSV, Excel (.xlsx, .xls)
+                                    </h5>
+                                </div>
+                                <button type="submit" class="btn btn-primary" style="margin-top: 20px;">Upload</button>
+                            </form>
+                        </div>
                     </div>
-                    <div class="modal-body">
-                      {% if request.session.user_role == 'admin' %}
-                        <form method="POST" action="{% url 'academic' %}" id="adminCourseForm" onsubmit="return validateAdminForm(event)">
-                            {% csrf_token %}
-                            <label>Semester: </label>
-                            <select name="semester" id="semester" required>
-                                <option value="">Select semester</option>
-                                <option value="1">1</option>
-                                <option value="2">2</option>
-                            </select>
-                            <br>
-                            <label>Academic Year: </label>
-                            <input id="academic_year" type="text" name="academic_year" placeholder="Enter academic year" maxlength="9" required>
-                            <br>
-                            <label>Course Code: </label>
-                            <input id="course_code" type="text" name="course_code" placeholder="Enter course code" 
-                                   pattern="[A-Za-z]{3}[0-9]{3}" title="Course code must be 3 letters followed by 3 numbers" required>
-                            <br>
-                            <label>Course Name: </label>
-                            <input id="course_name" type="text" name="course_name" placeholder="Enter course name" required>
-                            <br>
-                            <div id="lecturer-container">
-                                <label>Lecturer Name 1: </label>
-                                <input id="lecturer_name1" type="text" name="lecturer_name1" placeholder="Enter lecturer name" required>
-                                <br>
-                                <label>Lecturer Email 1: </label>
-                                <input id="lecturer_email1" type="text" name="lecturer_email1" placeholder="Enter lecturer email" required>
-                                <button type="button" onclick="addLecturerField()">+</button>
-                                <br>
-                            </div>
-                            <div id="venue-time-container">
-                                <label>Class Venue 1: </label>
-                                <input id="class_venue1" type="text" name="class_venue1" placeholder="Enter class venue" required>
-                                <br>
-                                <label>Class Day 1: </label>
-                                <select name="class_day1" id="class_day1" required>
-                                    <option value="">Select day</option>
-                                    <option value="Monday">Monday</option>
-                                    <option value="Tuesday">Tuesday</option>
-                                    <option value="Wednesday">Wednesday</option>
-                                    <option value="Thursday">Thursday</option>
-                                    <option value="Friday">Friday</option>
-                                    <option value="Saturday">Saturday</option>
-                                    <option value="Sunday">Sunday</option>
-                                </select>
-                                <br>
-                                <label>Class Start Time 1: </label>
-                                <input id="class_start_time1" type="time" name="class_start_time1" required>
-                                <br>
-                                <label>Class End Time 1: </label>
-                                <input id="class_end_time1" type="time" name="class_end_time1" required>
-                                <button type="button" onclick="addVenueTimeField()">+</button>
-                                <br>
-                            </div>
-                            <div id="coursework-container">
-                                <label>Coursework Type 1: </label>
-                                <input type="text" id="coursework_type1" name="coursework_type1" 
-                                       placeholder="Enter coursework type" required>
-                                <br>
-                                <label>Total Mark 1: </label>
-                                <input type="number" id="total_mark1" name="total_mark1" 
-                                       placeholder="Enter total mark" min="0" max="100" required>
-                                <button type="button" onclick="addCourseworkField()">+</button>
-                                <br>
-                            </div>
-                            
-                            <button type="submit" class="btn btn-primary">Add</button>
-                        </form>
-                      {% elif request.session.user_role == 'student' %}
-                        <form method="POST" action="{% url 'academic' %}" id="studentEnrollForm" onsubmit="return validateStudentForm(event)">
-                            {% csrf_token %}
-                            <input type="hidden" name="action" value="student_enroll">
-                            <h4 class="mb-4">Enroll course for Academic Session {{ latest_year|slice:"0:4" }}/{{ latest_year|slice:"5:9" }}, Semester {{ latest_semester }}</h4>
-                            <input type="hidden" name="academic_year" value="{{ latest_year }}">
-                            <input type="hidden" name="semester" value="{{ latest_semester }}">
-                            <label>Available Courses:</label>
-                            <select name="selected_course" required>
-                                <option value="">Select a course</option>
-                                {% for course in latest_courses %}
-                                    <option value="{{ course.course_code }}">
-                                        {{ course.course_code }} - {{ course.course_name }}
-                                    </option>
-                                {% endfor %}
-                            </select>
-                            <button type="submit" class="btn btn-primary">Enroll</button>
-                        </form>
-                      {% endif %}
-                    </div>
+                </div>
+            </div>
 
+            <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+              <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">
+                      {% if request.session.user_role == 'admin' %}ADD COURSE{% elif request.session.user_role == 'student' %}ENROLL COURSE{% endif %}
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                   </div>
+                  <div class="modal-body">
+                    {% if request.session.user_role == 'admin' %}
+                      <form method="POST" action="{% url 'academic' %}" id="adminCourseForm" onsubmit="return validateAdminForm(event)">
+                          {% csrf_token %}
+                          <label>Semester: </label>
+                          <select name="semester" id="semester" required>
+                              <option value="">Select semester</option>
+                              <option value="1">1</option>
+                              <option value="2">2</option>
+                          </select>
+                          <br>
+                          <label>Academic Year: </label>
+                          <input id="academic_year" type="text" name="academic_year" placeholder="Enter academic year" maxlength="9" required>
+                          <br>
+                          <label>Course Code: </label>
+                          <input id="course_code" type="text" name="course_code" placeholder="Enter course code" 
+                                 pattern="[A-Za-z]{3}[0-9]{3}" title="Course code must be 3 letters followed by 3 numbers" required>
+                          <br>
+                          <label>Course Name: </label>
+                          <input id="course_name" type="text" name="course_name" placeholder="Enter course name" required>
+                          <br>
+                          <div id="lecturer-container">
+                              <label>Lecturer Name 1: </label>
+                              <input id="lecturer_name1" type="text" name="lecturer_name1" placeholder="Enter lecturer name" required>
+                              <br>
+                              <label>Lecturer Email 1: </label>
+                              <input id="lecturer_email1" type="text" name="lecturer_email1" placeholder="Enter lecturer email" required>
+                              <button type="button" onclick="addLecturerField()">+</button>
+                              <br>
+                          </div>
+                          <div id="venue-time-container">
+                              <label>Class Venue 1: </label>
+                              <input id="class_venue1" type="text" name="class_venue1" placeholder="Enter class venue" required>
+                              <br>
+                              <label>Class Day 1: </label>
+                              <select name="class_day1" id="class_day1" required>
+                                  <option value="">Select day</option>
+                                  <option value="Monday">Monday</option>
+                                  <option value="Tuesday">Tuesday</option>
+                                  <option value="Wednesday">Wednesday</option>
+                                  <option value="Thursday">Thursday</option>
+                                  <option value="Friday">Friday</option>
+                                  <option value="Saturday">Saturday</option>
+                                  <option value="Sunday">Sunday</option>
+                              </select>
+                              <br>
+                              <label>Class Start Time 1: </label>
+                              <input id="class_start_time1" type="time" name="class_start_time1" required>
+                              <br>
+                              <label>Class End Time 1: </label>
+                              <input id="class_end_time1" type="time" name="class_end_time1" required>
+                              <button type="button" onclick="addVenueTimeField()">+</button>
+                              <br>
+                          </div>
+                          <div id="coursework-container">
+                              <label>Coursework Type 1: </label>
+                              <input type="text" id="coursework_type1" name="coursework_type1" 
+                                     placeholder="Enter coursework type" required>
+                              <br>
+                              <label>Total Mark 1: </label>
+                              <input type="number" id="total_mark1" name="total_mark1" 
+                                     placeholder="Enter total mark" min="0" max="100" required>
+                              <button type="button" onclick="addCourseworkField()">+</button>
+                              <br>
+                          </div>
+                          
+                          <button type="submit" class="btn btn-primary">Add</button>
+                      </form>
+                    {% elif request.session.user_role == 'student' %}
+                      <form method="POST" action="{% url 'academic' %}" id="studentEnrollForm" onsubmit="return validateStudentForm(event)">
+                          {% csrf_token %}
+                          <input type="hidden" name="action" value="student_enroll">
+                          <h4 style="margin-bottom: 20px;">Enroll course for Academic Session {{ latest_year|slice:"0:4" }}/{{ latest_year|slice:"5:9" }}, Semester {{ latest_semester }}</h4>
+                          <input type="hidden" name="academic_year" value="{{ latest_year }}">
+                          <input type="hidden" name="semester" value="{{ latest_semester }}">
+                          <label>Available Courses:</label>
+                          <select name="selected_course" required>
+                              <option value="">Select a course</option>
+                              {% for course in latest_courses %}
+                                  <option value="{{ course.course_code }}">
+                                      {{ course.course_code }} - {{ course.course_name }}
+                                  </option>
+                              {% endfor %}
+                          </select>
+                          <button type="submit" class="btn btn-primary" style="margin-top: 20px;">Enroll</button>
+                      </form>
+                    {% endif %}
+                  </div>
+
                 </div>
               </div>
-            {% endif %}
+            </div>
             <div class="search-bar">
               <input id="searchbar" type="text" onkeyup="searchCourse()" name="searchCourse" placeholder="Search courses by course code or course name">
             </div>
@@ -500,7 +674,7 @@
                             </a>
                             <div class="course-card-content">
                               <a href="{% url 'course-detail' semester_year='sem'|add:semester|add:'year'|add:academic_year course_code=course.course_code %}" style="text-decoration: none;">
-                                <h2>{{ course.course_code }} {{ course.course_name }}</h2>
+                                <h2 title="{{ course.course_code }} {{ course.course_name }}">{{ course.course_code }} {{ course.course_name }}</h2>
                               </a>
                               <div class="course-stats">
                                 <span>👥 {{ course.student_count }} Students</span>
@@ -540,7 +714,7 @@
                                     </a>
                                     <div class="course-card-content">
                                       <a href="{% url 'course-detail' semester_year='sem'|add:semester|add:'year'|add:academic_year course_code=course.course_code %}" style="text-decoration: none;">
-                                        <h2>{{ course.course_code }} {{ course.course_name }}</h2>
+                                        <h2 title="{{ course.course_code }} {{ course.course_name }}">{{ course.course_code }} {{ course.course_name }}</h2>
                                       </a>
                                       <div class="course-stats">
                                         <span>👥 {{ course.student_count }} Students</span>
@@ -580,7 +754,7 @@
                               </a>
                               <div class="course-card-content">
                                 <a href="{% url 'course-detail' semester_year='sem'|add:semester|add:'year'|add:academic_year course_code=course.course_code %}" style="text-decoration: none;">
-                                  <h2>{{ course.course_code }} {{ course.course_name }}</h2>
+                                  <h2 title="{{ course.course_code }} {{ course.course_name }}">{{ course.course_code }} {{ course.course_name }}</h2>
                                 </a>
                                 <div class="course-stats">
                                   <span>👥 {{ course.student_count }} Students</span>
