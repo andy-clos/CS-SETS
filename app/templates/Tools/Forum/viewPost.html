@@ -82,9 +82,12 @@
               <span class="add-comment" id="addCommentBtn">Add A Comment</span>
               {% endif %}
               {% if post.author == user_email %}
-              <button class="delete-btn">
-                  <i class="material-icons"  onclick="deletePost('{{ post.PostID }}')">delete</i>
-              </button>
+              <form method="POST" action="{% url 'delete_post' post.PostID %}" onsubmit="confirmDelete(event, this);">
+                {% csrf_token %}
+                <button type="submit" class="delete-btn">
+                    <i class="material-icons">delete</i>
+                </button>
+              </form>
               {% endif %}
             </div>
           
@@ -110,9 +113,9 @@
               <div class="containerViewPost">
                 <div class="black_font">{{ reply_data.content|safe  }}</div>
                 <div class="post-details">
-                  <form method="POST" action="{% url 'delete_reply' post.PostID reply_key %}">
+                  <form method="POST" action="{% url 'delete_reply' post.PostID reply_key %}" onsubmit="confirmDelete(event, this);">
                     {% csrf_token %}
-                    {% if reply_data.author == user_data.email  or request.session.user_role == 'admin'%}
+                    {% if reply_data.author == user_data.email or request.session.user_role == 'admin' %}
                     <button class="delete-btn-reply" type="submit">
                         <i class="material-icons">delete</i>
                     </button>
@@ -220,6 +223,28 @@
       </script>
 
       <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.1.3/sweetalert.min.js"></script>
+      <script>
+       function confirmDelete(event, form) {
+    event.preventDefault(); // Prevent the default form submission
+
+    Swal.fire({
+        title: 'Are you sure?',
+        text: "This action cannot be undone. Do you want to proceed?",
+        type: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Yes, delete it!'
+    }).then((result) => {
+      console.log(result)
+        if (result.value==true) {
+ 
+            form.submit(); // Submit the form if confirmed
+        }
+        // If cancelled, nothing happens
+    });
+}
+      </script>
     </div>
   </body>
 </html>

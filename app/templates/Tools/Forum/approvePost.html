@@ -119,12 +119,12 @@
                         <div class="ContainerViewPost">
                             <a href="{% url 'view_post' post.PostID %}" class="black_font">{{ post.title }}</a>
                             <div class="post-details">
-                                 <form method="POST" action="{% url 'delete_post' post.PostID %}">
-                                    {% csrf_token %}
-                                    <button type="submit" class="delete-btn">
-                                        <i class="material-icons">delete</i>
-                                    </button>
-                                </form>
+                              <form method="POST" action="{% url 'delete_post' post.PostID %}" onsubmit="confirmDelete(event, this);">
+                                {% csrf_token %}
+                                <button type="submit" class="delete-btn">
+                                    <i class="material-icons">delete</i>
+                                </button>
+                            </form>
                                 <form method="POST" action="{% url 'change_status' post.PostID %}">
                                     {% csrf_token %}
                                     <select name="status" class="sort-options" onchange="this.form.submit()">
@@ -191,6 +191,27 @@
         postContainer.innerHTML = ''; // Clear existing posts
         postArray.forEach(post => postContainer.appendChild(post)); // Append sorted posts
       }
+
+      function confirmDelete(event, form) {
+    event.preventDefault(); // Prevent the default form submission
+
+    Swal.fire({
+        title: 'Are you sure?',
+        text: "This action cannot be undone. Do you want to proceed?",
+        type: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Yes, delete it!'
+    }).then((result) => {
+      console.log(result)
+        if (result.value==true) {
+ 
+            form.submit(); // Submit the form if confirmed
+        }
+        // If cancelled, nothing happens
+    });
+}
     </script>
   </body>
 </html>
