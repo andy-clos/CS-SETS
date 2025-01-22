@@ -236,12 +236,14 @@
 }
 
 .image-container{
+    margin-top: 5%;
     margin-left: auto;
     margin-right: auto;
     width: 80%;
 }
 
 .mbti-info{
+    margin-top: 7%;
     text-align: center;
     margin-left: auto;
     margin-right: auto;
