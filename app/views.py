@@ -558,6 +558,8 @@ def dashboard_view(request):
             
     except Exception as e:
         return render(request, 'dashboard.html', {'error': str(e)})
+    # Default return if no conditions are met
+    return render(request, 'dashboard.html', {'error': 'No data available.'})
 
 @login_required
 def academic_view(request):
