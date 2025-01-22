@@ -166,12 +166,15 @@ function addLecturerField() {
   const newField = document.createElement("div");
   newField.setAttribute("id", `lecturer${totalLecturers}`);
   newField.innerHTML = `
-      <label>Lecturer Name ${totalLecturers}: </label>
-      <input id="lecturer_name${totalLecturers}" type="text" name="lecturer_name${totalLecturers}" placeholder="Enter lecturer name" required>
-      <br>
-      <label>Lecturer Email ${totalLecturers}: </label>
-      <input id="lecturer_email${totalLecturers}" type="text" name="lecturer_email${totalLecturers}" placeholder="Enter lecturer email" required>
-      <button type="button" onclick="removeLecturerField(${totalLecturers})">-</button>
+      <div class="input-group">
+          <label>Lecturer Name ${totalLecturers}: </label>
+          <input id="lecturer_name${totalLecturers}" type="text" name="lecturer_name${totalLecturers}" placeholder="Enter lecturer name" required>
+          <button type="button" onclick="removeLecturerField(${totalLecturers})">-</button>
+      </div>
+      <div class="input-group">
+          <label>Lecturer Email ${totalLecturers}: </label>
+          <input id="lecturer_email${totalLecturers}" type="text" name="lecturer_email${totalLecturers}" placeholder="Enter lecturer email" required>
+      </div>
   `;
   container.appendChild(newField);
 }
@@ -215,27 +218,32 @@ function addVenueTimeField() {
   const newField = document.createElement("div");
   newField.setAttribute("id", `venue_time${totalClasses}`);
   newField.innerHTML = `
-      <label>Class Venue ${totalClasses}: </label>
-      <input id="class_venue${totalClasses}" type="text" name="class_venue${totalClasses}" placeholder="Enter class venue" required>
-      <br>
-      <label>Class Day ${totalClasses}: </label>
-      <select name="class_day${totalClasses}" id="class_day${totalClasses}" required>
-          <option value="">Select day</option>
-          <option value="Monday">Monday</option>
-          <option value="Tuesday">Tuesday</option>
-          <option value="Wednesday">Wednesday</option>
-          <option value="Thursday">Thursday</option>
-          <option value="Friday">Friday</option>
-          <option value="Saturday">Saturday</option>
-          <option value="Sunday">Sunday</option>
-      </select>
-      <br>
-      <label>Class Start Time ${totalClasses}: </label>
-      <input id="class_start_time${totalClasses}" type="time" name="class_start_time${totalClasses}" required>
-      <br>
-      <label>Class End Time ${totalClasses}: </label>
-      <input id="class_end_time${totalClasses}" type="time" name="class_end_time${totalClasses}" required>
-      <button type="button" onclick="removeVenueTimeField(${totalClasses})">-</button>
+      <div class="input-group">
+          <label>Class Venue ${totalClasses}: </label>
+          <input id="class_venue${totalClasses}" type="text" name="class_venue${totalClasses}" placeholder="Enter class venue" required>
+          <button type="button" onclick="removeVenueTimeField(${totalClasses})">-</button>
+      </div>
+      <div class="input-group">
+          <label>Class Day ${totalClasses}: </label>
+          <select name="class_day${totalClasses}" id="class_day${totalClasses}" required>
+              <option value="">Select day</option>
+              <option value="Monday">Monday</option>
+              <option value="Tuesday">Tuesday</option>
+              <option value="Wednesday">Wednesday</option>
+              <option value="Thursday">Thursday</option>
+              <option value="Friday">Friday</option>
+              <option value="Saturday">Saturday</option>
+              <option value="Sunday">Sunday</option>
+          </select>
+      </div>
+      <div class="input-group">
+          <label>Class Start Time ${totalClasses}: </label>
+          <input id="class_start_time${totalClasses}" type="time" name="class_start_time${totalClasses}" required>
+      </div>
+      <div class="input-group">
+          <label>Class End Time ${totalClasses}: </label>
+          <input id="class_end_time${totalClasses}" type="time" name="class_end_time${totalClasses}" required>
+      </div>
   `;
   container.appendChild(newField);
 }
@@ -377,3 +385,16 @@ document.addEventListener("DOMContentLoaded", () => {
     item.addEventListener("click", activateMenu);
   });
 });
+
+function closePredictionModal() {
+    const modal = document.getElementById('predictionResultsModal');
+    const bootstrapModal = bootstrap.Modal.getInstance(modal);
+    
+    // Remove modal-specific styles and classes
+    document.body.style.removeProperty('overflow');
+    document.body.style.removeProperty('padding-right');
+    document.body.classList.remove('modal-open');
+    
+    // Hide the modal
+    bootstrapModal.hide();
+}

@@ -16,6 +16,246 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js"></script>
     <style>
+    /* Main Container */
+    .content {
+        padding: 2rem;
+        background-color: #f9c784;
+        min-height: 100vh;
+        border-radius: 10px;
+    }
+
+    /* Section Title */
+    .section-title {
+        font-size: 1.75rem;
+        color: #1e293b;
+        margin-bottom: 2rem;
+        font-weight: 600;
+    }
+
+    /* Form Styling */
+    #updateCourseForm {
+        background-color: white;
+        padding: 1.5rem;
+        border-radius: 12px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        margin-bottom: 2rem;
+    }
+
+    #updateCourseForm label {
+        display: block;
+        font-weight: 500;
+        color: #1e293b;
+        margin-bottom: 0.5rem;
+        font-size: 0.95rem;
+    }
+
+    #updateCourseForm input,
+    #updateCourseForm select {
+        width: 100%;
+        padding: 0.6rem 1rem;
+        border: 2px solid #e2e8f0;
+        border-radius: 8px;
+        font-size: 0.95rem;
+        background-color: #f8fafc;
+        color: #1e293b;
+        margin-bottom: 1rem;
+        transition: all 0.3s ease;
+    }
+
+    #updateCourseForm input:focus,
+    #updateCourseForm select:focus {
+        border-color: #4361ee;
+        box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
+        outline: none;
+    }
+
+    /* Container Sections */
+    #lecturer-container,
+    #venue-time-container {
+        background-color: #fae0bb;
+        padding: 1.2rem;
+        border-radius: 12px;
+        margin-bottom: 1rem;
+        border: 1px solid #e2e8f0;
+    }
+
+    /* Table Styling */
+    .table {
+        background-color: white;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    /* Table Header Styling */
+    .table th {
+        background-color: #f9c784;  /* Changed from #4361ee to match theme */
+        color: #1e293b;  /* Dark color for better visibility */
+        font-weight: 600;
+        padding: 1rem;
+        font-size: 0.95rem;
+        border-bottom: 2px solid #e2e8f0;
+        white-space: nowrap;
+        text-align: center;
+    }
+
+    .table td {
+        padding: 0.8rem 1rem;
+        color: #1e293b;
+        border-bottom: 1px solid #e2e8f0;
+        font-size: 0.95rem;
+    }
+
+    .table tbody tr:hover {
+        background-color: #f8fafc;
+    }
+
+    /* Export Buttons */
+    .export-buttons {
+        display: flex;
+        gap: 0.8rem;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        flex-wrap: wrap;
+    }
+
+    /* Button Group Styling */
+    .btn-group {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    /* Individual Button Styling */
+    .btn {
+        padding: 0.6rem 1.2rem;
+        border-radius: 8px;
+        font-size: 0.95rem;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        border: none;
+    }
+
+    .btn i {
+        font-size: 1rem;
+    }
+
+    /* Button Colors */
+    .btn-secondary {
+        background-color: #64748b;
+        color: white;
+    }
+
+    .btn-success {
+        background-color: #10b981;
+        color: white;
+    }
+
+    .btn-danger {
+        background-color: #ef4444;
+        color: white;
+    }
+
+    .btn-primary {
+        background-color: #4361ee;
+        color: white;
+    }
+
+    .btn-warning {
+        background-color: #f59e0b;
+        color: white;
+    }
+
+    /* Hover Effects */
+    .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Upload Button Container */
+    .upload-button {
+        display: inline-flex;
+    }
+
+    /* Prediction Button Container */
+    .prediction-button {
+        display: inline-flex;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .export-buttons {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .btn-group {
+            flex-direction: column;
+        }
+
+        .upload-button,
+        .prediction-button {
+            width: 100%;
+        }
+    }
+
+    /* Modal Styling */
+    .modal-content {
+        border-radius: 12px;
+        border: none;
+    }
+
+    .modal-header {
+        background-color: #4361ee;
+        color: white;
+        border-radius: 12px 12px 0 0;
+        padding: 1rem 1.5rem;
+    }
+
+    .modal-body {
+        padding: 1.5rem;
+        background-color: #f9c784;
+    }
+
+    /* Search Bar */
+    .search-bar {
+        max-width: 500px;
+        margin: 1rem auto;
+    }
+
+    .search-bar input {
+        width: 100%;
+        padding: 0.8rem 1.2rem;
+        border: 2px solid #e2e8f0;
+        border-radius: 10px;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+    }
+
+    .search-bar input:focus {
+        border-color: #4361ee;
+        box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
+        outline: none;
+    }
+
+    /* Enrolled Students Section */
+    .enrolled-students-section {
+        background-color: white;
+        padding: 1.5rem;
+        border-radius: 12px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        margin-top: 2rem;
+    }
+
+    .enrolled-students-section h3 {
+        color: #1e293b;
+        font-size: 1.5rem;
+        margin-bottom: 1.5rem;
+        font-weight: 600;
+    }
+
     .enrolled-students-section {
         margin-top: 2rem;
         margin-bottom: 2rem;
@@ -209,6 +449,613 @@
         color: white;
         margin-top: 10px;
     }
+
+    /* Sort Icon Styling */
+    .sort-icon {
+        display: inline-block;
+        width: 12px;
+        height: 12px;
+        margin-left: 5px;
+        vertical-align: middle;
+        opacity: 0.6;
+    }
+
+    /* Hover effect for sortable headers */
+    .table th[data-column] {
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .table th[data-column]:hover {
+        background-color: #f8b862;  /* Slightly darker shade for hover */
+        color: #000000;  /* Even darker on hover */
+    }
+
+    /* Ensure text stays on one line with ellipsis */
+    .table th {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 200px;  /* Adjust based on your needs */
+    }
+
+    /* Section Header Container */
+    .section-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 1.2rem;
+    }
+
+    .section-header h2 {
+        margin: 0;
+        font-size: 1.2rem;
+        color: #1e293b;
+        font-weight: 600;
+    }
+
+    /* Plus and Minus Button Styling */
+    button[onclick*="addLecturerField"],
+    button[onclick*="addVenueTimeField"],
+    button[onclick*="removeLecturerField"],
+    button[onclick*="removeVenueTimeField"] {
+        background-color: #4361ee;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin: 0;
+        font-size: 1.2rem;
+        font-weight: 500;
+    }
+
+    /* Minus Button Specific Style */
+    button[onclick*="removeLecturerField"],
+    button[onclick*="removeVenueTimeField"] {
+        background-color: #ef4444;  /* Red color for remove buttons */
+        margin-left: 0.5rem;
+    }
+
+    /* Hover Effects */
+    button[onclick*="addLecturerField"]:hover,
+    button[onclick*="addVenueTimeField"]:hover {
+        background-color: #3151e8;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    button[onclick*="removeLecturerField"]:hover,
+    button[onclick*="removeVenueTimeField"]:hover {
+        background-color: #dc2626;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Input Group Styling */
+    .input-group {
+        display: flex;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+
+    .input-group input,
+    .input-group select {
+        flex: 1;
+        margin-bottom: 0;
+    }
+
+    /* Action Buttons Container */
+    .table td:last-child {
+        text-align: center;
+        white-space: nowrap;
+        width: 150px; /* Fixed width for actions column */
+    }
+
+    /* Action Buttons Styling */
+    .table .btn {
+        width: 100px; /* Fixed width for buttons */
+        margin: 0.25rem;
+        padding: 0.5rem 0;
+        font-size: 0.9rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 6px;
+        transition: all 0.3s ease;
+    }
+
+    .table .btn-primary {
+        background-color: #4361ee;
+        border: none;
+    }
+
+    .table .btn-danger {
+        background-color: #ef4444;
+        border: none;
+    }
+
+    .table .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Button Group Layout */
+    .action-buttons-group {
+        display: flex;
+        justify-content: center;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+
+    /* Prediction Modal Styling */
+    #predictionResultsModal .modal-dialog {
+        max-width: 90%;
+    }
+
+    #predictionResultsModal .modal-content {
+        border-radius: 12px;
+        border: none;
+        background-color: #f8fafc;
+    }
+
+    #predictionResultsModal .modal-header {
+        background-color: #4361ee;
+        color: white;
+        border-radius: 12px 12px 0 0;
+        padding: 1rem 1.5rem;
+    }
+
+    #predictionResultsModal .modal-body {
+        padding: 1.5rem;
+        background-color: white;
+        color: #1e293b;
+    }
+
+    /* Risk Summary Card */
+    .risk-summary-card {
+        background-color: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .risk-summary-card h6 {
+        color: #1e293b;
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+    }
+
+    .risk-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+    }
+
+    .stat-item {
+        background-color: white;
+        padding: 1rem;
+        border-radius: 8px;
+        border: 1px solid #e2e8f0;
+    }
+
+    .stat-label {
+        color: #64748b;
+        font-size: 0.9rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .stat-value {
+        color: #1e293b;
+        font-size: 1.2rem;
+        font-weight: 600;
+    }
+
+    /* Prediction Table Styling */
+    #predictionTable {
+        background-color: white;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    #predictionTable th {
+        background-color: #f9c784;
+        color: #1e293b;
+        font-weight: 600;
+        padding: 1rem;
+        font-size: 0.95rem;
+        text-align: center;  /* Center align header text */
+        white-space: nowrap;
+        vertical-align: middle;
+    }
+
+    #predictionTable td {
+        padding: 1rem;
+        color: #1e293b;
+        font-size: 0.95rem;
+        border-bottom: 1px solid #e2e8f0;
+        text-align: center;  /* Center align cell content */
+        vertical-align: middle;
+    }
+
+    /* Actions Column Width */
+    #predictionTable th:last-child,
+    #predictionTable td:last-child {
+        width: 120px;
+    }
+
+    /* Alert Button Styling */
+    .alert-btn {
+        width: 100px;  /* Fixed width matching other buttons */
+        padding: 0.5rem 0;
+        font-size: 0.9rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 6px;
+        transition: all 0.3s ease;
+        background-color: #4361ee;
+        color: white;
+        border: none;
+        margin: 0.25rem;
+        text-decoration: none;
+        cursor: pointer;
+    }
+
+    .alert-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        background-color: #3151e8;
+    }
+
+    /* Text Truncation for Long Content */
+    #predictionTable td {
+        max-width: 200px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    /* Risk Analysis Column */
+    .risk-badge {
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        font-weight: 500;
+        text-align: center;
+        display: inline-block;
+    }
+
+    .risk-high {
+        background-color: #fee2e2;
+        color: #dc2626;
+    }
+
+    .risk-medium {
+        background-color: #fef3c7;
+        color: #d97706;
+    }
+
+    .risk-low {
+        background-color: #dcfce7;
+        color: #16a34a;
+    }
+
+    /* Modal Footer */
+    #predictionResultsModal .modal-footer {
+        border-top: 1px solid #e2e8f0;
+        padding: 1rem 1.5rem;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .risk-stats {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    /* Alert Button in Prediction Table */
+    .btn-warning.alert-btn {
+        width: 140px;  /* Fixed width to fit content */
+        height: 35px;  /* Fixed height */
+        padding: 0 0.75rem;
+        font-size: 0.85rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.4rem;  /* Space between icon and text */
+        border-radius: 6px;
+        transition: all 0.3s ease;
+        background-color: #f59e0b;  /* Warning color */
+        color: white;
+        border: none;
+        margin: 0.25rem;
+        white-space: nowrap;
+        overflow: hidden;
+    }
+
+    .btn-warning.alert-btn i {
+        font-size: 0.85rem;  /* Match icon size with text */
+    }
+
+    .btn-warning.alert-btn:hover {
+        background-color: #d97706;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Ensure the table cell can accommodate the button */
+    #predictionTable td:last-child {
+        width: 150px;  /* Slightly wider than button to provide padding */
+        padding: 0.5rem;
+        text-align: center;
+    }
+
+    /* Progress Column Styling */
+    #predictionTable td:nth-child(3) {
+        width: 12%;
+        text-align: center;
+        padding: 1rem;
+        vertical-align: middle;
+    }
+
+    /* Progress Bar Container */
+    .progress {
+        width: 100%;
+        height: 20px;  /* Increased height for better visibility */
+        background-color: #e2e8f0;
+        border-radius: 10px;
+        margin: 0 auto;  /* Center the progress bar */
+        overflow: hidden;
+    }
+
+    /* Progress Bar */
+    .progress-bar {
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 0.85rem;
+        font-weight: 500;
+        transition: width 0.3s ease;
+        border-radius: 10px;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Progress Bar Colors */
+    .progress-bar.bg-success {
+        background-color: #10b981;
+    }
+
+    .progress-bar.bg-warning {
+        background-color: #f59e0b;
+    }
+
+    .progress-bar.bg-danger {
+        background-color: #ef4444;
+    }
+
+    /* Progress Text */
+    .progress-bar {
+        position: relative;
+        min-width: 40px;  /* Ensure percentage is always visible */
+    }
+
+    /* For very low percentages, show text outside the bar */
+    .progress-bar[style*="width: 0%"],
+    .progress-bar[style*="width: 1%"],
+    .progress-bar[style*="width: 2%"],
+    .progress-bar[style*="width: 3%"],
+    .progress-bar[style*="width: 4%"],
+    .progress-bar[style*="width: 5%"] {
+        color: #1e293b;  /* Dark color for better visibility */
+    }
+
+    /* Global Modal Close Button Styling */
+    .modal .btn-close {
+        filter: invert(1) grayscale(100%) brightness(200%);  /* Makes the button white */
+        opacity: 0.8;  /* Slightly transparent */
+        transition: opacity 0.3s ease;
+    }
+
+    .modal .btn-close:hover {
+        opacity: 1;  /* Full opacity on hover */
+    }
+
+    .modal .btn-close:focus {
+        box-shadow: 0 0 0 0.25rem rgba(255, 255, 255, 0.25);  /* White focus ring */
+    }
+
+    /* Modal Header Styling */
+    .modal .modal-header {
+        background-color: #4361ee;  /* Consistent header background */
+        color: white;
+        border-radius: 12px 12px 0 0;
+        padding: 1rem 1.5rem;
+    }
+
+    /* Alert Modal Styling */
+    #alertModal .modal-dialog {
+        max-width: 600px;
+    }
+
+    #alertModal .modal-content {
+        border: none;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    #alertModal .modal-header {
+        background-color: #4361ee;
+        padding: 1.2rem 1.5rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    #alertModal .modal-header .modal-title {
+        color: white;
+        font-size: 1.25rem;
+        font-weight: 600;
+    }
+
+    #alertModal .modal-body {
+        padding: 1.5rem;
+        background-color: #f8fafc;
+    }
+
+    /* Form Styling */
+    #alertForm .form-label {
+        color: #1e293b;
+        font-weight: 600;
+        font-size: 0.95rem;
+        margin-bottom: 0.5rem;
+    }
+
+    #alertForm .form-control {
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 0.75rem;
+        font-size: 0.95rem;
+        color: #1e293b;
+        background-color: white;
+        transition: all 0.3s ease;
+    }
+
+    #alertForm .form-control:focus {
+        border-color: #4361ee;
+        box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
+    }
+
+    #alertForm textarea.form-control {
+        resize: vertical;
+        min-height: 100px;
+    }
+
+    /* Performance Summary Box */
+    #performanceSummary.alert-info {
+        background-color: #eff6ff;
+        border: 1px solid #bfdbfe;
+        color: #1e40af;
+        border-radius: 8px;
+        padding: 1rem;
+        font-size: 0.95rem;
+        margin-bottom: 1.5rem;
+    }
+
+    /* Submit Button */
+    #alertForm .btn-primary {
+        background-color: #4361ee;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        font-size: 0.95rem;
+        font-weight: 500;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+        margin-top: 1rem;
+    }
+
+    #alertForm .btn-primary:hover {
+        background-color: #3151e8;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(67, 97, 238, 0.2);
+    }
+
+    /* Form Group Spacing */
+    #alertForm .mb-3 {
+        margin-bottom: 1.5rem;
+    }
+
+    /* Placeholder Styling */
+    #alertForm .form-control::placeholder {
+        color: #94a3b8;
+        opacity: 0.7;
+    }
+
+    /* Focus States */
+    #alertForm .form-control:focus::placeholder {
+        opacity: 0.5;
+    }
+
+    /* Textarea Specific Styling */
+    #alertForm textarea.form-control {
+        width: 100%;
+        resize: vertical;
+        min-height: 120px;
+        max-height: 300px;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        font-size: 0.95rem;
+        line-height: 1.6;
+        letter-spacing: 0.01em;
+        padding: 1rem;
+        color: #1e293b;
+        background-color: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        transition: all 0.2s ease;
+    }
+
+    /* Specific heights for different textareas */
+    #feedbackMessage {
+        min-height: 150px;  /* Larger initial height for feedback */
+    }
+
+    #recommendedActions {
+        min-height: 120px;  /* Slightly smaller for actions */
+    }
+
+    /* Textarea Focus State */
+    #alertForm textarea.form-control:focus {
+        border-color: #4361ee;
+        box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
+        outline: none;
+    }
+
+    /* Textarea Placeholder */
+    #alertForm textarea.form-control::placeholder {
+        color: #94a3b8;
+        font-size: 0.9rem;
+        font-style: italic;
+        opacity: 0.7;
+    }
+
+    /* Scrollbar Styling for Textarea */
+    #alertForm textarea.form-control::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    #alertForm textarea.form-control::-webkit-scrollbar-track {
+        background: #f1f5f9;
+        border-radius: 4px;
+    }
+
+    #alertForm textarea.form-control::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 4px;
+    }
+
+    #alertForm textarea.form-control::-webkit-scrollbar-thumb:hover {
+        background: #94a3b8;
+    }
+
+    /* Label Styling */
+    #alertForm .form-label {
+        color: #1e293b;
+        font-weight: 600;
+        font-size: 0.95rem;
+        margin-bottom: 0.75rem;
+        display: block;
+    }
+
+    /* Form Group Spacing */
+    #alertForm .mb-3 {
+        margin-bottom: 1.75rem;
+    }
     </style>
 </head>
 <body>
@@ -265,19 +1112,27 @@
                     <input id="course_name" type="text" name="course_name" placeholder="Enter course name" required value="{{ course.course_name }}" {% if request.session.user_role == 'student' or request.session.user_role == 'lecturer' %} readonly {% endif %}>
                     <br>
                     <div id="lecturer-container">
+                        <div class="section-header">
+                            <h2>Lecturers</h2>
+                            {% if request.session.user_role == 'admin'%}
+                                <button type="button" onclick="addLecturerField()">+</button>
+                            {% endif %}
+                        </div>
                         {% for lecturer in course.lecturers %}
                         <label>Lecturer Name {{ forloop.counter }}: </label>
                         <input id="lecturer_name{{ forloop.counter }}" type="text" name="lecturer_name{{ forloop.counter }}" placeholder="Enter lecturer name" required value="{{ lecturer.lecturer_name }}" {% if request.session.user_role == 'student' or request.session.user_role == 'lecturer' %} readonly {% endif %}>
                         <br>
                         <label>Lecturer Email {{ forloop.counter }}: </label>
                         <input id="lecturer_email{{ forloop.counter }}" type="text" name="lecturer_email{{ forloop.counter }}" placeholder="Enter lecturer email" required value="{{ lecturer.lecturer_email }}" {% if request.session.user_role == 'student' or request.session.user_role == 'lecturer' %} readonly {% endif %}>
-                        {% if request.session.user_role == 'admin'%}
-                            <button type="button" onclick="addLecturerField()">+</button>
-                        {% endif %}
-                        <br>
                         {% endfor %}
                     </div>
                     <div id="venue-time-container">
+                        <div class="section-header">
+                            <h2>Venue and Time</h2>
+                            {% if request.session.user_role == 'admin'%}
+                                <button type="button" onclick="addVenueTimeField()">+</button>
+                            {% endif %}
+                        </div>
                         {% for class in course.venue_time %}
                         <label>Class Venue {{ forloop.counter }}: </label>
                         <input id="class_venue{{ forloop.counter }}" type="text" name="class_venue{{ forloop.counter }}" placeholder="Enter class venue" required value="{{ class.class_venue }}" {% if request.session.user_role == 'student' or request.session.user_role == 'lecturer' %} readonly {% endif %}>
@@ -303,15 +1158,11 @@
                         <br>
                         <label>Class End Time {{ forloop.counter }}: </label>
                         <input id="class_end_time{{ forloop.counter }}" type="time" name="class_end_time{{ forloop.counter }}" value="{{ class.class_end_time }}" required {% if request.session.user_role == 'student' or request.session.user_role == 'lecturer' %} readonly {% endif %}>
-                        {% if request.session.user_role == 'admin'%}
-                            <button type="button" onclick="addVenueTimeField()">+</button>
-                        {% endif %}
-                        <br>
                         {% endfor %}
-                        {% if request.session.user_role == 'admin'%}
-                            <button type="submit" class="btn btn-primary">Update Course</button>
-                        {% endif %}
                     </div>
+                    {% if request.session.user_role == 'admin'%}
+                    <button type="submit" class="btn btn-primary">Update Course</button>
+                    {% endif %}
                 </form>
                 
                 {% if request.session.user_role == 'admin' or request.session.user_role == 'student'%}
@@ -375,21 +1226,33 @@
                                 </button>
                             </div>
 
-                            <div class="modal fade" id="predictionResultsModal" tabindex="-1">
+                            <div class="modal fade" id="predictionResultsModal" tabindex="-1" 
+                                 data-bs-backdrop="static" data-bs-keyboard="false">
                                 <div class="modal-dialog modal-xl">
                                     <div class="modal-content">
                                         <div class="modal-header">
                                             <h5 class="modal-title">Student Risk Predictions</h5>
-                                            <button type="button" class="btn-close" onclick="closePredictionModal()" aria-label="Close"></button>
+                                            <button type="button" class="btn-close" 
+                                                    onclick="closePredictionModal()" 
+                                                    data-bs-dismiss="modal" 
+                                                    aria-label="Close"></button>
                                         </div>
                                         <div class="modal-body">
-                                            <div class="alert alert-info mb-3">
-                                                <h6>Risk Summary:</h6>
-                                                <p class="mb-1">High Risk Students: <span id="highRiskCount">0</span></p>
-                                                <p class="mb-0">Total Students: <span id="totalStudents">0</span></p>
+                                            <div class="risk-summary-card">
+                                                <h6>Risk Summary</h6>
+                                                <div class="risk-stats">
+                                                    <div class="stat-item">
+                                                        <div class="stat-label">High Risk Students</div>
+                                                        <div class="stat-value" id="highRiskCount">0</div>
+                                                    </div>
+                                                    <div class="stat-item">
+                                                        <div class="stat-label">Total Students</div>
+                                                        <div class="stat-value" id="totalStudents">0</div>
+                                                    </div>
+                                                </div>
                                             </div>
                                             <div class="table-responsive">
-                                                <table class="table table-striped" id="predictionTable">
+                                                <table class="table" id="predictionTable">
                                                     <thead>
                                                         <tr>
                                                             <th>Student Name</th>
@@ -397,7 +1260,7 @@
                                                             <th>Current Progress</th>
                                                             <th>Risk Analysis</th>
                                                             <th>Coursework Breakdown</th>
-                                                            <th>Actions</th>
+                                                            <th style="width: 120px;">Actions</th>
                                                         </tr>
                                                     </thead>
                                                     <tbody id="predictionTableBody">
@@ -425,18 +1288,32 @@
                                             <form id="alertForm" onsubmit="return sendAlert(event)">
                                                 <input type="hidden" id="alertStudentEmail">
                                                 <div class="mb-3">
-                                                    <label class="form-label">Student Performance Summary:</label>
+                                                    <label class="form-label">Student Performance Summary</label>
                                                     <div id="performanceSummary" class="alert alert-info"></div>
                                                 </div>
                                                 <div class="mb-3">
-                                                    <label for="feedbackMessage" class="form-label">Feedback Message:</label>
-                                                    <textarea class="form-control" id="feedbackMessage" rows="4" required></textarea>
+                                                    <label for="feedbackMessage" class="form-label">Feedback Message</label>
+                                                    <textarea 
+                                                        class="form-control" 
+                                                        id="feedbackMessage" 
+                                                        rows="4" 
+                                                        required
+                                                        placeholder="Enter your feedback message here..."
+                                                    ></textarea>
                                                 </div>
                                                 <div class="mb-3">
-                                                    <label for="recommendedActions" class="form-label">Recommended Actions:</label>
-                                                    <textarea class="form-control" id="recommendedActions" rows="3" required></textarea>
+                                                    <label for="recommendedActions" class="form-label">Recommended Actions</label>
+                                                    <textarea 
+                                                        class="form-control" 
+                                                        id="recommendedActions" 
+                                                        rows="3" 
+                                                        required
+                                                        placeholder="Enter recommended actions here..."
+                                                    ></textarea>
                                                 </div>
-                                                <button type="submit" class="btn btn-primary">Send Alert</button>
+                                                <button type="submit" class="btn btn-primary w-100">
+                                                    Send Alert
+                                                </button>
                                             </form>
                                         </div>
                                     </div>
@@ -498,16 +1375,18 @@
                                                 </td>
                                             {% endfor %}
                                             <td style="text-align: center;">{{ student.total_mark|default:0.0 }}</td>
-                                            <td style="text-align: center;">
-                                                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#marksModal{{ student.email|slugify }}">
-                                                    Edit Marks
-                                                </button>
-                                                {% if request.session.user_role == 'admin' %}
-                                                    <button type="button" class="btn btn-danger" 
-                                                        onclick="confirmUnenroll('{{ student.email }}', '{{ course_code }}', '{{ course.academic_year }}', '{{ semester }}')">
-                                                        Unenroll
+                                            <td>
+                                                <div class="action-buttons-group">
+                                                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#marksModal{{ student.email|slugify }}">
+                                                        Edit Marks
                                                     </button>
-                                                {% endif %}
+                                                    {% if request.session.user_role == 'admin' %}
+                                                        <button type="button" class="btn btn-danger" 
+                                                            onclick="confirmUnenroll('{{ student.email }}', '{{ course_code }}', '{{ course.academic_year }}', '{{ semester }}')">
+                                                            Unenroll
+                                                        </button>
+                                                    {% endif %}
+                                                </div>
                                             </td>
                                         </tr>
 
@@ -560,7 +1439,7 @@
                     </div>
                 {% elif request.session.user_role == 'student' %}
                     <div class="enrolled-students-section">
-                        <h3>Your Course Marks</h3>
+                        <h3>Your Coursework Marks</h3>
                         <table class="table">
                             <thead>
                                 <tr>
@@ -1075,7 +1954,7 @@
                         ${generateCourseworkBreakdown(pred.coursework_breakdown)}
                     </td>
                     <td>
-                        <button class="btn btn-warning btn-sm" 
+                        <button class="btn btn-warning btn-sm alert-btn" 
                                 onclick='showAlert(${JSON.stringify(pred).replace(/'/g, "&#39;")})'>
                             <i class="fas fa-bell"></i> Alert & Feedback
                         </button>
@@ -1398,6 +2277,13 @@
         
         return false;
     }
+
+    // Add event listener to handle modal hidden event
+    document.getElementById('predictionResultsModal').addEventListener('hidden.bs.modal', function () {
+        document.body.style.removeProperty('overflow');
+        document.body.style.removeProperty('padding-right');
+        document.body.classList.remove('modal-open');
+    });
     </script>
 
     <div class="modal fade" id="viewAnnouncement" tabindex="-1" aria-labelledby="updateAnnouncementModalLabel" aria-hidden="true">
