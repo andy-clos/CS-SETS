@@ -9,18 +9,223 @@
     <link rel="stylesheet" href="{% static 'css/header.css' %}">  
     <link rel="stylesheet" href="{% static 'css/style.css' %}">  
     <link rel="stylesheet" href="{% static 'css/footer.css' %}">
+    <link rel="stylesheet" href="{% static 'css/bootstrap.css' %}">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
 
     <style>
-    .section-title {
-        font-size: 40px;
-        font-weight: bold;
-        margin-bottom: 10px;
+    /* Main Container Styling */
+    .content {
+        padding: 2rem;
+        background-color: #fff;
+        border-radius: 12px;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
     }
-    #searchbar{
+
+    /* Section Title */
+    .section-title {
+        color: #4E598C;
+        font-size: 1.8rem;
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 3px solid #f9c784;
+    }
+
+    /* Search Bar Styling */
+    .search-bar {
+        margin-bottom: 1.5rem;
+    }
+
+    #searchbar {
         width: 100%;
+        padding: 0.8rem 1.2rem;
+        border: 2px solid #e2e8f0;
+        border-radius: 8px;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+    }
+
+    #searchbar:focus {
+        border-color: #f9c784;
+        box-shadow: 0 0 0 3px rgba(249, 199, 132, 0.2);
+        outline: none;
+    }
+
+    /* Table Container */
+    .table-responsive {
+        width: 100%;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    /* Table Width */
+    .table {
+        width: 100% !important;  /* Force 100% width */
+        margin-bottom: 0;
+        table-layout: fixed;  /* Better column width control */
+    }
+
+    /* Column Widths */
+    .table th:nth-child(1) { width: 25%; }  /* User Name */
+    .table th:nth-child(2) { width: 35%; }  /* User Email */
+    .table th:nth-child(3) { width: 25%; }  /* User Role */
+    .table th:nth-child(4) { width: 15%; }  /* Actions */
+
+    /* Table Cell Alignment */
+    .table thead th {
+        text-align: center;  /* Center header text */
+        vertical-align: middle;
+    }
+
+    .table tbody td {
+        text-align: center;  /* Center cell content */
+        vertical-align: middle;
+        padding: 1rem;
+        color: #4E598C;
+        font-size: 0.95rem;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    /* Button Container Alignment */
+    .table .btn-group {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    /* Maintain text overflow handling */
+    .table td {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        text-align: center;
+    }
+
+    /* Ensure consistent centering for all content types */
+    .table td * {
+        margin: 0 auto;
+    }
+
+    /* Table Header */
+    .table thead th {
+        background-color: #4E598C;
+        color: white;
+        font-weight: 500;
+        padding: 1rem;
+        font-size: 0.95rem;
+        border: none;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    /* Table Body */
+    .table tbody td {
+        padding: 1rem;
+        vertical-align: middle;
+        color: #4E598C;
+        font-size: 0.95rem;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .table tbody tr:hover {
+        background-color: #fff9f2;
+    }
+
+    /* Delete Button */
+    .btn-danger {
+        background-color: #dc3545;  /* Bootstrap's danger color */
+        border: none;
+        color: white;
+        padding: 0.5rem 1rem;
+        font-size: 0.9rem;
+        border-radius: 6px;
+        transition: all 0.3s ease;
+        font-weight: 500;
+    }
+
+    .btn-danger:hover {
+        background-color: #bb2d3b;  /* Darker shade for hover */
+        transform: translateY(-1px);
+        box-shadow: 0 2px 8px rgba(220, 53, 69, 0.3);
+    }
+
+    .btn-danger:focus {
+        box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.3);
+    }
+
+    .btn-danger:active {
+        background-color: #a52834;  /* Even darker for active state */
+        transform: translateY(0);
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .content {
+            padding: 1rem;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+        }
+
+        .table thead th {
+            padding: 0.8rem;
+            font-size: 0.85rem;
+        }
+
+        .table tbody td {
+            padding: 0.8rem;
+            font-size: 0.85rem;
+        }
+    }
+
+    /* Empty State */
+    .table tbody tr td[colspan="3"] {
+        text-align: center;
+        padding: 2rem;
+        color: #4E598C;
+        font-style: italic;
+    }
+
+    /* Table Row Animation */
+    .user-row {
+        transition: all 0.2s ease;
+    }
+
+    /* Search Placeholder */
+    #searchbar::placeholder {
+        color: #a0aec0;
+        font-size: 0.9rem;
+    }
+
+    /* Sortable Header Styling */
+    .table th.sortable {
+        cursor: pointer;
+        position: relative;
+        padding-right: 1.5rem;
+        user-select: none;
+    }
+
+    .table th.sortable:hover {
+        background-color: #3d4b7c;
+    }
+
+    .sort-icon {
+        font-size: 0.8rem;
+        margin-left: 0.5rem;
+        opacity: 0.5;
+    }
+
+    th.sortable.asc .sort-icon {
+        content: '↑';
+        opacity: 1;
+    }
+
+    th.sortable.desc .sort-icon {
+        content: '↓';
+        opacity: 1;
     }
     </style>
 </head>
@@ -41,9 +246,15 @@
                                 <table class="table table-striped table-hover w-100">
                                     <thead>
                                         <tr>
-                                            <th>User Name</th>
-                                            <th>User Email</th>
-                                            <th>User Role</th>
+                                            <th class="sortable" onclick="sortTable(0)">
+                                                User Name <span class="sort-icon">↕</span>
+                                            </th>
+                                            <th class="sortable" onclick="sortTable(1)">
+                                                User Email <span class="sort-icon">↕</span>
+                                            </th>
+                                            <th class="sortable" onclick="sortTable(2)">
+                                                User Role <span class="sort-icon">↕</span>
+                                            </th>
                                             <th>Actions</th>
                                         </tr>
                                     </thead>
@@ -140,5 +351,63 @@
         });
     }
     </script>
+    <script>
+    let currentSortCol = -1;
+    let currentSortDir = 'asc';
+
+    function sortTable(columnIndex) {
+        const table = document.querySelector('.table');
+        const tbody = table.querySelector('tbody');
+        const rows = Array.from(tbody.querySelectorAll('tr'));
+        const headers = table.querySelectorAll('th.sortable');
+        
+        // Update sort direction
+        if (currentSortCol === columnIndex) {
+            currentSortDir = currentSortDir === 'asc' ? 'desc' : 'asc';
+        } else {
+            currentSortDir = 'asc';
+            currentSortCol = columnIndex;
+        }
+
+        // Update header classes
+        headers.forEach(header => header.classList.remove('asc', 'desc'));
+        headers[columnIndex].classList.add(currentSortDir);
+
+        // Sort the rows
+        rows.sort((a, b) => {
+            const aValue = a.cells[columnIndex].textContent.trim().toLowerCase();
+            const bValue = b.cells[columnIndex].textContent.trim().toLowerCase();
+
+            if (aValue === bValue) return 0;
+            
+            if (currentSortDir === 'asc') {
+                return aValue > bValue ? 1 : -1;
+            } else {
+                return aValue < bValue ? 1 : -1;
+            }
+        });
+
+        // Clear and re-append rows
+        rows.forEach(row => tbody.appendChild(row));
+
+        // Visual feedback animation
+        rows.forEach(row => {
+            row.style.animation = 'none';
+            row.offsetHeight; // Trigger reflow
+            row.style.animation = 'highlightRow 1s';
+        });
+    }
+    </script>
+    <style>
+    /* Sort Animation */
+    @keyframes highlightRow {
+        0% { background-color: rgba(249, 199, 132, 0.2); }
+        100% { background-color: transparent; }
+    }
+
+    .table tbody tr {
+        transition: background-color 0.3s ease;
+    }
+    </style>
 </body>
 </html>
