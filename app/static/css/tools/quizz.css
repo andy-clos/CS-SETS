@@ -1,5 +1,5 @@
 button {
-  background-color: #ff9900;
+  background-color: #3a4369;
   color: white;
   padding: 10px 15px;
   border: none;
@@ -251,7 +251,7 @@ button {
 .tag-label {
   display: inline-flex;
   align-items: center;
-  background-color: #c82333;
+  background-color: #3a4369;
   padding: 5px 10px;
   border-radius: 15px;
   margin: 2px;
