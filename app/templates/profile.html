@@ -214,26 +214,150 @@
 
     /* Achievement Modal Styling */
     #addAchievementModal .modal-content {
-        border-radius: 15px;
         border: none;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
     }
 
     #addAchievementModal .modal-header {
-        background-color: #4E598C;
+        background-color: #4361ee;
         color: white;
-        border-radius: 15px 15px 0 0;
+        border-radius: 12px 12px 0 0;
         padding: 1.2rem 1.5rem;
+        border-bottom: none;
+    }
+
+    #addAchievementModal .modal-title {
+        color: white;
+        font-size: 1.25rem;
+        font-weight: 600;
+    }
+
+    #addAchievementModal .btn-close {
+        filter: invert(1) grayscale(100%) brightness(200%);
+        opacity: 0.8;
     }
 
     #addAchievementModal .modal-body {
         padding: 1.5rem;
-        background-color: #fff;
     }
 
+    /* Form Styling */
+    #achievementForm .form-label {
+        color: #1e293b;
+        font-weight: 600;
+        font-size: 0.95rem;
+        margin-bottom: 0.75rem;
+        display: block;
+    }
+
+    #achievementForm .form-control {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 2px solid #e2e8f0;
+        border-radius: 8px;
+        font-size: 0.95rem;
+        color: #1e293b;
+        background-color: white;
+        transition: all 0.2s ease;
+        margin-bottom: 0.5rem;
+    }
+
+    /* Textarea Specific Styling */
+    #achievementForm textarea.form-control {
+        min-height: 120px;
+        resize: vertical;
+        line-height: 1.5;
+        font-family: inherit;
+    }
+
+    /* File Input Styling */
+    #achievementForm input[type="file"].form-control {
+        padding: 0.5rem;
+        font-size: 0.9rem;
+    }
+
+    #achievementForm input[type="file"].form-control::file-selector-button {
+        padding: 0.5rem 1rem;
+        margin-right: 1rem;
+        border: none;
+        border-radius: 6px;
+        background-color: #4361ee;
+        color: white;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    #achievementForm input[type="file"].form-control::file-selector-button:hover {
+        background-color: #3151e8;
+    }
+
+    /* Focus States */
+    #achievementForm .form-control:focus {
+        border-color: #4361ee;
+        box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
+        outline: none;
+    }
+
+    /* Helper Text */
+    #achievementForm .text-muted {
+        color: #1e293b !important;
+        font-size: 0.85rem;
+        margin-top: 0.25rem;
+        display: block;
+    }
+
+    /* Modal Footer */
     #addAchievementModal .modal-footer {
-        background-color: #f8fafc;
-        border-radius: 0 0 15px 15px;
         padding: 1rem 1.5rem;
+        border-top: 1px solid rgba(0,0,0,0.1);
+        border-radius: 0 0 12px 12px;
+    }
+
+    /* Button Styling */
+    #addAchievementModal .btn {
+        padding: 0.75rem 1.5rem;
+        font-weight: 500;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+
+    #addAchievementModal .btn-primary {
+        background-color: #4361ee;
+        border: none;
+        color: white;
+    }
+
+    #addAchievementModal .btn-primary:hover {
+        background-color: #3151e8;
+        transform: translateY(-1px);
+    }
+
+    #addAchievementModal .btn-secondary {
+        background-color: #e2e8f0;
+        border: none;
+        color: #475569;
+    }
+
+    #addAchievementModal .btn-secondary:hover {
+        background-color: #cbd5e1;
+    }
+
+    /* Spacing */
+    #addAchievementModal .mb-3 {
+        margin-bottom: 1.5rem;
+    }
+
+    /* Responsive Adjustments */
+    @media (max-width: 576px) {
+        #addAchievementModal .modal-body {
+            padding: 1rem;
+        }
+
+        #achievementForm .form-control {
+            font-size: 0.9rem;
+            padding: 0.6rem 0.8rem;
+        }
     }
 
     /* Personality Section */
