@@ -16,14 +16,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js"></script>
     <style>
-    /* Main Container */
-    .content {
-        padding: 2rem;
-        background-color: #f9c784;
-        min-height: 100vh;
-        border-radius: 10px;
-    }
-
     /* Section Title */
     .section-title {
         font-size: 1.75rem;
@@ -201,8 +193,7 @@
         }
     }
 
-    /* Modal Styling */
-    .modal-content {
+    /* .modal-content {
         border-radius: 12px;
         border: none;
     }
@@ -217,7 +208,7 @@
     .modal-body {
         padding: 1.5rem;
         background-color: #f9c784;
-    }
+    } */
 
     /* Search Bar */
     .search-bar {
@@ -450,7 +441,6 @@
         margin-top: 10px;
     }
 
-    /* Sort Icon Styling */
     .sort-icon {
         display: inline-block;
         width: 12px;
@@ -460,18 +450,16 @@
         opacity: 0.6;
     }
 
-    /* Hover effect for sortable headers */
     .table th[data-column] {
         cursor: pointer;
         transition: all 0.3s ease;
     }
 
     .table th[data-column]:hover {
-        background-color: #f8b862;  /* Slightly darker shade for hover */
-        color: #000000;  /* Even darker on hover */
+        background-color: #f8b862; 
+        color: #000000; 
     }
 
-    /* Ensure text stays on one line with ellipsis */
     .table th {
         overflow: hidden;
         text-overflow: ellipsis;
@@ -873,13 +861,12 @@
         box-shadow: 0 0 0 0.25rem rgba(255, 255, 255, 0.25);  /* White focus ring */
     }
 
-    /* Modal Header Styling */
-    .modal .modal-header {
-        background-color: #4361ee;  /* Consistent header background */
+    /* .modal .modal-header {
+        background-color: #4361ee;
         color: white;
         border-radius: 12px 12px 0 0;
         padding: 1rem 1.5rem;
-    }
+    } */
 
     /* Alert Modal Styling */
     #alertModal .modal-dialog {
@@ -1056,6 +1043,92 @@
     #alertForm .mb-3 {
         margin-bottom: 1.75rem;
     }
+
+    /* Update Marks Modal Styling */
+    .marks-modal .modal-content {
+        border: none;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .marks-modal .modal-header {
+        background-color: #4361ee;
+        padding: 1.2rem 1.5rem;
+        border-radius: 12px 12px 0 0;
+    }
+
+    .marks-modal .modal-title {
+        color: white;
+        font-size: 1.25rem;
+        font-weight: 600;
+    }
+
+    .marks-modal .modal-body {
+        padding: 1.5rem;
+        background-color: #f8fafc;
+    }
+
+    .marks-modal .form-label {
+        color: #1e293b;
+        font-weight: 600;
+        font-size: 0.95rem;
+        margin-bottom: 0.75rem;
+        display: block;
+    }
+
+    .marks-modal .form-control {
+        padding: 0.75rem 1rem;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        font-size: 1rem;
+        color: #1e293b;
+        background-color: white;
+        transition: all 0.2s ease;
+        margin-bottom: 1rem;
+    }
+
+    .marks-modal .form-control:focus {
+        border-color: #4361ee;
+        box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
+        outline: none;
+    }
+
+    .marks-modal .modal-footer {
+        background-color: #f8fafc;
+        border-top: 1px solid #e2e8f0;
+        border-radius: 10px;
+    }
+
+    .marks-modal .btn {
+        padding: 0.75rem 1.5rem;
+        font-weight: 500;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+
+    .marks-modal .btn-primary {
+        background-color: #4361ee;
+        border: none;
+    }
+
+    .marks-modal .btn-primary:hover {
+        background-color: #3151e8;
+        transform: translateY(-1px);
+    }
+
+    .marks-modal .btn-secondary {
+        background-color: #e2e8f0;
+        border: none;
+        color: #475569;
+    }
+
+    .marks-modal .btn-secondary:hover {
+        background-color: #cbd5e1;
+    }
+
+    .marks-modal .mb-3 {
+        margin-bottom: 1.5rem;
+    } */
     </style>
 </head>
 <body>
@@ -1391,7 +1464,7 @@
                                         </tr>
 
                                         <!-- Marks Modal for each student -->
-                                        <div class="modal fade" id="marksModal{{ student.email|slugify }}" tabindex="-1" aria-labelledby="marksModalLabel{{ student.email|slugify }}" aria-hidden="true">
+                                        <div class="modal fade marks-modal" id="marksModal{{ student.email|slugify }}" tabindex="-1" aria-labelledby="marksModalLabel{{ student.email|slugify }}" aria-hidden="true">
                                             <div class="modal-dialog">
                                                 <div class="modal-content">
                                                     <div class="modal-header">
