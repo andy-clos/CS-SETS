@@ -15,10 +15,161 @@
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
     />
     <style>
-      .section-title {
-        font-size: 40px;
+      /* New styles with updated color scheme */
+      .container {
+        min-height: 100vh;
+      }
+
+      main {
+        /* background: linear-gradient(135deg, #eef2ff 10%, #f5f3ff 100%); */
+        padding: 2rem;
+      }
+
+      .display {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+      }
+
+      .display-header {
+        text-align: center;
+        margin-bottom: 3rem;
+      }
+
+      .display-header-title {
+        font-size: 2.5rem;
         font-weight: bold;
-        margin-bottom: 10px;
+        color: #4e598c;
+        margin-bottom: 1rem;
+      }
+
+      .display-header-subtitle {
+        font-size: 1.25rem;
+        color: #656f9f;
+      }
+
+      .user-prompt {
+        text-align: center;
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #4e598c;
+        margin-bottom: 3rem;
+      }
+
+      .tools-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        /* gap: 1.5rem;
+        padding: 1rem; */
+      }
+
+      .tool-item {
+        position: relative;
+        background: white;
+        border-radius: 0.75rem;
+        padding: 1.5rem;
+        box-shadow: 0 4px 6px rgba(78, 89, 140, 0.1);
+        transition: all 0.3s ease;
+        overflow: hidden;
+      }
+
+      .tool-item:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 10px 15px rgba(78, 89, 140, 0.2);
+      }
+
+      .tool-item::before {
+        content: "";
+        position: absolute;
+        top: -2rem;
+        right: -2rem;
+        width: 6rem;
+        height: 6rem;
+        border-radius: 50%;
+        background: #4e598c;
+        opacity: 0.1;
+        transition: opacity 0.3s ease;
+      }
+
+      .tool-item:hover::before {
+        opacity: 0.15;
+      }
+
+      .tool-item i {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 3rem;
+        height: 3rem;
+        border-radius: 0.5rem;
+        margin-bottom: 1rem;
+        font-size: 1.25rem;
+        color: white;
+        background: #4e598c;
+      }
+
+      .tool-item span {
+        display: block;
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #4e598c;
+        margin-bottom: 0.5rem;
+      }
+
+      .tool-item p {
+        color: #656f9f;
+        margin-bottom: 1rem;
+      }
+
+      .tool-button {
+        display: inline-block;
+        padding: 0.5rem 1rem;
+        background: #4e598c;
+        color: white;
+        border-radius: 0.5rem;
+        text-decoration: none;
+        transition: background 0.3s ease;
+      }
+
+      .tool-button:hover {
+        background: #3a4369;
+      }
+
+      a {
+        text-decoration: none;
+      }
+
+      /* Subtle variations for different tools */
+      .tool-item:nth-child(1) i {
+        background: #4e598c;
+      }
+      .tool-item:nth-child(2) i {
+        background: #5b67a0;
+      }
+      .tool-item:nth-child(3) i {
+        background: #4e598c;
+      }
+      .tool-item:nth-child(4) i {
+        background: #5b67a0;
+      }
+      .tool-item:nth-child(5) i {
+        background: #4e598c;
+      }
+
+      .tool-item:nth-child(1)::before {
+        background: #4e598c;
+      }
+      .tool-item:nth-child(2)::before {
+        background: #5b67a0;
+      }
+      .tool-item:nth-child(3)::before {
+        background: #4e598c;
+      }
+      .tool-item:nth-child(4)::before {
+        background: #5b67a0;
+      }
+      .tool-item:nth-child(5)::before {
+        background: #4e598c;
       }
     </style>
   </head>
@@ -27,10 +178,6 @@
       {% include 'navbar.html' %} {% include 'header.html' %}
 
       <main>
-        <section class="content">
-          <h2 class="section-title">Tools</h2>
-        </section>
-
         <div class="display">
           <div class="display-header">
             <h1 class="display-header-title">Academic Tools Management</h1>
@@ -42,18 +189,23 @@
           <div class="user-prompt">
             HI USER! WHAT TOPIC ARE YOU INTERESTED IN?
           </div>
-          <a href="/quizzMenu">
+
           <div class="tools-container">
-            <div class="tool-item">
-              <i class="fas fa-book"></i>
-              <span>Study Tools</span>
-            </div>
-          </a>
+            <a href="/quizzMenu">
+              <div class="tool-item">
+                <i class="fas fa-book"></i>
+                <span>Study Tools</span>
+                <!-- <p>Lets study together</p> -->
+                <div class="tool-button">Get Started</div>
+              </div>
+            </a>
 
             <a href="/forum">
               <div class="tool-item">
                 <i class="fas fa-comments"></i>
                 <span>Forum</span>
+                <!-- <p>Connect with other students</p> -->
+                <div class="tool-button">Get Started</div>
               </div>
             </a>
 
@@ -61,18 +213,26 @@
               <div class="tool-item">
                 <i class="fas fa-file-alt"></i>
                 <span>Resume Generator</span>
+                <!-- <p>Create professional resumes</p> -->
+                <div class="tool-button">Get Started</div>
               </div>
             </a>
+
             <a href="/timetable">
               <div class="tool-item">
                 <i class="fas fa-calendar-alt"></i>
                 <span>Timetable Generator</span>
+                <!-- <p>Plan your schedule efficiently</p> -->
+                <div class="tool-button">Get Started</div>
               </div>
             </a>
+
             <a href="/cgpa">
               <div class="tool-item">
                 <i class="fas fa-calculator"></i>
                 <span>CGPA Calculator</span>
+                <!-- <p>Plan your academic </p> -->
+                <div class="tool-button">Get Started</div>
               </div>
             </a>
           </div>

@@ -1,8 +1,10 @@
 display {
-  width: 60%;
+  width: 80%;
   padding: 2rem;
-  background-color: #f8f9fa;
+  background-color: #e6f0ff;
   text-align: center;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
 .display-header {
@@ -13,19 +15,17 @@ display {
   width: auto;
   gap: 0.5rem;
   margin-bottom: 3rem;
+  color: #333;
 }
 
 .display-header-title {
   font-size: 2.5rem;
   font-weight: bold;
-  text-align: center;
-  margin: 0;
 }
 
 .display-header-subtitle {
   font-size: 1.2rem;
   font-weight: normal;
-  text-align: center;
   margin: 0;
   color: #666;
 }
@@ -50,13 +50,16 @@ display {
   gap: 1rem;
   padding: 1.5rem;
   background-color: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   cursor: pointer;
-  transition: transform 0.2s;
+  transition: background-color 0.3s, transform 0.2s;
+  border: 1px solid #ddd;
+  width: 200px;
 }
 
 .tool-item:hover {
+  background-color: #f1f1f1;
   transform: translateY(-5px);
 }
 
@@ -66,8 +69,10 @@ display {
 }
 
 .tool-item span {
-  font-size: 1rem;
+  font-size: 1.2rem;
   text-align: center;
+  color: #007bff;
+  font-weight: bold;
 }
 
 .tools-container a {
@@ -77,4 +82,18 @@ display {
 
 .tools-container a:hover {
   text-decoration: none;
+}
+
+.get-started-btn {
+  background-color: #007bff;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.get-started-btn:hover {
+  background-color: #0056b3;
 }

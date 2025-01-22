@@ -1,5 +1,5 @@
 main {
-  background-color: #ececec;
+background: linear-gradient(135deg, #eef2ff 10%, #f5f3ff 100%);  
   padding-bottom: 60px; /* Adjust this value based on the footer height */
 }
 
@@ -58,7 +58,7 @@ header {
 }
 
 button {
-  background-color: #ff9900;
+  background-color: #4e598c;
   color: #fff;
   border: none;
   padding: 8px 16px;
@@ -78,7 +78,7 @@ button:hover {
 }
 
 .create-post-btn a:hover {
-  text-decoration: none;
+  text-decoration: none;w3
 }
 
 .label {
@@ -90,10 +90,9 @@ button:hover {
 
 .tag {
   display: flex;
+  gap: 0.5rem;
   flex-wrap: wrap;
-  gap: 5px;
 }
-
 .sort-options {
   margin-left: 10px;
 }
@@ -195,26 +194,30 @@ button:hover {
 }
 
 /*tag */
+.tag-container {
+  margin-top: 0.5rem;
+}
+
 .label-container {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 10px;
-  padding: 10px;
+  gap: 0.5rem;
+  margin-top: 1rem;
 }
 
 .tag-label {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  background-color: white;
-  color: #333;
-  border-radius: 20px;
-  padding: 5px 10px;
-  font-size: 14px;
-  font-weight: 500;
-  margin: 2px;
+  background: #3a4369;
+  padding: 0.5rem 1rem;
+  border-radius: 2rem;
+  color: white;
+  font-size: 0.875rem;
 }
 
+.tag-text {
+  margin-right: 0.5rem;
+}
 .tag-label .remove-btn {
   margin-left: 10px;
   color: white;
@@ -231,21 +234,6 @@ button:hover {
   margin-bottom: 10px;
 }
 
-.tag-label {
-  display: inline-flex;
-  align-items: center;
-  background-color: #c82333;
-  padding: 5px 10px;
-  border-radius: 15px;
-  margin: 2px;
-  color: white;
-}
-
-.tag-text {
-  color: white;
-  margin-right: 5px;
-}
-
 .remove-btn {
   cursor: pointer;
   color: white;
@@ -260,7 +248,7 @@ button:hover {
 .containerViewPost {
   background-color: white;
   padding: 30px;
-  border-radius: 5px;
+  border-radius: 20px;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
   max-width: 100%;
   margin: 0 auto;
@@ -423,4 +411,91 @@ button:hover {
 
 .delete-btn:hover {
   color: black; /* Change color on hover */
+}
+
+display {
+  width: 60%;
+  padding: 2rem;
+  background-color: #f8f9fa; /* Light background for the display area */
+  text-align: center;
+}
+
+.display-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  width: auto;
+  gap: 0.5rem;
+  margin-bottom: 3rem;
+  background-color: #007bff; /* Blue background for header */
+  color: white; /* White text for contrast */
+  padding: 20px; /* Add padding for better spacing */
+  border-radius: 10px; /* Rounded corners */
+}
+
+.display-header-title {
+  font-size: 2.5rem;
+  font-weight: bold;
+  margin: 0;
+}
+
+.display-header-subtitle {
+  font-size: 1.2rem;
+  font-weight: normal;
+  margin: 0;
+  color: #e0e0e0; /* Light gray for subtitle */
+}
+
+.user-prompt {
+  text-align: center;
+  font-size: 1.2rem;
+  margin-bottom: 3rem;
+  color: #4e598c; /* Darker color for prompt */
+}
+
+.tools-container {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+
+.tool-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.5rem;
+  background-color: #ffffff; /* White background for tool items */
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.2s;
+  border: 1px solid #ddd; /* Light border for separation */
+}
+
+.tool-item:hover {
+  background-color: #e9ecef; /* Light gray on hover */
+  transform: translateY(-5px); /* Lift effect on hover */
+}
+
+.tool-item img {
+  width: 48px;
+  height: 48px;
+}
+
+.tool-item span {
+  font-size: 1rem;
+  text-align: center;
+  color: #007bff; /* Blue color for tool item text */
+}
+
+.tools-container a {
+  text-decoration: none;
+  color: inherit;
+}
+
+.tools-container a:hover {
+  text-decoration: none;
 }

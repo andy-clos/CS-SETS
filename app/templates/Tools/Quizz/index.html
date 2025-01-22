@@ -22,7 +22,7 @@
     <style>
       body {
         font-family: Arial, sans-serif;
-        background-color: #f4f4f4;
+        background: linear-gradient(135deg, #eef2ff 10%, #f5f3ff 100%);  
         margin: 0;
         padding: 0;
       }
@@ -36,6 +36,7 @@
         font-weight: bold;
         margin-bottom: 20px;
         text-align: center;
+        color: #4e598c; /* Forum color */
       }
 
       .options-container {
@@ -62,6 +63,7 @@
       .file-info h3 {
         margin: 0;
         font-size: 20px;
+        color: #4e598c; /* Forum color */
       }
       .file-info span {
         display: block;
@@ -73,30 +75,30 @@
       }
       .file-actions button {
         padding: 8px 12px;
-        background-color: #28a745;
+        background-color: #4e598c; /* Forum color */
         color: white;
         border: none;
         border-radius: 5px;
         cursor: pointer;
       }
       .file-actions button:hover {
-        background-color: #218838;
+        background-color: #3a4369; /* Darker shade for hover */
       }
       .create-new-button {
         padding: 10px 15px;
-        background-color: #007bff;
+        background-color: #4e598c; /* Forum color */
         color: white;
         border: none;
         border-radius: 5px;
         cursor: pointer;
       }
       .create-new-button:hover {
-        background-color: #0056b3;
+        background-color: #3a4369; /* Darker shade for hover */
       }
       .tag-label {
         display: inline-flex; /* Use inline-flex to allow the container to size based on content */
         align-items: center; /* Center the text vertically */
-        background-color: #c82333; /* Background color for the tag */
+        background-color: #3a4369; /* Background color for the tag */
         padding: 5px 10px; /* Padding around the text */
         border-radius: 15px; /* Rounded corners */
         margin: 2px; /* Space between tags */
@@ -130,9 +132,9 @@
         {% if message.tags == 'info' %}
         <script>
         swal({
-            title: "Congratualations",
+            title: "Congratulations",
             text: "{{ message }}",
-            icon: "success",  // Use 'icon' instead of 'type' for SweetAlert2
+            icon: "success",
             showConfirmButton: true,
         });
       </script>
