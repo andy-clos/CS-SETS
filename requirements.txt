@@ -1,0 +1,11 @@
+Django==5.1.3
+firebase_admin==6.6.0
+joblib==1.4.2
+numpy==2.2.2
+pandas==2.2.3
+Pillow==11.1.0
+Pyrebase4==4.8.0
+pytz==2024.1
+Requests==2.32.3
+scikit_learn==1.6.1
+xhtml2pdf==0.2.16
