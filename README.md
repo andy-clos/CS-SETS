@@ -12,6 +12,6 @@ Group Members:
 
 Framework: Django
 
-To run the server, enter command "python manage.py runserver"
-
-If pop up any missing Python pip modules or packages, please install it all accordingly, then run the above command again.
+To run the server, follow the steps below:
+1) Run command "pip install -r requirements.txt"
+2) Run command "python manage.py runserver"
