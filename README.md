@@ -1,5 +1,7 @@
 # CS Smart EduTrack System (CS-SETS)
 
+Deployed Web App: https://cssets.pythonanywhere.com/
+
 **CAT304 - Group Innovation Project and Study for Sustainability**
 
 ## 📚 Project Overview
